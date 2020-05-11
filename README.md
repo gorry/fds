@@ -5,4 +5,4 @@ FDSは、FDX68を搭載したRaspberry Piで動作するFDXイメージ（仮想
 
 FDS is FDX image file (virtual floppy disk) selector for FDX68 on the Raspberry Pi.
 
-Refer to : http://gorry.haun.org/pw/?FDS
+Refer to : http://gorry.haun.org/pw/?fds
