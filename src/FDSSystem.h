@@ -39,6 +39,7 @@
 
 #if defined(FDS_WINDOWS)
 #include <direct.h>
+#include <io.h>
 #endif  // defined(FDS_WINDOWS)
 
 // =====================================================================

@@ -1023,7 +1023,7 @@ FDSSystem::cmdProtectDisk()
 			return;
 		}
 #if defined(FDS_WINDOWS)
-		int ret2 = _chmod(path.c_str(), ((sel == 0) ? 0444 : 0666));
+		int ret2 = _chmod(path.c_str(), ((sel == 0) ? _S_IREAD : _S_IREAD| _S_IWRITE));
 #else
 		int ret2 = chmod(path.c_str(), ((sel == 0) ? 0444 : 0666));
 #endif  // defined(FDS_WINDOWS)
