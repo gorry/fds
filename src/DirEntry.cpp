@@ -120,6 +120,11 @@ Directory::getFiles(bool isRoot)
 		}
 		closedir(dirp);
 	}
+	if (mFiles.size() == 0) {
+		DirEntry entry("[No File]", DirEntry::Type::Unknown);
+		mFiles.push_back(entry);
+		
+	}
 }
 
 // -------------------------------------------------------------

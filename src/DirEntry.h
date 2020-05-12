@@ -33,7 +33,7 @@ class DirEntry
 {
 public:		// struct, enum
 	enum class Type : int {
-		Unknown=-1,
+		Unknown=0,
 		ParentDir,
 		Dir,
 		FdxFile,

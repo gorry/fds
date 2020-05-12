@@ -51,10 +51,12 @@ class FDSSystem
 public:		// struct, enum
 	enum class ColorPair : short {
 		Normal = 1,
+		FilerUnknown,
 		FilerParentDir,
 		FilerDir,
 		FilerFdxFile,
 		FilerOtherFile,
+		FilerUnknownCsr,
 		FilerParentDirCsr,
 		FilerDirCsr,
 		FilerFdxFileCsr,

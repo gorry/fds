@@ -75,7 +75,7 @@ FDSSystem::filerViewRefresh()
 		bool sel = false;
 		FDSSystem::ColorPair col = FDSSystem::ColorPair::Normal;
 		if (y < (int)mFiles.size()) {
-			col = (FDSSystem::ColorPair)((int)ColorPair::FilerParentDir + (int)mFiles[y].type());
+			col = (FDSSystem::ColorPair)((int)ColorPair::FilerUnknown + (int)mFiles[y].type());
 			wattron(mwFilerView, COLOR_PAIR(col));
 		}
 		if (i == mFilerViewCsrY) {

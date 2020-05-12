@@ -169,6 +169,9 @@ FDSSystem::mainLoop()
 			// 情報ビューの更新依頼があれば更新
 			if (infoRefresh) {
 				int idx = filerViewGetIdx();
+				if (idx >= (int)mFiles.size()) {
+					break;
+				}
 				if (mFiles[idx].isFdxFile() || mFiles[idx].isNormalDir()) {
 					std::string path = mRootDir + mCurDir + mFiles[idx].filename();
 					if (mFiles[idx].isDir()) {
@@ -344,10 +347,12 @@ FDSSystem::initView()
 		use_default_colors();
 		#define MyColor(r,g,b) (((r)*36)+((g)*6)+(b)+16)
 		init_pair((short)ColorPair::Normal,             MyColor(5,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::FilerUnknown,       MyColor(3,3,3), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerParentDir,     MyColor(0,5,5), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerDir,           MyColor(0,5,0), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerFdxFile,       MyColor(5,5,5), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerOtherFile,     MyColor(3,3,3), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerUnknownCsr,    MyColor(3,3,3), MyColor(0,0,5));
 		init_pair((short)ColorPair::FilerParentDirCsr,  MyColor(0,5,5), MyColor(0,0,5));
 		init_pair((short)ColorPair::FilerDirCsr,        MyColor(0,5,0), MyColor(0,0,5));
 		init_pair((short)ColorPair::FilerFdxFileCsr,    MyColor(5,5,5), MyColor(0,0,5));
@@ -372,10 +377,12 @@ FDSSystem::initView()
 
 	} else {
 		init_pair((short)ColorPair::Normal,             COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerUnknown,       COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerParentDir,     COLOR_YELLOW, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerDir,           COLOR_GREEN, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerFdxFile,       COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerOtherFile,     COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerUnknownCsr,    COLOR_WHITE, COLOR_BLUE);
 		init_pair((short)ColorPair::FilerParentDirCsr,  COLOR_YELLOW, COLOR_BLUE);
 		init_pair((short)ColorPair::FilerDirCsr,        COLOR_GREEN, COLOR_BLUE);
 		init_pair((short)ColorPair::FilerFdxFileCsr,    COLOR_WHITE, COLOR_BLUE);
