@@ -212,6 +212,8 @@ void
 DlgSelect::end()
 {
 	if (mwFrame) {
+		werase(mwFrame);
+		wrefresh(mwFrame);
 		delwin(mwFrame);
 		mwFrame = nullptr;
 	}

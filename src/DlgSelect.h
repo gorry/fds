@@ -38,7 +38,7 @@ public:		// struct, enum
 
 public:		// function
 	DlgSelect() {}
-	virtual ~DlgSelect() {}
+	virtual ~DlgSelect() { end(); }
 
 	template <size_t N>
 	void setItemsArray(const ItemsArray<N>& items)

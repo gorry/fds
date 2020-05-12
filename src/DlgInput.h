@@ -33,7 +33,7 @@ public:		// struct, enum
 
 public:		// function
 	DlgInput() {}
-	virtual ~DlgInput() {}
+	virtual ~DlgInput() { end(); }
 
 	void setText(const std::string& text);
 	const std::string getText();
