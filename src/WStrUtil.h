@@ -42,6 +42,8 @@ public:
 	static std::string wstr2str(const std::wstring& wstr);
 	static std::string wstr2strN(const std::wstring& wstr, int mbslen);
 	static int wstricmp(const std::wstring& wstr1, const std::wstring& wstr2);
+	static std::wstring pathSlash2Backslash(const std::wstring& path);
+	static std::wstring pathBackslash2Slash(const std::wstring& path);
 
 };
 

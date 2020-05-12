@@ -369,6 +369,41 @@ std::string WStrUtil::wstr2strN(const std::wstring& wstr, int maxlen)
 	return str;
 }
 
+// -------------------------------------------------------------
+// Path文字列の"/"を"\"に置き換える
+// -------------------------------------------------------------
+std::wstring WStrUtil::pathSlash2Backslash(const std::wstring& path)
+{
+	std::wstring newpath;
+	int  len = (int)path.length();
+	for (int i=0; i<len; i++) {
+		wchar_t c = path[i];
+		if (c == '/') {
+			c = '\\';
+		}
+		newpath.push_back(c);
+	}
+	return newpath;
+}
+
+// -------------------------------------------------------------
+// Path文字列の"\"を"/"に置き換える
+// -------------------------------------------------------------
+std::wstring WStrUtil::pathBackslash2Slash(const std::wstring& path)
+{
+	std::wstring newpath;
+	int len = (int)path.length();
+	for (int i=0; i<len; i++) {
+		wchar_t c = path[i];
+		if (c == '\\') {
+			c = '/';
+		}
+		newpath.push_back(c);
+	}
+	return newpath;
+}
+
+
 
 // =====================================================================
 // [EOF]

@@ -101,6 +101,49 @@ FDSSystem::start()
 		sprintf(buf, "SYSTEM-%d", sel+1);
 		mIniSecSystem = buf;
 
+		// 選択した設定を読み込む
+		setRootDir(mIniFile.getString(mIniSecSystem, "ROOTDIR"));
+		{
+			// システムのルートディレクトリが存在するか調べる
+			std::string path = mRootDir+".";
+#if defined(FDS_WINDOWS)
+			struct _stat st;
+			int ret = _stat(path.c_str(), &st);
+#else
+			struct stat st;
+			int ret = lstat(path.c_str(), &st);
+#endif
+			if (ret < 0) {
+				if (errno == ENOENT) {
+					// ルートディレクトリが存在しなければ作成するか尋ねる
+					FDS_ERROR("start: No System Root Directory!\n");
+					FDS_ERROR(" path=[%s]\n", path.c_str());
+					DlgSelect::ItemsVec items2;
+					items2.push_back("Make "+mRootDir);
+					items2.push_back("[ Quit ]");
+					DlgSelect dlg2;
+					dlg2.setItemsVec(items2);
+					dlg2.setHeader("No System Root Directory!");
+					dlg2.setCanEscape(true);
+					int sel2 = dlg2.start();
+					if (sel2 == 0) {
+						// ルートディレクトリを作成する
+#if defined(FDS_WINDOWS)
+						std::wstring wrootdir = WStrUtil::str2wstr(mRootDir);
+						wrootdir = WStrUtil::pathSlash2Backslash(wrootdir);
+						std::wstring cmd = L"mkdir " + wrootdir;
+						_wsystem(cmd.c_str());
+#else
+						std::string cmd = "mkdir -p "+mRootDir;
+						system(cmd.c_str());
+#endif
+					} else {
+						continue;
+					}
+				}
+			}
+		}
+
 		// FddEmuを起動
 		std::string cmd = mIniFile.getString("GLOBAL", "FDDEMUCMD");
 		std::string option = mIniFile.getString(mIniSecSystem, "FDDEMUOPT");
@@ -108,8 +151,7 @@ FDSSystem::start()
 		mFddEmu.setFddEmuOption(option);
 		mFddEmu.run();
 
-		// 選択した設定を読み込んでFDSメイン起動
-		setRootDir(mIniFile.getString(mIniSecSystem, "ROOTDIR"));
+		// FDSメイン起動
 		mainLoop();
 
 		// FddEmuを終了
