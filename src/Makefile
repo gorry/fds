@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20200513a.tar.gz
+FDSARC = fds68k_20200519a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
@@ -84,7 +84,7 @@ arc:
 	cp dirent/*.c dirent/*.h package/fds/src/dirent/
 	cd package/fds; tar cvzf src.tar.gz src; rm -rf src; cd ../..
 	-cp Release/fds ./
-	cp ../readme.md fds APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
+	cp ../readme.md fds APACHE-LICENSE-2.0.txt fds.ini readme.txt update.txt package/fds/
 	cd package; tar cvzf $(FDSARC) fds; cd ..
 
 ifeq ($(MAKECMDGOALS),)
