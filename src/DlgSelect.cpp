@@ -150,12 +150,14 @@ DlgSelect::start(int x, int y, int sel)
 			}
 			break;
 		  case KEY_UP:
+		  case KEY_A2:
 			mSelect--;
 			if (mSelect < 0) {
 				mSelect = (int)mSelectTxt.size()-1;
 			}
 			break;
 		  case KEY_DOWN:
+		  case KEY_C2:
 			mSelect++;
 			if (mSelect > (int)mSelectTxt.size()-1) {
 				mSelect = 0;
@@ -165,6 +167,11 @@ DlgSelect::start(int x, int y, int sel)
 			  menuRet = mSelect;
 			  finish = true;
 			  break;
+
+		  default:
+			FDS_LOG("DlgSelect: key=%d\n", key);
+			break;
+
 		}
 	}
 

@@ -165,9 +165,11 @@ DlgInput::start(int x, int y, int w)
 			}
 			break;
 		  case KEY_LEFT:
+		  case KEY_B1:
 			keyLeft();
 			break;
 		  case KEY_RIGHT:
+		  case KEY_B3:
 			keyRight();
 			break;
 		  case KEY_HOME:
@@ -196,7 +198,7 @@ DlgInput::start(int x, int y, int w)
 				keyChar(wch);
 				break;
 			}
-			// fprintf(stderr, "key=%d, wch=%d\n", key, (int)wch);
+			FDS_LOG("DlgInput: key=%d\n", key);
 			break;
 		}
 	}

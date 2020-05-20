@@ -235,10 +235,12 @@ FDSSystem::mainLoop()
 			wtimeout(mwFilerView, FddViewRefreshInterval);
 			break;
 		  case KEY_UP:
+		  case KEY_A2:
 			filerViewUpCursor();
 			infoRefresh = true;
 			goto clearInfoView;
 		  case KEY_DOWN:
+		  case KEY_C2:
 			filerViewDownCursor();
 			infoRefresh = true;
 			goto clearInfoView;
