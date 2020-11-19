@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20200519a.tar.gz
+FDSARC = fds68k_20201104a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
@@ -10,15 +10,21 @@ CPPSRCS = \
 	DlgInput.cpp \
 	DlgSelect.cpp \
 	FddEmu.cpp \
+	FdDump.cpp \
+	FdRestore.cpp \
 	FDSSystem.cpp \
 	FDSSystemCmd.cpp \
+	FDSSystemDump.cpp \
 	FDSSystemFdd.cpp \
 	FDSSystemFiler.cpp \
 	FDSSystemHelp.cpp \
 	FDSSystemInfo.cpp \
 	FDSSystemPath.cpp \
+	FDSSystemRestore.cpp \
+	FdxTool.cpp \
 	IniFile.cpp \
 	Log.cpp \
+	MakeArgv.cpp \
 	WStrUtil.cpp \
 	
 
@@ -68,6 +74,14 @@ $(OBJDIR)/%.dd: %.cpp
 	mkdir -p $(dir $@)
 	echo -n $(OBJDIR)/>$@
 	$(CXX) -MM $< >> $@
+
+.PHONY: run
+run: target
+ifneq ($(NOSUDO),)
+	$(TARGET)
+else
+	sudo $(TARGET)
+endif
 
 .PHONY: clean
 clean:

@@ -105,17 +105,25 @@ FDSSystem::infoViewRefresh()
 			disktype = ((mFdxHeader.mRpm == 300) ? "2DD(720KB)" : "2DD(640KB)");
 			break;
 		  case 2:
-			disktype = ((mFdxHeader.mRpm == 300) ? "2HD(1.4MB)" : "2HD(1.4MB)");
+			disktype = ((mFdxHeader.mRpm == 300) ? "2HD(1.4MB,PC/AT)" : "2HD(1.2MB,JP)");
 			break;
 		  case 9:
-			disktype = "RAW";
+			if (mFdxHeader.mCylinders < 60) {
+				disktype = "2D[RAW]";
+			} else {
+				if (mFdxHeader.mRate < 5000) {
+					disktype = ((mFdxHeader.mRpm == 300) ? "2DD(720KB)[RAW]" : "2DD(640KB)[RAW]");
+				} else {
+					disktype = ((mFdxHeader.mRpm == 300) ? "2HD(1.4MB,PC/AT)[RAW]" : "2HD(1.2MB,JP)[RAW]");
+				}
+			}
 			break;
 		  default:
 			break;
 		}
 
 		// リビジョン・タイプ・ライトプロテクト・シリンダ・ヘッド
-		sprintf(&buf[1][0], "Format:rev%d(%s)  Protect:%s  Cyl:%d  Head:%d", 
+		sprintf(&buf[1][0], "Rev:%d  Format:%s  Protect:%s  Cyl:%d  Head:%d", 
 		  (int)mFdxHeader.mRevision, disktype, 
 		  (mFdxHeader.mWriteProtect ? "ON " : "OFF"),
 		  mFdxHeader.mCylinders,

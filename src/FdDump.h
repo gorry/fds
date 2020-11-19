@@ -1,11 +1,11 @@
 ﻿// ◇
 // fds: fdx68 selector
-// FddEmu: FddEmuの操作
+// FdDump: FdDumpの操作
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 
-#if !defined(__FDDEMU_H__)
-#define __FDDEMU_H__
+#if !defined(__FDDUMP_H__)
+#define __FDDUMP_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +18,9 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fcntl.h>
+#else
+#include <windows.h>
 #endif
 
 #include <vector>
@@ -27,29 +30,47 @@
 #include "Log.h"
 #include "MakeArgv.h"
 
-// FddEmuのコマンドポート
-#define FDDEMU_PORTNO 6869
-
 // =====================================================================
-// FddEmuの操作
+// FdDumpの操作
 // =====================================================================
 
-class FddEmu
+#define MAX_TRACKS 256
+
+class FdDump
 {
 public:		// struct, enum
-	struct Status {
-		int mId = 0;
-		bool mInsert = false;
-		bool mProtect = false;
-		int mCluster = 0;
-		std::string mFileName;
+	enum class TrackStatus : char {
+		None = 0,
+		Retry1 = 1,
+		Retry2 = 2,
+		Retry3 = 3,
+		Retry4 = 4,
+		Retry5 = 5,
+		Retry6 = 6,
+		Retry7 = 7,
+		Retry8 = 8,
+		Retry9 = 9,
+		Finish = 100,
+		Error = 101,
+		Unformat = 102,
 	};
 
-	enum class Command : int {
-		List = 0,
-		Insert,
-		Eject,
-		Protect,
+	struct Status {
+		int mTracks = 0;
+		int mNowTrack = -1;
+		bool mFinished = false;
+		TrackStatus mStatus[MAX_TRACKS];
+		char mChanged[MAX_TRACKS];
+		std::string mName;
+		std::string mFormat;
+	};
+
+	enum class LogMode : int {
+		None = 0,
+		ESC1 = 1,
+		ESC2 = 2,
+		ESC3 = 3,
+		CR = 4,
 	};
 
 	enum class ErrNo : int {
@@ -62,24 +83,29 @@ public:		// struct, enum
 	static const int Drives = 2;
 
 public:		// function
-	FddEmu();
-	virtual ~FddEmu() {}
+	FdDump();
+	virtual ~FdDump() {}
 
-	void setNoRoot(bool sw);
 	void setCmd(const std::string& cmd);
 	void setOption(const std::string& option);
+	void setDiskName(const std::string& name);
+	void setFormatName(const std::string& name);
 	int run();
 	void kill();
 	bool updateStatus();
-	const Status& getStatus(int id) const { return mStatus[id]; }
-	bool setImage(int id, const std::string& filename);
-	bool ejectDrive(int id);
-	bool protectDrive(int id);
-	bool execCmd(const std::string& cmd, const std::string& option);
+	const Status& getStatus() const { return mStatus; }
 	ErrNo getErrNo() const { return mErrNo; }
 
+	typedef int Callback(Status& st, void* param);
+	void setCallback(Callback* func, void* param);
+
 private:	// function
-	bool sendCommand(const std::string& command, bool getStatus);
+	bool recvStatus(void);
+	void analyzeLogLine(void);
+	void putLogLine(void);
+	void clearLogLine(void);
+
+
 
 public:		// var
 
@@ -89,14 +115,17 @@ private:	// var
 	std::vector<std::string> mArgv;
 #if !defined(FDS_WINDOWS)
 	pid_t mPid = 0;
+	int mPipe[2];
 #endif
-	Status mStatus[2] = {};
-	std::string mDiskPath[2];
+	Status mStatus = {};
 	ErrNo mErrNo = ErrNo::None;
-	bool mNoRoot = false;
+	LogMode mLogMode;
+	std::string mLineBuf;
+	Callback* mCallbackFunc;
+	void* mCallbackParam;
 
 };
 
-#endif  // __FDDEMU_H__
+#endif  // __FDDUMP_H__
 // =====================================================================
 // [EOF]

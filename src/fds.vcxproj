@@ -22,7 +22,6 @@
     <ProjectGuid>{1C23B5B9-0AE0-4D71-B571-D5528DBE7348}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>fds</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -164,6 +163,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dirent\dirent.c" />
+    <ClCompile Include="FdDump.cpp" />
+    <ClCompile Include="FdRestore.cpp" />
+    <ClCompile Include="FDSSystemDump.cpp" />
+    <ClCompile Include="FDSSystemRestore.cpp" />
+    <ClCompile Include="FdxTool.cpp" />
     <ClCompile Include="wcwidth\wcwidth.c" />
     <ClCompile Include="DirEntry.cpp" />
     <ClCompile Include="DirStack.cpp" />
@@ -184,6 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent\dirent.h" />
+    <ClInclude Include="FdDump.h" />
+    <ClInclude Include="FdRestore.h" />
+    <ClInclude Include="FdxTool.h" />
     <ClInclude Include="wcwidth\wcwidth.h" />
     <ClInclude Include="DirEntry.h" />
     <ClInclude Include="DirStack.h" />

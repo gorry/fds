@@ -124,7 +124,7 @@ IniFile::load(const char* filename)
 				if ((c == 0x0d) || (c == 0x0a) || (c == 0x1a)) {
 					// 改行またはEOFならバリュー終了、
 					// キー/バリューをデータベースへ登録後、モード0へ遷移
-					std::string sectionkey = section + ":" + key;
+					std::string sectionkey = (section.empty() ? key : (section + ":" + key));
 					mIniFileMap.insert(std::make_pair(sectionkey, value));
 					continue;
 				}
@@ -159,7 +159,10 @@ IniFile::load(const char* filename)
 const std::string
 IniFile::getString(const std::string& section, const std::string& key)
 {
-	std::string sectionkey = section + ":" + key;
+	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
+	if (mIniFileMap.end() == mIniFileMap.find(sectionkey)) {
+		return "";
+	}
 	return mIniFileMap[sectionkey];
 }
 
@@ -169,8 +172,90 @@ IniFile::getString(const std::string& section, const std::string& key)
 int
 IniFile::getInt(const std::string& section, const std::string& key)
 {
-	std::string sectionkey = section + ":" + key;
+	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
+	if (mIniFileMap.end() == mIniFileMap.find(sectionkey)) {
+		return 0;
+	}
 	return atoi(mIniFileMap[sectionkey].c_str());
+}
+
+// -------------------------------------------------------------
+// INIファイル書き込み
+// -------------------------------------------------------------
+int
+IniFile::save(const char* filename)
+{
+	std::string lastsection;
+	bool isfirstline = true;
+
+	// INIファイルを開く
+	FILE *fout = fopen(filename, "w");
+	if (fout == nullptr) {
+		return -1;
+	}
+
+	// マップ内全部（mIniFileMapはsectionkeyでソート済）
+	for (const auto& e: mIniFileMap) {
+		const std::string& sectionkey = e.first;
+		const std::string& value = e.second;
+		std::string section;
+		std::string key;
+
+		// セクション名とキー名を取り出す
+		size_t pos = sectionkey.find(":", 0);
+		if (std::string::npos == pos) {
+			// ":"で区切られていなければキー名のみ
+			key = sectionkey;
+		} else {
+			// ":"で区切られていればセクション名とキー名を取り出し
+			section = sectionkey.substr(0, pos);
+			key = sectionkey.substr(pos+1);
+		}
+
+		// セクション名が変わる場合はそれを出力
+		if (lastsection != section) {
+			if (!isfirstline) {
+				// 最初のセクションでなければ
+				fputs("\n", fout);
+			}
+			fprintf(fout, "[%s]\n", section.c_str());
+			lastsection = section;
+		}
+
+		// [key]=[value]を出力
+		fprintf(fout, "%s=%s\n", key.c_str(), value.c_str());
+		isfirstline = false;
+	}
+
+	// INIファイルを閉じる
+	fclose(fout);
+	return 0;
+}
+
+// -------------------------------------------------------------
+// データベースへ文字列を登録する
+// -------------------------------------------------------------
+void
+IniFile::setString(const std::string& section, const std::string& key, const std::string& value)
+{
+	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
+	auto e = mIniFileMap.find(sectionkey);
+	if (mIniFileMap.end() != e) {
+		mIniFileMap.erase(e);
+	}
+	mIniFileMap.emplace(sectionkey, value);
+}
+
+// -------------------------------------------------------------
+// データベースへint値（10進数）を登録する
+// -------------------------------------------------------------
+void
+IniFile::setInt(const std::string& section, const std::string& key, int value)
+{
+	char buf[16];
+	sprintf(buf, "%d", value);
+	std::string valuestr(buf);
+	setString(section, key, valuestr);
 }
 
 // =====================================================================

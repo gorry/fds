@@ -32,7 +32,7 @@ class DlgInput
 public:		// struct, enum
 
 public:		// function
-	DlgInput() {}
+	DlgInput();
 	virtual ~DlgInput() { end(); }
 
 	void setText(const std::string& text);
@@ -40,6 +40,7 @@ public:		// function
 	void setHeader(const std::string& text);
 	void setMaxLength(int maxlen);
 	void setCanEscape(bool f);
+	void setOffset(int ofsx, int ofsy);
 	int start(int w=0);
 	int start(int x, int y, int w=0);
 	void end();
@@ -73,6 +74,8 @@ private:	// var
 	bool mInsertMode = false;
 	bool mFinish = false;
 	bool mCanEscape = false;
+	int mOfsX = 0;
+	int mOfsY = 0;
 	std::string mHeader = "Input";
 
 };

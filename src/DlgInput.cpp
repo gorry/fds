@@ -12,6 +12,15 @@
 // =====================================================================
 
 // -------------------------------------------------------------
+// コンストラクタ
+// -------------------------------------------------------------
+DlgInput::DlgInput()
+ : mOfsX(0)
+ , mOfsY(0)
+{
+}
+
+// -------------------------------------------------------------
 // 初期入力テキストの設定
 // -------------------------------------------------------------
 void 
@@ -54,6 +63,16 @@ void
 DlgInput::setCanEscape(bool f)
 {
 	mCanEscape = f;
+}
+
+// -------------------------------------------------------------
+// 表示オフセットの設定
+// -------------------------------------------------------------
+void 
+DlgInput::setOffset(int ofsx, int ofsy)
+{
+	mOfsX = ofsx;
+	mOfsY = ofsy;
 }
 
 // -------------------------------------------------------------
@@ -133,7 +152,7 @@ DlgInput::start(int x, int y, int w)
 	}
 
 	// 表示準備
-	mwFrame = newwin(h2, w2, y, x);
+	mwFrame = newwin(h2, w2, y+mOfsY, x+mOfsX);
 	wborder(mwFrame, 0,0,0,0,0,0,0,0);
 	wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::InputHeader)|A_BOLD);
 	mvwaddstr(mwFrame, 1, 2, mHeader.c_str());
@@ -165,9 +184,15 @@ DlgInput::start(int x, int y, int w)
 			}
 			break;
 		  case KEY_LEFT:
+#if defined(KEY_B1)
+		  case KEY_B1:
+#endif
 			keyLeft();
 			break;
 		  case KEY_RIGHT:
+#if defined(KEY_B3)
+		  case KEY_B3:
+#endif
 			keyRight();
 			break;
 		  case KEY_HOME:
@@ -196,7 +221,7 @@ DlgInput::start(int x, int y, int w)
 				keyChar(wch);
 				break;
 			}
-			// fprintf(stderr, "key=%d, wch=%d\n", key, (int)wch);
+			FDS_LOG("DlgInput: key=%d\n", key);
 			break;
 		}
 	}

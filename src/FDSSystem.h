@@ -32,6 +32,9 @@
 #include "IniFile.h"
 #include "DlgSelect.h"
 #include "FddEmu.h"
+#include "FdDump.h"
+#include "FdRestore.h"
+#include "FdxTool.h"
 #include "FDXFile.h"
 #include "DlgInput.h"
 #include "WStrUtil.h"
@@ -78,6 +81,18 @@ public:		// struct, enum
 		FddCluster,
 		HelpHeader,
 		InfoHeader,
+		DumpHeader,
+		DumpGauge,
+		DumpStatusNone,
+		DumpStatusFinish,
+		DumpStatusUnformat,
+		DumpStatusError,
+		RestoreHeader,
+		RestoreGauge,
+		RestoreStatusNone,
+		RestoreStatusFinish,
+		RestoreStatusUnformat,
+		RestoreStatusError,
 	};
 
 	enum class HelpViewMode : int {
@@ -135,7 +150,7 @@ private:	// function
 	void destroyView();
 	void drawHeader();
 
-	void loadIniFile();
+	int loadIniFile();
 
 	void setViewLayout();
 
@@ -158,6 +173,14 @@ private:	// function
 	void cmdProtectDisk();
 	void cmdDelete();
 	void cmdShell();
+	void cmdDumpDisk();
+	void cmdRestoreDisk();
+
+	static int cmdDumpDiskCallback_(FdDump::Status& st, void* p);
+	int cmdDumpDiskCallback(FdDump::Status& st);
+
+	static int cmdRestoreDiskCallback_(FdRestore::Status& st, void* p);
+	int cmdRestoreDiskCallback(FdRestore::Status& st);
 
 	// filer view
 	void filerViewCreateWindow();
@@ -212,6 +235,20 @@ private:	// function
 	void helpViewRedraw();
 	void helpViewSetMode(FDSSystem::HelpViewMode md);
 
+	// dump view
+	void dumpViewCreateWindow();
+	void dumpViewDestroyWindow();
+	void dumpViewRefresh();
+	void dumpViewRedraw();
+	void dumpViewUpdate(FdDump::Status& st);
+
+	// restore view
+	void restoreViewCreateWindow();
+	void restoreViewDestroyWindow();
+	void restoreViewRefresh();
+	void restoreViewRedraw();
+	void restoreViewUpdate(FdRestore::Status& st);
+
 public:		// var
 
 private:	// var
@@ -220,8 +257,12 @@ private:	// var
 	Directory mFiles;
 	DirStack mDirStack;
 	IniFile mIniFile;
+	IniFile mSavFile;
 	std::string mIniSecSystem;
+	FdxTool mFdxTool;
 	FddEmu mFddEmu;
+	FdDump mFdDump;
+	FdRestore mFdRestore;
 	bool mNoRoot;
 
 	// filer view
@@ -253,6 +294,22 @@ private:	// var
 	WINDOW *mwHelpView = nullptr;
 	XYWH mHelpViewXYWH = {};
 	HelpViewMode mHelpViewMode = HelpViewMode::ParentDir;
+
+	// dump dialog
+	int mLastDumpMode = 0;
+
+	// dump view
+	WINDOW *mwDumpView = nullptr;
+	XYWH mDumpViewXYWH = {};
+	FdDump::Status mDumpViewStatus;
+
+	// restore dialog
+	int mLastRestoreMode = 0;
+
+	// restore view
+	WINDOW *mwRestoreView = nullptr;
+	XYWH mRestoreViewXYWH = {};
+	FdRestore::Status mRestoreViewStatus;
 
 };
 

@@ -28,18 +28,18 @@ FddEmu::FddEmu()
 // FddEmuの起動コマンドライン設定
 // -------------------------------------------------------------
 void
-FddEmu::setFddEmuCmd(const std::string& cmd)
+FddEmu::setCmd(const std::string& cmd)
 {
-	mFddEmuCmd = cmd;
+	mCmd = cmd;
 }
 
 // -------------------------------------------------------------
 // FddEmuの起動コマンドラインオプション設定
 // -------------------------------------------------------------
 void
-FddEmu::setFddEmuOption(const std::string& option)
+FddEmu::setOption(const std::string& option)
 {
-	mFddEmuOption = option;
+	mOption = option;
 }
 
 // -------------------------------------------------------------
@@ -57,6 +57,8 @@ FddEmu::setNoRoot(bool sw)
 int
 FddEmu::run()
 {
+	mErrNo = ErrNo::None;
+
 #if !defined(FDS_NOROOT)
 
 	// NoRootモードならFddEmuの起動は外部に任せる
@@ -88,9 +90,9 @@ FddEmu::run()
 		}
 
 		// FddEmuを起動
-		std::vector<const char*> argv = makeArgv(mFddEmuCmd, mFddEmuOption);
-		FDS_LOG("cmd=[%s], option=[%s]\n", mFddEmuCmd.c_str(), mFddEmuOption.c_str());
-		execvp(mFddEmuCmd.c_str(), (char* const*)&argv[0]);
+		std::vector<const char*> argv = makeArgv(mCmd, mOption, mArgv);
+		FDS_LOG("cmd=[%s], option=[%s]\n", mCmd.c_str(), mOption.c_str());
+		execvp(mCmd.c_str(), (char* const*)&argv[0]);
 
 		// 起動
 		exit(1);
@@ -133,97 +135,6 @@ FddEmu::kill()
 	::kill(mPid, SIGHUP);
 	mPid = 0;
 #endif  // !defined(FDS_NOROOT)
-}
-
-// -------------------------------------------------------------
-// 起動コマンドライン文字列からArgvを生成する
-// -------------------------------------------------------------
-std::vector<const char*>
-FddEmu::makeArgv(const std::string& cmd, const std::string& option)
-{
-	mArgv.clear();
-	mArgv.push_back(cmd.c_str());
-
-	int mode = 0;
-	char c = 0;
-	char c2 = 0;
-	const char* p = option.c_str();
-	std::string arg;
-	while ((c = *(p++)) != '\0') {
-		switch (mode) {
-		  default:
-		  case 0:
-			if ((c == ' ') || (c == '\t')) {
-				continue;
-			}
-			if (c == '\\') {
-				c = *(p++);
-				if (c == '\0') goto finish;
-				arg.push_back(c);
-				mode = 1;
-				continue;
-			}
-			if ((c == '\'') || (c == '\"')) {
-				arg.push_back(c);
-				c2 = c;
-				mode = 2;
-				continue;
-			}
-			arg.push_back(c);
-			mode = 1;
-			continue;
-		  case 1:
-			if ((c == ' ') || (c == '\t')) {
-				mArgv.push_back(arg);
-				arg.clear();
-				mode = 0;
-				continue;
-			}
-			if (c == '\\') {
-				c = *(p++);
-				if (c == '\0') goto finish;
-				arg.push_back(c);
-				continue;
-			}
-			if ((c == '\'') || (c == '\"')) {
-				arg.push_back(c);
-				c2 = c;
-				mode = 2;
-				continue;
-			}
-			mode = 1;
-			arg.push_back(c);
-			continue;
-		  case 2:
-			if (c == '\\') {
-				c = *(p++);
-				if (c == '\0') goto finish;
-				arg.push_back(c);
-				continue;
-			}
-			if (c == c2) {
-				arg.push_back(c);
-				mode = 1;
-				continue;
-			}
-			arg.push_back(c);
-			continue;
-		}
-
-	  finish:;
-		break;
-	}
-	if (!arg.empty()) {
-		mArgv.push_back(arg);
-	}
-
-	std::vector<const char*> argv;
-	for (int i=0; i<(int)mArgv.size(); i++) {
-		argv.push_back(mArgv[i].c_str());
-	}
-	argv.push_back(nullptr);
-
-	return argv;
 }
 
 // -------------------------------------------------------------
@@ -299,22 +210,6 @@ FddEmu::protectDrive(int id)
 	mStatus[id].mProtect = !mStatus[id].mProtect;
 	return true;
 #endif  // !defined(FDS_WINDOWS)
-}
-
-// -------------------------------------------------------------
-// 外部コマンドの実行
-// -------------------------------------------------------------
-bool
-FddEmu::execCmd(const std::string& cmd, const std::string& option)
-{
-	// 外部コマンドを起動
-	std::string cmdline = cmd + " " + option;
-	cmdline += ">>" FDS_LOGFILENAME " 2>&1";
-	FDS_LOG("execCmd: [%s]\n", cmdline.c_str());
-	int ret = system(cmdline.c_str());
-	FDS_LOG("execCmd: ret=%d\n", ret);
-
-	return ret;
 }
 
 // -------------------------------------------------------------

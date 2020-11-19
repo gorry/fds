@@ -33,6 +33,10 @@ public:		// function
 //	int getInt(const char* section, const char* key);
 	int getInt(const std::string& section, const std::string& key);
 
+	int save(const char* filename);
+	void setString(const std::string& section, const std::string& key, const std::string& value);
+	void setInt(const std::string& section, const std::string& key, const int value);
+
 private:	// function
 
 public:		// var

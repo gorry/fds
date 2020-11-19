@@ -12,6 +12,15 @@
 // =====================================================================
 
 // -------------------------------------------------------------
+// コンストラクタ
+// -------------------------------------------------------------
+DlgSelect::DlgSelect()
+ : mOfsX(0)
+ , mOfsY(0)
+{
+}
+
+// -------------------------------------------------------------
 // 選択肢の設定（vector）
 // -------------------------------------------------------------
 void 
@@ -31,6 +40,7 @@ DlgSelect::setItemsOk()
 {
 	mSelectTxt.clear();
 	mSelectTxt.push_back("OK");
+	setCanEscape(false);
 }
 
 // -------------------------------------------------------------
@@ -42,6 +52,32 @@ DlgSelect::setItemsOkCancel()
 	mSelectTxt.clear();
 	mSelectTxt.push_back("OK");
 	mSelectTxt.push_back("Cancel");
+	setCanEscape(false);
+}
+
+// -------------------------------------------------------------
+// 選択肢の設定（固定：Yes/Noのみ）
+// -------------------------------------------------------------
+void 
+DlgSelect::setItemsYesNo()
+{
+	mSelectTxt.clear();
+	mSelectTxt.push_back("Yes");
+	mSelectTxt.push_back("No");
+	setCanEscape(false);
+}
+
+// -------------------------------------------------------------
+// 選択肢の設定（固定：Yes/No/Cancelのみ）
+// -------------------------------------------------------------
+void 
+DlgSelect::setItemsYesNoCancel()
+{
+	mSelectTxt.clear();
+	mSelectTxt.push_back("Yes");
+	mSelectTxt.push_back("No");
+	mSelectTxt.push_back("Cancel");
+	setCanEscape(false);
 }
 
 // -------------------------------------------------------------
@@ -60,6 +96,16 @@ void
 DlgSelect::setHeader(const std::string& text)
 {
 	mHeader = text;
+}
+
+// -------------------------------------------------------------
+// 表示オフセットの設定
+// -------------------------------------------------------------
+void 
+DlgSelect::setOffset(int ofsx, int ofsy)
+{
+	mOfsX = ofsx;
+	mOfsY = ofsy;
 }
 
 // -------------------------------------------------------------
@@ -129,7 +175,7 @@ DlgSelect::start(int x, int y, int sel)
 	}
 
 	// 表示準備
-	mwFrame = newwin(h, w, y, x);
+	mwFrame = newwin(h, w, y+mOfsY, x+mOfsX);
 	wborder(mwFrame, 0,0,0,0,0,0,0,0);
 	wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectHeader)|A_BOLD);
 	mvwaddstr(mwFrame, 1, 2, mHeader.c_str());
@@ -150,12 +196,18 @@ DlgSelect::start(int x, int y, int sel)
 			}
 			break;
 		  case KEY_UP:
+#if defined(KEY_A2)
+		  case KEY_A2:
+#endif
 			mSelect--;
 			if (mSelect < 0) {
 				mSelect = (int)mSelectTxt.size()-1;
 			}
 			break;
 		  case KEY_DOWN:
+#if defined(KEY_C2)
+		  case KEY_C2:
+#endif
 			mSelect++;
 			if (mSelect > (int)mSelectTxt.size()-1) {
 				mSelect = 0;
@@ -165,6 +217,11 @@ DlgSelect::start(int x, int y, int sel)
 			  menuRet = mSelect;
 			  finish = true;
 			  break;
+
+		  default:
+			FDS_LOG("DlgSelect: key=%d\n", key);
+			break;
+
 		}
 	}
 

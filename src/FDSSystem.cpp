@@ -66,13 +66,17 @@ FDSSystem::start()
 {
 	char buf[FDX_STRING_MAX];
 
+	// 設定ファイル読み込み
+	int err = loadIniFile();
+	if (err < 0) {
+		fprintf(stderr, "[fds.ini] not found. Please copy [fds_sample.ini] to [fds.ini].\n");
+		return;
+	}
+
 	// ウィンドウ位置算出
 	initView();
 	setViewLayout();
 	drawHeader();
-
-	// 設定ファイル読み込み
-	loadIniFile();
 
 	// システム選択肢択準備
 	DlgSelect::ItemsVec items;
@@ -147,8 +151,8 @@ FDSSystem::start()
 		// FddEmuを起動
 		std::string cmd = mIniFile.getString("GLOBAL", "FDDEMUCMD");
 		std::string option = mIniFile.getString(mIniSecSystem, "FDDEMUOPT");
-		mFddEmu.setFddEmuCmd(cmd);
-		mFddEmu.setFddEmuOption(option);
+		mFddEmu.setCmd(cmd);
+		mFddEmu.setOption(option);
 		mFddEmu.run();
 
 		// FDSメイン起動
@@ -235,10 +239,16 @@ FDSSystem::mainLoop()
 			wtimeout(mwFilerView, FddViewRefreshInterval);
 			break;
 		  case KEY_UP:
+#if defined(KEY_A2)
+		  case KEY_A2:
+#endif
 			filerViewUpCursor();
 			infoRefresh = true;
 			goto clearInfoView;
 		  case KEY_DOWN:
+#if defined(KEY_C2)
+		  case KEY_C2:
+#endif
 			filerViewDownCursor();
 			infoRefresh = true;
 			goto clearInfoView;
@@ -329,6 +339,12 @@ FDSSystem::mainLoop()
 			cmdEjectAllDrive();
 			goto refreshScreen;
 
+		  case '<':
+			cmdDumpDisk();
+			break;
+		  case '>':
+			cmdRestoreDisk();
+			break;
 		  default:
 			FDS_LOG("mainLoop: key=%d\n", key);
 			break;
@@ -388,64 +404,88 @@ FDSSystem::initView()
 	if (env && strstr(env, "256color")) {
 		use_default_colors();
 		#define MyColor(r,g,b) (((r)*36)+((g)*6)+(b)+16)
-		init_pair((short)ColorPair::Normal,             MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::FilerUnknown,       MyColor(3,3,3), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerParentDir,     MyColor(0,5,5), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerDir,           MyColor(0,5,0), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerFdxFile,       MyColor(5,5,5), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerOtherFile,     MyColor(3,3,3), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerUnknownCsr,    MyColor(3,3,3), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerParentDirCsr,  MyColor(0,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerDirCsr,        MyColor(0,5,0), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerFdxFileCsr,    MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerOtherFileCsr,  MyColor(3,3,3), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerProtected,     MyColor(5,0,0), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerProtectedCsr,  MyColor(5,0,0), MyColor(0,0,5));
-		init_pair((short)ColorPair::Header,             MyColor(0,0,0), MyColor(5,3,0));
-		init_pair((short)ColorPair::PathHeader,         MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::PathRoot,           MyColor(3,5,0), MyColor(0,0,0));
-		init_pair((short)ColorPair::PathCurrent,        MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectHeader,       MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectItem,         MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectItemCursor,   MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::InputHeader,        MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::InputEdit,          MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FddHeaderOff,       MyColor(0,0,0), MyColor(2,2,2));
-		init_pair((short)ColorPair::FddHeaderOn,        MyColor(0,5,0), MyColor(2,2,2));
-		init_pair((short)ColorPair::FddProtect,         MyColor(5,0,0), MyColor(0,0,0));
-		init_pair((short)ColorPair::FddCluster,         MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::HelpHeader,         MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::InfoHeader,         MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::Normal,                MyColor(5,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::FilerUnknown,          MyColor(3,3,3), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerParentDir,        MyColor(0,5,5), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerDir,              MyColor(0,5,0), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerFdxFile,          MyColor(5,5,5), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerOtherFile,        MyColor(3,3,3), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerUnknownCsr,       MyColor(3,3,3), MyColor(0,0,5));
+		init_pair((short)ColorPair::FilerParentDirCsr,     MyColor(0,5,5), MyColor(0,0,5));
+		init_pair((short)ColorPair::FilerDirCsr,           MyColor(0,5,0), MyColor(0,0,5));
+		init_pair((short)ColorPair::FilerFdxFileCsr,       MyColor(5,5,5), MyColor(0,0,5));
+		init_pair((short)ColorPair::FilerOtherFileCsr,     MyColor(3,3,3), MyColor(0,0,5));
+		init_pair((short)ColorPair::FilerProtected,        MyColor(5,0,0), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerProtectedCsr,     MyColor(5,0,0), MyColor(0,0,5));
+		init_pair((short)ColorPair::Header,                MyColor(0,0,0), MyColor(5,3,0));
+		init_pair((short)ColorPair::PathHeader,            MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::PathRoot,              MyColor(3,5,0), MyColor(0,0,0));
+		init_pair((short)ColorPair::PathCurrent,           MyColor(0,5,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::SelectHeader,          MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::SelectItem,            MyColor(5,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::SelectItemCursor,      MyColor(5,5,5), MyColor(0,0,5));
+		init_pair((short)ColorPair::InputHeader,           MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::InputEdit,             MyColor(5,5,5), MyColor(0,0,5));
+		init_pair((short)ColorPair::FddHeaderOff,          MyColor(0,0,0), MyColor(2,2,2));
+		init_pair((short)ColorPair::FddHeaderOn,           MyColor(0,5,0), MyColor(2,2,2));
+		init_pair((short)ColorPair::FddProtect,            MyColor(5,0,0), MyColor(0,0,0));
+		init_pair((short)ColorPair::FddCluster,            MyColor(0,5,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::HelpHeader,            MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::InfoHeader,            MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::DumpHeader,            MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::DumpGauge,             MyColor(0,5,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::DumpStatusNone,        MyColor(3,3,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::DumpStatusFinish,      MyColor(5,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::DumpStatusUnformat,    MyColor(0,0,0), MyColor(5,5,5));
+		init_pair((short)ColorPair::DumpStatusError,       MyColor(0,5,5), MyColor(5,0,0));
+		init_pair((short)ColorPair::RestoreHeader,         MyColor(0,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::RestoreGauge,          MyColor(0,5,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::RestoreStatusNone,     MyColor(3,3,3), MyColor(0,0,0));
+		init_pair((short)ColorPair::RestoreStatusFinish,   MyColor(5,5,5), MyColor(0,0,0));
+		init_pair((short)ColorPair::RestoreStatusUnformat, MyColor(0,0,0), MyColor(5,5,5));
+		init_pair((short)ColorPair::RestoreStatusError,    MyColor(0,5,5), MyColor(5,0,0));
 
 	} else {
-		init_pair((short)ColorPair::Normal,             COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerUnknown,       COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerParentDir,     COLOR_YELLOW, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerDir,           COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerFdxFile,       COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerOtherFile,     COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerUnknownCsr,    COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerParentDirCsr,  COLOR_YELLOW, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerDirCsr,        COLOR_GREEN, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerFdxFileCsr,    COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerOtherFileCsr,  COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerProtected,     COLOR_RED, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerProtectedCsr,  COLOR_RED, COLOR_BLUE);
-		init_pair((short)ColorPair::Header,             COLOR_BLACK, COLOR_YELLOW);
-		init_pair((short)ColorPair::PathHeader,         COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::PathRoot,           COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::PathCurrent,        COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectHeader,       COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectItem,         COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectItemCursor,   COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::InputHeader,        COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::InputEdit,          COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FddHeaderOff,       COLOR_BLACK, COLOR_WHITE);
-		init_pair((short)ColorPair::FddHeaderOn,        COLOR_GREEN, COLOR_WHITE);
-		init_pair((short)ColorPair::FddProtect,         COLOR_RED, COLOR_BLACK);
-		init_pair((short)ColorPair::FddCluster,         COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::HelpHeader,         COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::InfoHeader,         COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::Normal,                COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerUnknown,          COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerParentDir,        COLOR_YELLOW, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerDir,              COLOR_GREEN, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerFdxFile,          COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerOtherFile,        COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerUnknownCsr,       COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::FilerParentDirCsr,     COLOR_YELLOW, COLOR_BLUE);
+		init_pair((short)ColorPair::FilerDirCsr,           COLOR_GREEN, COLOR_BLUE);
+		init_pair((short)ColorPair::FilerFdxFileCsr,       COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::FilerOtherFileCsr,     COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::FilerProtected,        COLOR_RED, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerProtectedCsr,     COLOR_RED, COLOR_BLUE);
+		init_pair((short)ColorPair::Header,                COLOR_BLACK, COLOR_YELLOW);
+		init_pair((short)ColorPair::PathHeader,            COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::PathRoot,              COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::PathCurrent,           COLOR_GREEN, COLOR_BLACK);
+		init_pair((short)ColorPair::SelectHeader,          COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::SelectItem,            COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::SelectItemCursor,      COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::InputHeader,           COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::InputEdit,             COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::FddHeaderOff,          COLOR_BLACK, COLOR_WHITE);
+		init_pair((short)ColorPair::FddHeaderOn,           COLOR_GREEN, COLOR_WHITE);
+		init_pair((short)ColorPair::FddProtect,            COLOR_RED, COLOR_BLACK);
+		init_pair((short)ColorPair::FddCluster,            COLOR_GREEN, COLOR_BLACK);
+		init_pair((short)ColorPair::HelpHeader,            COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::InfoHeader,            COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::DumpHeader,            COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::DumpGauge,             COLOR_GREEN, COLOR_BLACK);
+		init_pair((short)ColorPair::DumpStatusNone,        COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::DumpStatusFinish,      COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::DumpStatusUnformat,    COLOR_BLACK, COLOR_WHITE);
+		init_pair((short)ColorPair::DumpStatusError,       COLOR_WHITE, COLOR_RED);
+		init_pair((short)ColorPair::RestoreHeader,         COLOR_CYAN, COLOR_BLACK);
+		init_pair((short)ColorPair::RestoreGauge,          COLOR_GREEN, COLOR_BLACK);
+		init_pair((short)ColorPair::RestoreStatusNone,     COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::RestoreStatusFinish,   COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::RestoreStatusUnformat, COLOR_BLACK, COLOR_WHITE);
+		init_pair((short)ColorPair::RestoreStatusError,    COLOR_WHITE, COLOR_RED);
 	}
 }
 
@@ -501,10 +541,11 @@ FDSSystem::drawHeader()
 // -------------------------------------------------------------
 // 設定ファイルの読み込み
 // -------------------------------------------------------------
-void
+int
 FDSSystem::loadIniFile()
 {
-	mIniFile.load("fds.ini");
+	int err = mIniFile.load("fds.ini");
+	return err;
 }
 
 // -------------------------------------------------------------
@@ -550,6 +591,21 @@ FDSSystem::setViewLayout()
 	mFilerViewXYWH.H = mInfoViewXYWH.y() - mPathViewXYWH.b() + 2;
 	mFilerViewXYWH.X = fullViewXYWH.x();
 	mFilerViewXYWH.Y = mPathViewXYWH.b() - 1;
+
+	// ダンプビューは中央
+	mDumpViewXYWH.W = 52;
+	mDumpViewXYWH.H = 16;
+	mDumpViewXYWH.X = (fullViewXYWH.w()-mDumpViewXYWH.w())/2;
+	mDumpViewXYWH.Y = (fullViewXYWH.h()-mDumpViewXYWH.h())/2;
+	mDumpViewXYWH.Y -= 2;
+
+	// リストアビューは中央
+	mRestoreViewXYWH.W = 52;
+	mRestoreViewXYWH.H = 16;
+	mRestoreViewXYWH.X = (fullViewXYWH.w()-mRestoreViewXYWH.w())/2;
+	mRestoreViewXYWH.Y = (fullViewXYWH.h()-mRestoreViewXYWH.h())/2;
+	mRestoreViewXYWH.Y -= 2;
+
 }
 
 // -------------------------------------------------------------

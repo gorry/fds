@@ -66,7 +66,7 @@ FDSSystem::fddViewRefresh()
 	for (int i=0; i<mFddEmu.Drives; i++) {
 		char buf[1024];
 		const std::string& drive = getDriveName(i);
-		const FddEmu::status& st = mFddEmu.getStatus(i); 
+		const FddEmu::Status& st = mFddEmu.getStatus(i); 
 
 		if (!st.mInsert) {
 			// ドライブは空

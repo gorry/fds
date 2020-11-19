@@ -37,7 +37,7 @@ public:		// struct, enum
 	using ItemsArray = std::array<std::string, N>;
 
 public:		// function
-	DlgSelect() {}
+	DlgSelect();
 	virtual ~DlgSelect() { end(); }
 
 	template <size_t N>
@@ -52,8 +52,11 @@ public:		// function
 	void setItemsVec(const ItemsVec& items);
 	void setItemsOk();
 	void setItemsOkCancel();
+	void setItemsYesNo();
+	void setItemsYesNoCancel();
 	void setCanEscape(bool f);
 	void setHeader(const std::string& text);
+	void setOffset(int ofsx, int ofsy);
 	int start(int sel=0);
 	int start(int x, int y, int sel=0);
 	void end();
@@ -73,6 +76,8 @@ private:	// var
 	int mInnerWidth = 0;
 	int mSelect = 0;
 	bool mCanEscape = false;
+	int mOfsX = 0;
+	int mOfsY = 0;
 
 };
 

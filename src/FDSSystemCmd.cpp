@@ -82,6 +82,7 @@ FDSSystem::cmdRename()
 				dlg2.setHeader("Use Extention \".FDX\"!");
 				dlg2.setCanEscape(true);
 				dlg2.start();
+				dlg2.end();
 				refreshAllView();
 				filename = newname;
 				continue;
@@ -97,6 +98,7 @@ FDSSystem::cmdRename()
 			dlg2.setHeader("Can't use '/'!");
 			dlg2.setCanEscape(true);
 			dlg2.start();
+			dlg2.end();
 			refreshAllView();
 			filename = newname;
 			continue;
@@ -333,6 +335,7 @@ FDSSystem::cmdCreateDisk()
 				dlg3.setHeader("Use Extention \".FDX\"!");
 				dlg3.setCanEscape(true);
 				dlg3.start();
+				dlg3.end();
 				refreshAllView();
 				filename = newname;
 				continue;
@@ -347,6 +350,7 @@ FDSSystem::cmdCreateDisk()
 				dlg3.setHeader("Can't use '/'!");
 				dlg3.setCanEscape(true);
 				dlg3.start();
+				dlg3.end();
 				refreshAllView();
 				filename = newname;
 				continue;
@@ -365,6 +369,7 @@ FDSSystem::cmdCreateDisk()
 				dlg3.setHeader("Disk Already Exist!");
 				dlg3.setCanEscape(true);
 				dlg3.start();
+				dlg3.end();
 				refreshAllView();
 				filename = newname;
 				continue;
@@ -373,7 +378,7 @@ FDSSystem::cmdCreateDisk()
 			// イメージを作成
 			std::string option = fdxtoolopt+" \""+dst.c_str()+"\"";
 			std::string cmd = mIniFile.getString("GLOBAL", "FDXTOOLCMD");
-			int ret2 = mFddEmu.execCmd(cmd.c_str(), option.c_str());
+			int ret2 = mFdxTool.execCmd(cmd.c_str(), option.c_str());
 			if (ret2 != 0) {
 				// 失敗
 				FDS_ERROR("cmdCreateDisk: Create Disk Failed!\n");
@@ -471,6 +476,7 @@ FDSSystem::cmdDupDisk()
 			dlg3.setHeader("Use Extention \".FDX\"!");
 			dlg3.setCanEscape(true);
 			dlg3.start();
+			dlg3.end();
 			refreshAllView();
 			newfile = newname;
 			continue;
@@ -485,7 +491,7 @@ FDSSystem::cmdDupDisk()
 #else
 		std::string cmd = "cp";
 		std::string option = "-pf \"" + src + "\" \"" + dst + "\"";
-		int ret2 = mFddEmu.execCmd(cmd.c_str(), option.c_str());
+		int ret2 = mFdxTool.execCmd(cmd.c_str(), option.c_str());
 #endif  // defined(FDS_WINDOW)
 		if (ret2 != 0) {
 			// 失敗
@@ -549,6 +555,7 @@ FDSSystem::cmdMakeDirectory()
 			dlg2.setHeader("Can't use '/'!");
 			dlg2.setCanEscape(true);
 			dlg2.start();
+			dlg2.end();
 			refreshAllView();
 			filename = newname;
 			continue;
@@ -1043,6 +1050,441 @@ FDSSystem::cmdProtectDisk()
 	mFiles.getFiles(mCurDir.empty());
 	mFiles.sortFiles();
 }
+
+// -------------------------------------------------------------
+// ディスクをダンプする
+// -------------------------------------------------------------
+void
+FDSSystem::cmdDumpDisk()
+{
+	// ダンプ形式選択肢準備
+	DlgSelect::ItemsVec items;
+	int n = mIniFile.getInt("GLOBAL", "DUMPS");
+	for (int i=0; i<n; i++) {
+		char buf[FDX_FILENAME_MAX];
+		sprintf(buf, "DUMP-%d", i+1);
+		items.push_back(mIniFile.getString(buf, "NAME"));
+	}
+	items.push_back("[ Cancel ]");
+
+	// ダンプ形式選択肢
+	int sel = 0;
+	while (!0) {
+	  select:;
+		// ダイアログ表示
+		DlgSelect dlg;
+		dlg.setItemsVec(items);
+		dlg.setHeader("[Select Dump Format]");
+		dlg.setCanEscape(true);
+		sel = dlg.start(sel);
+
+		// [Cancel]を選んだら終了
+		if ((sel == -1) || (sel == (int)items.size()-1)) {
+			break;
+		}
+
+		// 選択した設定を読み込む
+		char section[FDX_FILENAME_MAX];
+		sprintf(section, "DUMP-%d", sel+1);
+		std::string name = mIniFile.getString(section, "NAME");
+		std::string fdxdumpopt = mIniFile.getString(section, "FDDUMPOPT");
+		std::string filename = mIniFile.getString(section, "FILENAME");
+
+		while (!0) {
+			// 新しいファイル名を入力
+			DlgInput dlg2;
+			dlg2.setHeader("Dump ["+name+"] Disk:");
+			dlg2.setText(filename);
+			dlg2.setCanEscape(true);
+			dlg2.setMaxLength(FDX_FILENAME_MAX);
+			int ret = dlg2.start(COLS/2);
+
+			// 入力が行われなかったらフォーマット選択に戻る
+			if (ret < 0) {
+				goto select;
+			}
+
+			// 入力が空だったら最初の名前でやり直し
+			std::string newname = dlg2.getText();
+			if (newname.empty()) {
+				refreshAllView();
+				continue;
+			}
+			// 入力結果の拡張子が".FDX"でなかったらやり直し
+			std::wstring wnewname = WStrUtil::str2wstr(newname);
+			size_t len = wnewname.length();
+			if ((len < 5) || (WStrUtil::wstricmp(&wnewname[len-4], L".FDX"))) {
+				FDS_ERROR("cmdDumpDisk: Use Extention \".FDX\"!\n");
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader("Use Extention \".FDX\"!");
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				filename = newname;
+				continue;
+			}
+
+			// ファイル名に"/"が含まれていたらやり直し
+			if (std::string::npos != newname.find('/')) {
+				FDS_ERROR("cmdDumpDisk: Can't use '/'!\n");
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader("Can't use '/'!");
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				filename = newname;
+				continue;
+			}
+
+			// すでにファイルがあったらやり直し
+			std::string dst = mRootDir + mCurDir + newname;
+			FILE* fin = fopen(dst.c_str(), "rb");
+			if (fin) {
+				fclose(fin);
+				// 失敗
+				FDS_ERROR("cmdDumpDisk: Disk Already Exist!\n");
+				FDS_ERROR(" dst=[%s]\n", dst.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader("Disk Already Exist!");
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				filename = newname;
+				continue;
+			}
+
+			// FddEmuを終了
+			mFddEmu.kill();
+
+			// ダンプビューを作成
+			refreshAllView();
+			dumpViewCreateWindow();
+			dumpViewRedraw();
+			wtimeout(mwDumpView, 0);
+			nodelay(mwDumpView, true);
+
+			// ディスクをダンプ
+			mFdDump.setCallback(&cmdDumpDiskCallback_, this);
+			std::string option = fdxdumpopt+" \""+dst.c_str()+"\"";
+			std::string cmd = mIniFile.getString("GLOBAL", "FDDUMPCMD");
+			mFdDump.setCmd(cmd);
+			mFdDump.setOption(option);
+			mFdDump.setFormatName(name);
+			mFdDump.setDiskName(newname);
+			while (!0) {
+				int ret2 = mFdDump.run();
+				if (ret2 < 0) {
+					// キャンセル
+					FDS_ERROR("cmdDumpDisk: Dump Disk Canceled!\n");
+					DlgSelect dlg3;
+					dlg3.setItemsYesNo();
+					dlg3.setHeader("Dump Disk Canceled! Retry?");
+					dlg3.setOffset(0, 8);
+					int ret3 = dlg3.start();
+					dlg3.end();
+					if (ret3 == 0) {
+						refreshAllView();
+						continue; // retry
+					}
+					break;
+				} else if (ret2 == 0) {
+					// 成功
+					FDS_ERROR("cmdDumpDisk: Dump Disk Finished!\n");
+					DlgSelect dlg3;
+					dlg3.setItemsOk();
+					dlg3.setHeader("Dump Disk Finished!");
+					dlg3.setOffset(0, 8);
+					dlg3.start();
+					dlg3.end();
+					break;
+				} else if (ret2 > 0) {
+					// 失敗
+					FDS_ERROR("cmdDumpDisk: Dump Disk Failed!\n");
+					FDS_ERROR(" dst=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", dst.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
+					DlgSelect dlg3;
+					dlg3.setItemsYesNo();
+					dlg3.setHeader("Dump Disk Failed! Retry?");
+					dlg3.setOffset(0, 8);
+					int ret3 = dlg3.start();
+					dlg3.end();
+					if (ret3 == 0) {
+						refreshAllView();
+						continue; // retry
+					}
+					break;
+				}
+				break;
+			}
+
+			// ダンプビューを破棄
+			dumpViewDestroyWindow();
+			refreshAllView();
+
+			// FddEmuを再開
+			mFddEmu.run();
+
+			// 新しいファイルリストを取得
+			mFiles.getFiles(mCurDir.empty());
+			mFiles.sortFiles();
+			filerViewFindEntry(newname);
+
+			// 作成したファイルの情報を表示
+			infoViewSetFile(dst);
+			infoViewRefresh();
+
+			return;
+		}
+	}
+
+}
+
+// -------------------------------------------------------------
+// ダンプ表示コールバックエントリ
+// -------------------------------------------------------------
+int
+FDSSystem::cmdDumpDiskCallback_(FdDump::Status& st, void* param)
+{
+	FDSSystem* me = (FDSSystem*)param;
+	int ret = me->cmdDumpDiskCallback(st);
+	return ret;
+}
+
+// -------------------------------------------------------------
+// ダンプ表示コールバック本体
+// -------------------------------------------------------------
+int
+FDSSystem::cmdDumpDiskCallback(FdDump::Status& st)
+{
+	FDS_LOG("callback: Track=%d\n", st.mNowTrack);
+	dumpViewUpdate(st);
+	dumpViewRefresh();
+
+	// ESCキー判定
+	bool escape = false;
+	int key = wgetch(mwDumpView);
+	if (key == 0x20) {
+		escape = true;
+	}
+	if (key == 0x1b) {
+		if (doEscKey(mwDumpView)) {
+			escape = true;
+		}
+	}
+
+	return ((escape == true) ? -1 : 0);
+}
+
+// =====================================================================
+
+// -------------------------------------------------------------
+// ディスクをリストアする
+// -------------------------------------------------------------
+void
+FDSSystem::cmdRestoreDisk()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return;
+	}
+
+	// FDXファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile()) {
+		return;
+	}
+
+	// 選択したFDXファイルで情報ビューを更新
+	std::string path = mRootDir + mCurDir + mFiles[idx].filename();
+	if (mFiles[idx].isDir()) {
+		path += "/";
+	}
+	infoViewSetFile(path);
+	infoViewRefresh();
+	int ret = infoViewGetResult();
+	if (ret == -1) {
+		return;
+	}
+	if (ret < -1) {
+		// 正常に情報取得できなければ中止
+		DlgSelect dlg;
+		dlg.setItemsOk();
+		dlg.setHeader("FDX File Info Error!");
+		dlg.setCanEscape(true);
+		dlg.start();
+		return;
+	}
+
+	// ディスク名を設定
+	FdxHeader& disk = infoViewGetFdxHeader();
+	{
+		std::string name = std::string((const char*)&(disk.mName[0]));
+		mFdRestore.setDiskName(name);
+		mFdRestore.setCylinders(disk.mCylinders);
+	}
+
+	// リストア形式選択肢準備
+	DlgSelect::ItemsVec items;
+	int n = mIniFile.getInt("GLOBAL", "RESTORES");
+	for (int i=0; i<n; i++) {
+		char buf[FDX_FILENAME_MAX];
+		sprintf(buf, "RESTORE-%d", i+1);
+		items.push_back(mIniFile.getString(buf, "NAME"));
+	}
+	items.push_back("[ Cancel ]");
+
+	// リストア形式選択肢
+	int sel = 0;
+	while (!0) {
+		// ダイアログ表示
+		DlgSelect dlg;
+		dlg.setItemsVec(items);
+		dlg.setHeader("[Select Restore Format]");
+		dlg.setCanEscape(true);
+		sel = dlg.start(sel);
+
+		// [Cancel]を選んだら終了
+		if ((sel == -1) || (sel == (int)items.size()-1)) {
+			break;
+		}
+
+		// 選択した設定を読み込む
+		char section[FDX_FILENAME_MAX];
+		sprintf(section, "RESTORE-%d", sel+1);
+		std::string name = mIniFile.getString(section, "NAME");
+		std::string fdxrestoreopt = mIniFile.getString(section, "FDRESTOREOPT");
+
+		while (!0) {
+			// FddEmuを終了
+			mFddEmu.kill();
+
+			// Fdxファイルのアナライズ
+			{
+				std::string cmd = mIniFile.getString("GLOBAL", "FDXTOOLCMD");
+				std::string option = "-a \""+path+"\"";
+				mFdRestore.setAnalyzeCmd(cmd);
+				mFdRestore.setAnalyzeOption(option);
+				mFdRestore.analyze();
+			}
+
+			// リストアビューを作成
+			refreshAllView();
+			restoreViewCreateWindow();
+			restoreViewRedraw();
+			wtimeout(mwRestoreView, 0);
+			nodelay(mwRestoreView, true);
+
+			// ディスクをリストア
+			char buf[16];
+			sprintf(buf, "-c%d", disk.mCylinders);
+			std::string option = fdxrestoreopt+" "+buf+" \""+path.c_str()+"\"";
+			std::string cmd = mIniFile.getString("GLOBAL", "FDRESTORECMD");
+			mFdRestore.setCmd(cmd);
+			mFdRestore.setOption(option);
+			mFdRestore.setFormatName(name);
+			mFdRestore.setCallback(&cmdRestoreDiskCallback_, this);
+
+			while (!0) {
+				int ret2 = mFdRestore.run();
+				if (ret2 < 0) {
+					// キャンセル
+					FDS_ERROR("cmdRestoreDisk: Restore Disk Canceled!\n");
+					DlgSelect dlg3;
+					dlg3.setItemsYesNo();
+					dlg3.setHeader("Restore Disk Canceled! Retry?");
+					dlg3.setOffset(0, 8);
+					int ret3 = dlg3.start();
+					dlg3.end();
+					if (ret3 == 0) {
+						refreshAllView();
+						continue; // retry
+					}
+					break;
+				} else if (ret2 == 0) {
+					// 成功
+					FDS_ERROR("cmdRestoreDisk: Restore Disk Finished!\n");
+					DlgSelect dlg3;
+					dlg3.setItemsOk();
+					dlg3.setHeader("Restore Disk Finished!");
+					dlg3.setOffset(0, 8);
+					dlg3.start();
+					dlg3.end();
+					break;
+				} else if (ret2 > 0) {
+					// 失敗
+					FDS_ERROR("cmdRestoreDisk: Restore Disk Failed!\n");
+					FDS_ERROR(" path=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", path.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
+					DlgSelect dlg3;
+					dlg3.setItemsYesNo();
+					dlg3.setHeader("Restore Disk Failed! Retry?");
+					dlg3.setOffset(0, 8);
+					int ret3 = dlg3.start();
+					dlg3.end();
+					if (ret3 == 0) {
+						refreshAllView();
+						continue; // retry
+					}
+					break;
+				}
+				break;
+			}
+
+			// リストアビューを破棄
+			restoreViewDestroyWindow();
+			refreshAllView();
+
+			// FddEmuを再開
+			mFddEmu.run();
+
+			return;
+		}
+	}
+
+}
+
+// -------------------------------------------------------------
+// リストア表示コールバックエントリ
+// -------------------------------------------------------------
+int
+FDSSystem::cmdRestoreDiskCallback_(FdRestore::Status& st, void* param)
+{
+	FDSSystem* me = (FDSSystem*)param;
+	int ret = me->cmdRestoreDiskCallback(st);
+	return ret;
+}
+
+// -------------------------------------------------------------
+// リストア表示コールバック本体
+// -------------------------------------------------------------
+int
+FDSSystem::cmdRestoreDiskCallback(FdRestore::Status& st)
+{
+	FDS_LOG("callback: Track=%d\n", st.mNowTrack);
+	restoreViewUpdate(st);
+	restoreViewRefresh();
+
+	// ESCキー判定
+	bool escape = false;
+	int key = wgetch(mwRestoreView);
+	if (key == 0x20) {
+		escape = true;
+	}
+	if (key == 0x1b) {
+		if (doEscKey(mwRestoreView)) {
+			escape = true;
+		}
+	}
+
+	return ((escape == true) ? -1 : 0);
+}
+
 
 
 // =====================================================================
