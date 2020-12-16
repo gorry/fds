@@ -279,7 +279,7 @@ FDSSystem::filerViewDownCursor()
 
 	// カーソルがビュー最下段より後を差さないよう調整
 	int h = mFilerViewInnerH-1;
-	if (mFilerViewCsrY >= h) {
+	if (mFilerViewCsrY > h) {
 		mFilerViewCsrY = h;
 		filerViewSetViewOfsY(mFilerViewOfsY+1);
 	}
