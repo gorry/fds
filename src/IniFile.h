@@ -28,12 +28,13 @@ public:		// function
 	virtual ~IniFile() {}
 
 	int load(const char* filename);
-//	const std::string getString(const char* section, const char* key);
+	int load(const std::string& filename) { return load(filename.c_str()); }
+	bool hasKey(const std::string& section, const std::string& key);
 	const std::string getString(const std::string& section, const std::string& key);
-//	int getInt(const char* section, const char* key);
 	int getInt(const std::string& section, const std::string& key);
 
 	int save(const char* filename);
+	int save(const std::string& filename) { return save(filename.c_str()); }
 	void setString(const std::string& section, const std::string& key, const std::string& value);
 	void setInt(const std::string& section, const std::string& key, const int value);
 

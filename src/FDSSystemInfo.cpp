@@ -122,23 +122,23 @@ FDSSystem::infoViewRefresh()
 			break;
 		}
 
-		// リビジョン・タイプ・ライトプロテクト・シリンダ・ヘッド
-		sprintf(&buf[1][0], "Rev:%d  Format:%s  Protect:%s  Cyl:%d  Head:%d", 
+		// リビジョン・タイプ・シリンダ・ヘッド
+		sprintf(&buf[1][0], "Rev:%d Format:%s Cyl:%d Head:%d", 
 		  (int)mFdxHeader.mRevision, disktype, 
-		  (mFdxHeader.mWriteProtect ? "ON " : "OFF"),
 		  mFdxHeader.mCylinders,
 		  mFdxHeader.mHeads
 		);
 
 		// トラックあたりサンプル量・データレート・モーター速度
-		sprintf(&buf[2][0], "Samples/Trk:%d  Rate:%dkbps  Motor:%drpm", 
+		sprintf(&buf[2][0], "Smpl/Tr:%d Rate:%dkbps Mtr:%drpm Protect:%s", 
 		  mFdxHeader.mTrackSize,
 		  mFdxHeader.mRate,
-		  mFdxHeader.mRpm
+		  mFdxHeader.mRpm,
+		  (mFdxHeader.mWriteProtect ? "ON " : "OFF")
 		);
 
 		// ディスク名
-		sprintf(&buf[3][0], "Name:[%s]",
+		sprintf(&buf[3][0], "Disk Name:[%s]",
 		  buf2
 		);
 	}

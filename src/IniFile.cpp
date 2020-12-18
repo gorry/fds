@@ -154,6 +154,19 @@ IniFile::load(const char* filename)
 }
 
 // -------------------------------------------------------------
+// データベースにキーがあるかどうか調べる
+// -------------------------------------------------------------
+bool
+IniFile::hasKey(const std::string& section, const std::string& key)
+{
+	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
+	if (mIniFileMap.end() == mIniFileMap.find(sectionkey)) {
+		return false;
+	}
+	return true;
+}
+
+// -------------------------------------------------------------
 // データベースから文字列を読み出す
 // -------------------------------------------------------------
 const std::string

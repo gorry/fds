@@ -60,7 +60,7 @@ FDSSystem::dumpViewRefresh()
 	werase(mwDumpView);
 
 	// ヘッダ
-	char buf[256];
+	char buf[FDX_STRING_MAX];
 	sprintf(buf, "[Dump %s : %s]", mDumpViewStatus.mName.c_str(), mDumpViewStatus.mFormat.c_str());
 	wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpHeader)|A_BOLD);
 	std::wstring wbuf = WStrUtil::str2wstr(buf);

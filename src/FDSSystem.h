@@ -8,7 +8,7 @@
 #if !defined(__FDSSYSTEM_H__)
 #define __FDSSYSTEM_H__
 
-#define FDS_VERSION "20200513a"
+#define FDS_VERSION "20201219a"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +36,7 @@
 #include "FdRestore.h"
 #include "FdxTool.h"
 #include "FDXFile.h"
+#include "FDSConfig.h"
 #include "DlgInput.h"
 #include "WStrUtil.h"
 #include "Log.h"
@@ -256,14 +257,14 @@ private:	// var
 	std::string mCurDir;
 	Directory mFiles;
 	DirStack mDirStack;
-	IniFile mIniFile;
 	IniFile mSavFile;
-	std::string mIniSecSystem;
 	FdxTool mFdxTool;
 	FddEmu mFddEmu;
 	FdDump mFdDump;
 	FdRestore mFdRestore;
 	bool mNoRoot;
+
+	FDSConfig mConfig;
 
 	// filer view
 	WINDOW *mwFilerView = nullptr;

@@ -165,6 +165,9 @@
     <ClCompile Include="dirent\dirent.c" />
     <ClCompile Include="FdDump.cpp" />
     <ClCompile Include="FdRestore.cpp" />
+    <ClCompile Include="FDSConfig.cpp" />
+    <ClCompile Include="FDSDrive.cpp" />
+    <ClCompile Include="FDSMachine.cpp" />
     <ClCompile Include="FDSSystemDump.cpp" />
     <ClCompile Include="FDSSystemRestore.cpp" />
     <ClCompile Include="FdxTool.cpp" />
@@ -190,6 +193,9 @@
     <ClInclude Include="dirent\dirent.h" />
     <ClInclude Include="FdDump.h" />
     <ClInclude Include="FdRestore.h" />
+    <ClInclude Include="FDSConfig.h" />
+    <ClInclude Include="FDSDrive.h" />
+    <ClInclude Include="FDSMachine.h" />
     <ClInclude Include="FdxTool.h" />
     <ClInclude Include="wcwidth\wcwidth.h" />
     <ClInclude Include="DirEntry.h" />

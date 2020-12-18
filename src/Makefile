@@ -12,6 +12,9 @@ CPPSRCS = \
 	FddEmu.cpp \
 	FdDump.cpp \
 	FdRestore.cpp \
+	FDSConfig.cpp \
+	FDSDrive.cpp \
+	FDSMachine.cpp \
 	FDSSystem.cpp \
 	FDSSystemCmd.cpp \
 	FDSSystemDump.cpp \

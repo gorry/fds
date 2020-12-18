@@ -60,7 +60,7 @@ FDSSystem::restoreViewRefresh()
 	werase(mwRestoreView);
 
 	// ヘッダ
-	char buf[256];
+	char buf[FDX_STRING_MAX];
 	sprintf(buf, "[Restore %s : %s]", mRestoreViewStatus.mName.c_str(), mRestoreViewStatus.mFormat.c_str());
 	wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreHeader)|A_BOLD);
 	std::wstring wbuf = WStrUtil::str2wstr(buf);

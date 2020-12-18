@@ -64,12 +64,9 @@ FDSSystem::setNoRoot(bool sw)
 void
 FDSSystem::start()
 {
-	char buf[FDX_STRING_MAX];
-
 	// 設定ファイル読み込み
 	int err = loadIniFile();
 	if (err < 0) {
-		fprintf(stderr, "[fds.ini] not found. Please copy [fds_sample.ini] to [fds.ini].\n");
 		return;
 	}
 
@@ -78,22 +75,21 @@ FDSSystem::start()
 	setViewLayout();
 	drawHeader();
 
-	// システム選択肢択準備
+	// マシン選択肢択準備
 	DlgSelect::ItemsVec items;
-	int n = mIniFile.getInt("GLOBAL", "SYSTEMS");
+	int n = mConfig.numMachines();
 	for (int i=0; i<n; i++) {
-		sprintf(buf, "SYSTEM-%d", i+1);
-		items.push_back(mIniFile.getString(buf, "NAME"));
+		items.push_back(mConfig.cfgMachine(i).name());
 	}
 	items.push_back("[ Quit ]");
 
-	// システム選択肢
-	int sel = 0;
+	// マシン選択肢
+	int sel = mConfig.machineNo();
 	while (!0) {
 		// ダイアログ表示
 		DlgSelect dlg;
 		dlg.setItemsVec(items);
-		dlg.setHeader("[Select System]");
+		dlg.setHeader("[Select Machine]");
 		sel = dlg.start(sel);
 
 		// [Quit]を選んだら終了
@@ -101,14 +97,13 @@ FDSSystem::start()
 			break;
 		}
 
-		// システムを選択
-		sprintf(buf, "SYSTEM-%d", sel+1);
-		mIniSecSystem = buf;
+		// マシンを選択
+		mConfig.setMachineNo(sel);
 
 		// 選択した設定を読み込む
-		setRootDir(mIniFile.getString(mIniSecSystem, "ROOTDIR"));
+		setRootDir(mConfig.cfgMachine().rootDir());
 		{
-			// システムのルートディレクトリが存在するか調べる
+			// マシンのルートディレクトリが存在するか調べる
 			std::string path = mRootDir+".";
 #if defined(FDS_WINDOWS)
 			struct _stat st;
@@ -149,8 +144,8 @@ FDSSystem::start()
 		}
 
 		// FddEmuを起動
-		std::string cmd = mIniFile.getString("GLOBAL", "FDDEMUCMD");
-		std::string option = mIniFile.getString(mIniSecSystem, "FDDEMUOPT");
+		std::string cmd = mConfig.fddEmuCmd();
+		std::string option = mConfig.cfgMachine().fddEmuOpt();
 		mFddEmu.setCmd(cmd);
 		mFddEmu.setOption(option);
 		mFddEmu.run();
@@ -544,8 +539,12 @@ FDSSystem::drawHeader()
 int
 FDSSystem::loadIniFile()
 {
-	int err = mIniFile.load("fds.ini");
-	return err;
+	int err = mConfig.load("fds2.ini");
+	if (err < 0) {
+		return err;
+	}
+
+	return 0;
 }
 
 // -------------------------------------------------------------
@@ -609,22 +608,12 @@ FDSSystem::setViewLayout()
 }
 
 // -------------------------------------------------------------
-// 各システム用のドライブ名の取得
+// 各マシン用のドライブ名の取得
 // -------------------------------------------------------------
 const std::string&
 FDSSystem::getDriveName(int id)
 {
-	static std::string sDriveName[2];
-
-	if (sDriveName[id].empty()) {
-		for (int i=0; i<mFddEmu.Drives; i++) {
-			char buf[64];
-			sprintf(buf, "DRIVE%dNAME", i);
-			sDriveName[i] = mIniFile.getString(mIniSecSystem, buf);
-		}
-	}
-
-	return sDriveName[id];
+	return mConfig.cfgMachine().driveName(id);
 }
 
 // -------------------------------------------------------------
