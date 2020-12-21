@@ -1105,7 +1105,7 @@ FDSSystem::cmdDumpDisk()
 		// ダイアログ表示
 		DlgSelect dlg0;
 		dlg0.setItemsVec(items0);
-		dlg0.setHeader("[Select Drive]");
+		dlg0.setHeader("[Select Dump FDD]");
 		dlg0.setCanEscape(true);
 		selDrive = dlg0.start(selDrive);
 
@@ -1243,10 +1243,10 @@ FDSSystem::cmdDumpDisk()
 					int ret2 = mFdDump.run();
 					if (ret2 < 0) {
 						// キャンセル
-						FDS_ERROR("cmdDumpDisk: Dump Media Canceled!\n");
+						FDS_ERROR("cmdDumpDisk: Dump FDD Canceled!\n");
 						DlgSelect dlg3;
 						dlg3.setItemsYesNo();
-						dlg3.setHeader("Dump Media Canceled! Retry?");
+						dlg3.setHeader("Dump FDD Canceled! Retry?");
 						dlg3.setOffset(0, 8);
 						int ret3 = dlg3.start();
 						dlg3.end();
@@ -1257,21 +1257,21 @@ FDSSystem::cmdDumpDisk()
 						break;
 					} else if (ret2 == 0) {
 						// 成功
-						FDS_ERROR("cmdDumpDisk: Dump Media Finished!\n");
+						FDS_ERROR("cmdDumpDisk: Dump FDD Finished!\n");
 						DlgSelect dlg3;
 						dlg3.setItemsOk();
-						dlg3.setHeader("Dump Media Finished!");
+						dlg3.setHeader("Dump FDD Finished!");
 						dlg3.setOffset(0, 8);
 						dlg3.start();
 						dlg3.end();
 						break;
 					} else if (ret2 > 0) {
 						// 失敗
-						FDS_ERROR("cmdDumpDisk: Dump Media Failed!\n");
+						FDS_ERROR("cmdDumpDisk: Dump FDD Failed!\n");
 						FDS_ERROR(" dst=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", dst.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 						DlgSelect dlg3;
 						dlg3.setItemsYesNo();
-						dlg3.setHeader("Dump Media Failed! Retry?");
+						dlg3.setHeader("Dump FDD Failed! Retry?");
 						dlg3.setOffset(0, 8);
 						int ret3 = dlg3.start();
 						dlg3.end();
@@ -1427,7 +1427,7 @@ FDSSystem::cmdRestoreDisk()
 		// ダイアログ表示
 		DlgSelect dlg0;
 		dlg0.setItemsVec(items);
-		dlg0.setHeader("[Select Drive]");
+		dlg0.setHeader("[Select Restore FDD]");
 		dlg0.setCanEscape(true);
 		selDrive = dlg0.start(selDrive);
 
@@ -1446,7 +1446,7 @@ FDSSystem::cmdRestoreDisk()
 		{
 			// "Yes/No"を選択
 			DlgSelect dlg;
-			std::string title = "Restore [" + name + "] to Media. OK?";
+			std::string title = "Restore [" + name + "] to FDD. OK?";
 			dlg.setHeader(title);
 			dlg.setItemsYesNo();
 			dlg.setCanEscape(true);
@@ -1458,10 +1458,10 @@ FDSSystem::cmdRestoreDisk()
 			}
 		}
 
-		while (!0) {
-			// FddEmuを終了
-			mFddEmu.kill();
+		// FddEmuを終了
+		mFddEmu.kill();
 
+		while (!0) {
 			// Fdxファイルのアナライズ
 			{
 				std::string cmd = mConfig.fdxToolCmd();
@@ -1492,39 +1492,41 @@ FDSSystem::cmdRestoreDisk()
 				int ret2 = mFdRestore.run();
 				if (ret2 < 0) {
 					// キャンセル
-					FDS_ERROR("cmdRestoreDisk: Restore Media Canceled!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore FDD Canceled!\n");
 					DlgSelect dlg3;
 					dlg3.setItemsYesNo();
-					dlg3.setHeader("Restore Media Canceled! Retry?");
+					dlg3.setHeader("Restore FDD Canceled! Retry?");
 					dlg3.setOffset(0, 8);
 					int ret3 = dlg3.start();
 					dlg3.end();
 					if (ret3 == 0) {
+						mFdRestore.revertAnalyzeStatus();
 						refreshAllView();
 						continue; // retry
 					}
 					break;
 				} else if (ret2 == 0) {
 					// 成功
-					FDS_ERROR("cmdRestoreDisk: Restore Media Finished!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore FDD Finished!\n");
 					DlgSelect dlg3;
 					dlg3.setItemsOk();
-					dlg3.setHeader("Restore Media Finished!");
+					dlg3.setHeader("Restore FDD Finished!");
 					dlg3.setOffset(0, 8);
 					dlg3.start();
 					dlg3.end();
 					break;
 				} else if (ret2 > 0) {
 					// 失敗
-					FDS_ERROR("cmdRestoreDisk: Restore Media Failed!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore FDD Failed!\n");
 					FDS_ERROR(" path=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", path.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 					DlgSelect dlg3;
 					dlg3.setItemsYesNo();
-					dlg3.setHeader("Restore Media Failed! Retry?");
+					dlg3.setHeader("Restore FDD Failed! Retry?");
 					dlg3.setOffset(0, 8);
 					int ret3 = dlg3.start();
 					dlg3.end();
 					if (ret3 == 0) {
+						mFdRestore.revertAnalyzeStatus();
 						refreshAllView();
 						continue; // retry
 					}

@@ -61,6 +61,8 @@ public:		// struct, enum
 		bool mFinished = false;
 		TrackStatus mStatus[MAX_TRACKS];
 		char mChanged[MAX_TRACKS];
+		TrackStatus mStatus_Backup[MAX_TRACKS];
+		char mChanged_Backup[MAX_TRACKS];
 		std::string mName;
 		std::string mFormat;
 	};
@@ -102,6 +104,7 @@ public:		// function
 	void setCallback(Callback* func, void* param);
 
 	int analyze();
+	void revertAnalyzeStatus(void);
 
 private:	// function
 	bool recvStatus(void);

@@ -517,7 +517,26 @@ FdRestore::analyze()
 		return -1;
 	}
 
+	// ステータスのバックアップをとっておく
+	for (int i=0; i<mStatus.mTracks; i++) {
+		mStatus.mStatus_Backup[i] = mStatus.mStatus[i];
+		mStatus.mChanged_Backup[i] = mStatus.mChanged[i];
+	}
+
 	return 0;
+}
+
+// -------------------------------------------------------------
+// FdxAnalyzeのステータスの変更を戻す
+// -------------------------------------------------------------
+void
+FdRestore::revertAnalyzeStatus()
+{
+	// ステータスのバックアップをとっておく
+	for (int i=0; i<mStatus.mTracks; i++) {
+		mStatus.mStatus[i] = mStatus.mStatus_Backup[i];
+		mStatus.mChanged[i] = mStatus.mChanged_Backup[i];
+	}
 }
 
 // -------------------------------------------------------------

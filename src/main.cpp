@@ -83,7 +83,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-
 #if defined(NDEBUG)
 	// Ctrl+Cを殺す
 	signal(SIGINT, abortHandler);

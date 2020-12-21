@@ -70,7 +70,7 @@ FddEmu::run()
 	// スレッドの生成
 	pid_t pid = fork();
 	if (pid < 0) {
-		fprintf(stderr, "cannot fork()");
+		fprintf(stderr, "cannot fork()\n");
 		return -1;
 	}
 

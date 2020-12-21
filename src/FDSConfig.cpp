@@ -44,8 +44,8 @@ FDSConfig::load(const std::string& filename)
 		}
 	}
 	if (num < 2) {
-		FDS_ERROR("failed: no DRIVE entry in [DRIVES] section in file %s", filename.c_str());
-		fprintf(stderr, "No DRIVE entry in [DRIVES] section in file %s", filename.c_str());
+		FDS_ERROR("failed: no DRIVE entry in [DRIVES] section in file %s\n", filename.c_str());
+		fprintf(stderr, "No DRIVE entry in [DRIVES] section in file %s\n", filename.c_str());
 		return -1;
 	}
 	mVecDrives.resize(num-1);
