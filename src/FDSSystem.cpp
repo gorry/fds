@@ -64,6 +64,22 @@ FDSSystem::setNoRoot(bool sw)
 void
 FDSSystem::start()
 {
+#if !defined(FDS_WINDOWS)
+	// fddemuチェック
+	if (!mNoRoot) {
+		FILE *fin = popen("pgrep fddemu", "r");
+		char buf[FDX_FILENAME_MAX];
+		fgets(buf, sizeof(buf), fin);
+		pclose(fin);
+		FDS_LOG("pgrep: %s\n", buf);
+		if (atoi(buf) > 1) {
+			FDS_ERROR("fddemu is already running. stop.\n");
+			fprintf(stderr, "fddemu is already running. stop.\n");
+			return;
+		}
+	}
+#endif
+
 	// 設定ファイル読み込み
 	int err = loadIniFile();
 	if (err < 0) {
