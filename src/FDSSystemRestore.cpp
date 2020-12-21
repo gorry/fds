@@ -61,35 +61,39 @@ FDSSystem::restoreViewRefresh()
 
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
-	sprintf(buf, "[Restore %s : %s]", mRestoreViewStatus.mName.c_str(), mRestoreViewStatus.mFormat.c_str());
+	std::wstring wbuf;
 	wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreHeader)|A_BOLD);
-	std::wstring wbuf = WStrUtil::str2wstr(buf);
+	sprintf(buf, "[Restore : %s]", mRestoreViewStatus.mFormat.c_str());
+	wbuf = WStrUtil::str2wstr(buf);
 	mvwaddwstr(mwRestoreView, 1, 2, wbuf.c_str());
 	wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreHeader)|A_BOLD);
+	sprintf(buf, "%s", mRestoreViewStatus.mName.c_str());
+	wbuf = WStrUtil::str2wstr(buf);
+	mvwaddwstr(mwRestoreView, 2, 2, wbuf.c_str());
 
 	// ゲージ
 	wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreGauge));
 	//                           01234567890123456789012345678901234567890123456789
-	mvwaddwstr(mwRestoreView,  2, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
-	mvwaddwstr(mwRestoreView,  3, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwRestoreView,  4, 2, L"  0|                     |                     |");
-	mvwaddwstr(mwRestoreView,  5, 2, L" 20|                     |                     |");
-	mvwaddwstr(mwRestoreView,  6, 2, L" 40|                     |                     |");
-	mvwaddwstr(mwRestoreView,  7, 2, L" 60|                     |                     |");
-	mvwaddwstr(mwRestoreView,  8, 2, L" 80|                     |                     |");
-	mvwaddwstr(mwRestoreView,  9, 2, L"100|                     |                     |");
-	mvwaddwstr(mwRestoreView, 10, 2, L"120|                     |                     |");
-	mvwaddwstr(mwRestoreView, 11, 2, L"140|                     |                     |");
-	mvwaddwstr(mwRestoreView, 12, 2, L"160|                     |                     |");
-	mvwaddwstr(mwRestoreView, 13, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwRestoreView, 14, 2, L"           [Push SPACE Key to Cancel]           ");
+	mvwaddwstr(mwRestoreView,  3, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
+	mvwaddwstr(mwRestoreView,  4, 2, L"---+---------------------+---------------------+");
+	mvwaddwstr(mwRestoreView,  5, 2, L"  0|                     |                     |");
+	mvwaddwstr(mwRestoreView,  6, 2, L" 20|                     |                     |");
+	mvwaddwstr(mwRestoreView,  7, 2, L" 40|                     |                     |");
+	mvwaddwstr(mwRestoreView,  8, 2, L" 60|                     |                     |");
+	mvwaddwstr(mwRestoreView,  9, 2, L" 80|                     |                     |");
+	mvwaddwstr(mwRestoreView, 10, 2, L"100|                     |                     |");
+	mvwaddwstr(mwRestoreView, 11, 2, L"120|                     |                     |");
+	mvwaddwstr(mwRestoreView, 12, 2, L"140|                     |                     |");
+	mvwaddwstr(mwRestoreView, 13, 2, L"160|                     |                     |");
+	mvwaddwstr(mwRestoreView, 14, 2, L"---+---------------------+---------------------+");
+	mvwaddwstr(mwRestoreView, 15, 2, L"           [Push SPACE Key to Cancel]           ");
 	wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreGauge));
 
 	for (int i=0; i<mRestoreViewStatus.mTracks; i++) {
 		if (!0) { // mRestoreViewStatus.mChanged[i]) {
 			int n = i%20;
 			int x =  (n+(n>=10)) * 2 + 7;
-			int y = (i/20) + 4;
+			int y = (i/20) + 5;
 			switch (mRestoreViewStatus.mStatus[i]) {
 			  default:
 				break;

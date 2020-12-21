@@ -1,6 +1,6 @@
 ﻿// ◇
 // fds: fdx68 selector
-// DlgSystem: 選択肢ダイアログ
+// DlgSelect: 選択肢ダイアログ
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 // =====================================================================
@@ -65,6 +65,7 @@ DlgSelect::setItemsYesNo()
 	mSelectTxt.push_back("Yes");
 	mSelectTxt.push_back("No");
 	setCanEscape(false);
+	mYesNo = true;
 }
 
 // -------------------------------------------------------------
@@ -78,6 +79,7 @@ DlgSelect::setItemsYesNoCancel()
 	mSelectTxt.push_back("No");
 	mSelectTxt.push_back("Cancel");
 	setCanEscape(false);
+	mYesNo = true;
 }
 
 // -------------------------------------------------------------
@@ -153,6 +155,7 @@ int
 DlgSelect::start(int x, int y, int sel)
 {
 	int menuRet = -1;
+	mDisableEnter = mYesNo;
 
 	// 準備
 	mSelect = sel;
@@ -199,6 +202,10 @@ DlgSelect::start(int x, int y, int sel)
 #if defined(KEY_A2)
 		  case KEY_A2:
 #endif
+			if (mDisableEnter) {
+				mDisableEnter = false;
+				break;
+			}
 			mSelect--;
 			if (mSelect < 0) {
 				mSelect = (int)mSelectTxt.size()-1;
@@ -208,15 +215,35 @@ DlgSelect::start(int x, int y, int sel)
 #if defined(KEY_C2)
 		  case KEY_C2:
 #endif
+			if (mDisableEnter) {
+				mDisableEnter = false;
+				break;
+			}
 			mSelect++;
 			if (mSelect > (int)mSelectTxt.size()-1) {
 				mSelect = 0;
 			}
 			break;
 		  case 10: // ENTER
-			  menuRet = mSelect;
-			  finish = true;
-			  break;
+			if (!mDisableEnter) {
+				menuRet = mSelect;
+				finish = true;
+			}
+			break;
+		  case 'Y':
+		  case 'y':
+			if (mYesNo) {
+				menuRet = 0;
+				finish = true;
+			}
+			break;
+		  case 'N':
+		  case 'n':
+			if (mYesNo) {
+				menuRet = 0;
+				finish = true;
+			}
+			break;
 
 		  default:
 			FDS_LOG("DlgSelect: key=%d\n", key);
@@ -238,17 +265,17 @@ DlgSelect::show()
 
 	for (int i=0; i<(int)mSelectTxt.size(); i++) {
 		// 選択肢カーソルを表示
-		if (i == mSelect) {
+		if ((i == mSelect) && (!mDisableEnter)) {
 			wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor));
 		}
 		mvwaddwstr(mwFrame, mInnerOfsY+i, mInnerOfsX, buf.c_str());
-		if (i == mSelect) {
+		if ((i == mSelect) && (!mDisableEnter)) {
 			wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor));
 		}
 
 		// 選択肢を表示
 		wmove(mwFrame, mInnerOfsY+i, mInnerOfsX+1);
-		if (i == mSelect) {
+		if ((i == mSelect) && (!mDisableEnter)) {
 			wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor)|A_BOLD);
 			waddstr(mwFrame, mSelectTxt[i].c_str());
 			wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor)|A_BOLD);

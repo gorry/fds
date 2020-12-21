@@ -389,6 +389,11 @@ FDSSystem::cmdCreateDisk()
 				dlg3.start();
 				return;
 			}
+#if !defined(FDS_WINDOWS)
+			if (!mNoRoot) {
+				chmod(dst.c_str(), 0666);
+			}
+#endif
 
 			// 新しいファイルリストを取得
 			mFiles.getFiles(mCurDir.empty());
@@ -502,6 +507,11 @@ FDSSystem::cmdDupDisk()
 			dlg3.setCanEscape(true);
 			dlg3.start();
 		}
+#if !defined(FDS_WINDOWS)
+		if (!mNoRoot) {
+			chmod(dst.c_str(), 0666);
+		}
+#endif
 
 		// 新しいファイルリストを取得
 		mFiles.getFiles(mCurDir.empty());
@@ -566,6 +576,9 @@ FDSSystem::cmdMakeDirectory()
 		int ret2 = _mkdir(dst.c_str());
 #else
 		int ret2 = mkdir(dst.c_str(), 0755);
+		if (!mNoRoot) {
+			chmod(dst.c_str(), 0777);
+		}
 #endif
 		if (ret2 != 0) {
 			FDS_ERROR("cmdMakeDirectory: Make Directory Failed!\n");
@@ -873,21 +886,16 @@ FDSSystem::cmdDelete()
 	}
 
 	{
-		// "Y"を入力
-		DlgInput dlg;
-		dlg.setHeader("Input 'Y' to Delete:");
-		dlg.setMaxLength(1);
+		// "Yes/No"を選択
+		DlgSelect dlg;
+		std::string title = "Delete [" + mFiles[idx].filename() + "]. OK?";
+		dlg.setHeader(title);
+		dlg.setItemsYesNo();
 		dlg.setCanEscape(true);
 		ret = dlg.start();
 
-		// 入力が行われなかったら中止
-		if (ret < 0) {
-			return;
-		}
-
-		// 入力が'Y"でなかったら中止
-		std::string yes = dlg.getText();
-		if (toupper(yes[0]) != 'Y') {
+		// Yesでなかったら中止
+		if (ret != 0) {
 			return;
 		}
 
@@ -1035,9 +1043,14 @@ FDSSystem::cmdProtectDisk()
 			return;
 		}
 #if defined(FDS_WINDOWS)
-		int ret2 = _chmod(path.c_str(), ((sel == 0) ? _S_IREAD : _S_IREAD| _S_IWRITE));
+		int mode = ((sel == 0) ? _S_IREAD : _S_IREAD| _S_IWRITE);
+		int ret2 = _chmod(path.c_str(), mode);
 #else
-		int ret2 = chmod(path.c_str(), ((sel == 0) ? 0444 : 0666));
+		int mode = ((sel == 0) ? 0444 : 0666);
+		if (mNoRoot) {
+			mode &= 0644;
+		}
+		int ret2 = chmod(path.c_str(), mode);
 #endif  // defined(FDS_WINDOWS)
 		if (ret2 != 0) {
 			FDS_ERROR("cmdProtectDisk: Chmod Failed!\n");
@@ -1072,7 +1085,7 @@ FDSSystem::cmdDumpDisk()
 			const std::string& type = mConfig.cfgDrive(i).dump(j).type();
 			for (int k=0; k<mConfig.cfgMachine().numDump(); k++) {
 				const FDSMachineDump& d = mConfig.cfgMachine().dump(k);
-				if (type.compare(d.type()) == 0) {
+				if (std::string::npos != type.find(d.type())) {
 					if (i == driveNo) {
 						selDrive = vecDrive.size();
 					}
@@ -1230,10 +1243,10 @@ FDSSystem::cmdDumpDisk()
 					int ret2 = mFdDump.run();
 					if (ret2 < 0) {
 						// キャンセル
-						FDS_ERROR("cmdDumpDisk: Dump Disk Canceled!\n");
+						FDS_ERROR("cmdDumpDisk: Dump Media Canceled!\n");
 						DlgSelect dlg3;
 						dlg3.setItemsYesNo();
-						dlg3.setHeader("Dump Disk Canceled! Retry?");
+						dlg3.setHeader("Dump Media Canceled! Retry?");
 						dlg3.setOffset(0, 8);
 						int ret3 = dlg3.start();
 						dlg3.end();
@@ -1244,21 +1257,21 @@ FDSSystem::cmdDumpDisk()
 						break;
 					} else if (ret2 == 0) {
 						// 成功
-						FDS_ERROR("cmdDumpDisk: Dump Disk Finished!\n");
+						FDS_ERROR("cmdDumpDisk: Dump Media Finished!\n");
 						DlgSelect dlg3;
 						dlg3.setItemsOk();
-						dlg3.setHeader("Dump Disk Finished!");
+						dlg3.setHeader("Dump Media Finished!");
 						dlg3.setOffset(0, 8);
 						dlg3.start();
 						dlg3.end();
 						break;
 					} else if (ret2 > 0) {
 						// 失敗
-						FDS_ERROR("cmdDumpDisk: Dump Disk Failed!\n");
+						FDS_ERROR("cmdDumpDisk: Dump Media Failed!\n");
 						FDS_ERROR(" dst=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", dst.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 						DlgSelect dlg3;
 						dlg3.setItemsYesNo();
-						dlg3.setHeader("Dump Disk Failed! Retry?");
+						dlg3.setHeader("Dump Media Failed! Retry?");
 						dlg3.setOffset(0, 8);
 						int ret3 = dlg3.start();
 						dlg3.end();
@@ -1270,6 +1283,11 @@ FDSSystem::cmdDumpDisk()
 					}
 					break;
 				}
+#if !defined(FDS_WINDOWS)
+				if (!mNoRoot) {
+					chmod(dst.c_str(), 0666);
+				}
+#endif
 
 				// ダンプビューを破棄
 				dumpViewDestroyWindow();
@@ -1388,7 +1406,7 @@ FDSSystem::cmdRestoreDisk()
 			const std::string& type = mConfig.cfgDrive(i).restore(j).type();
 			for (int k=0; k<mConfig.cfgMachine().numRestore(); k++) {
 				const FDSMachineRestore& d = mConfig.cfgMachine().restore(k);
-				if (type.compare(d.type()) == 0) {
+				if (std::string::npos != type.find(d.type())) {
 					if (i == driveNo) {
 						selDrive = vecDrive.size();
 					}
@@ -1405,7 +1423,7 @@ FDSSystem::cmdRestoreDisk()
 
 	// ドライブ選択肢
 	while (!0) {
-	  // select:;
+	  selectDrive:;
 		// ダイアログ表示
 		DlgSelect dlg0;
 		dlg0.setItemsVec(items);
@@ -1424,6 +1442,21 @@ FDSSystem::cmdRestoreDisk()
 		// 選択した設定を読み込む
 		std::string name = mConfig.cfgDrive().name();
 		std::string fdrestoreopt = mConfig.makeRestoreOpt(0);
+
+		{
+			// "Yes/No"を選択
+			DlgSelect dlg;
+			std::string title = "Restore [" + name + "] to Media. OK?";
+			dlg.setHeader(title);
+			dlg.setItemsYesNo();
+			dlg.setCanEscape(true);
+			ret = dlg.start();
+
+			// Yesでなかったら中止
+			if (ret != 0) {
+				goto selectDrive;
+			}
+		}
 
 		while (!0) {
 			// FddEmuを終了
@@ -1459,10 +1492,10 @@ FDSSystem::cmdRestoreDisk()
 				int ret2 = mFdRestore.run();
 				if (ret2 < 0) {
 					// キャンセル
-					FDS_ERROR("cmdRestoreDisk: Restore Disk Canceled!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore Media Canceled!\n");
 					DlgSelect dlg3;
 					dlg3.setItemsYesNo();
-					dlg3.setHeader("Restore Disk Canceled! Retry?");
+					dlg3.setHeader("Restore Media Canceled! Retry?");
 					dlg3.setOffset(0, 8);
 					int ret3 = dlg3.start();
 					dlg3.end();
@@ -1473,21 +1506,21 @@ FDSSystem::cmdRestoreDisk()
 					break;
 				} else if (ret2 == 0) {
 					// 成功
-					FDS_ERROR("cmdRestoreDisk: Restore Disk Finished!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore Media Finished!\n");
 					DlgSelect dlg3;
 					dlg3.setItemsOk();
-					dlg3.setHeader("Restore Disk Finished!");
+					dlg3.setHeader("Restore Media Finished!");
 					dlg3.setOffset(0, 8);
 					dlg3.start();
 					dlg3.end();
 					break;
 				} else if (ret2 > 0) {
 					// 失敗
-					FDS_ERROR("cmdRestoreDisk: Restore Disk Failed!\n");
+					FDS_ERROR("cmdRestoreDisk: Restore Media Failed!\n");
 					FDS_ERROR(" path=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", path.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 					DlgSelect dlg3;
 					dlg3.setItemsYesNo();
-					dlg3.setHeader("Restore Disk Failed! Retry?");
+					dlg3.setHeader("Restore Media Failed! Retry?");
 					dlg3.setOffset(0, 8);
 					int ret3 = dlg3.start();
 					dlg3.end();

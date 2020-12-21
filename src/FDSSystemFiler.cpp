@@ -427,6 +427,7 @@ FDSSystem::filerViewSelectEntry()
 			DlgSelect dlg;
 			dlg.setItemsVec(items);
 			dlg.setHeader("Insert Disk Drive");
+			dlg.setCanEscape(true);
 			sel = dlg.start(sel);
 			if (sel < 0) {
 				return;

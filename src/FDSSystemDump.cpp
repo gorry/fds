@@ -61,35 +61,39 @@ FDSSystem::dumpViewRefresh()
 
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
-	sprintf(buf, "[Dump %s : %s]", mDumpViewStatus.mName.c_str(), mDumpViewStatus.mFormat.c_str());
+	std::wstring wbuf;
 	wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpHeader)|A_BOLD);
-	std::wstring wbuf = WStrUtil::str2wstr(buf);
+	sprintf(buf, "[Dump : %s]", mDumpViewStatus.mFormat.c_str());
+	wbuf = WStrUtil::str2wstr(buf);
 	mvwaddwstr(mwDumpView, 1, 2, wbuf.c_str());
 	wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpHeader)|A_BOLD);
+	sprintf(buf, "%s", mDumpViewStatus.mName.c_str());
+	wbuf = WStrUtil::str2wstr(buf);
+	mvwaddwstr(mwDumpView, 2, 2, wbuf.c_str());
 
 	// ゲージ
 	wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpGauge));
 	//                           01234567890123456789012345678901234567890123456789
-	mvwaddwstr(mwDumpView,  2, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
-	mvwaddwstr(mwDumpView,  3, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwDumpView,  4, 2, L"  0|                     |                     |");
-	mvwaddwstr(mwDumpView,  5, 2, L" 20|                     |                     |");
-	mvwaddwstr(mwDumpView,  6, 2, L" 40|                     |                     |");
-	mvwaddwstr(mwDumpView,  7, 2, L" 60|                     |                     |");
-	mvwaddwstr(mwDumpView,  8, 2, L" 80|                     |                     |");
-	mvwaddwstr(mwDumpView,  9, 2, L"100|                     |                     |");
-	mvwaddwstr(mwDumpView, 10, 2, L"120|                     |                     |");
-	mvwaddwstr(mwDumpView, 11, 2, L"140|                     |                     |");
-	mvwaddwstr(mwDumpView, 12, 2, L"160|                     |                     |");
-	mvwaddwstr(mwDumpView, 13, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwDumpView, 14, 2, L"           [Push SPACE Key to Cancel]           ");
+	mvwaddwstr(mwDumpView,  3, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
+	mvwaddwstr(mwDumpView,  4, 2, L"---+---------------------+---------------------+");
+	mvwaddwstr(mwDumpView,  5, 2, L"  0|                     |                     |");
+	mvwaddwstr(mwDumpView,  6, 2, L" 20|                     |                     |");
+	mvwaddwstr(mwDumpView,  7, 2, L" 40|                     |                     |");
+	mvwaddwstr(mwDumpView,  8, 2, L" 60|                     |                     |");
+	mvwaddwstr(mwDumpView,  9, 2, L" 80|                     |                     |");
+	mvwaddwstr(mwDumpView, 10, 2, L"100|                     |                     |");
+	mvwaddwstr(mwDumpView, 11, 2, L"120|                     |                     |");
+	mvwaddwstr(mwDumpView, 12, 2, L"140|                     |                     |");
+	mvwaddwstr(mwDumpView, 13, 2, L"160|                     |                     |");
+	mvwaddwstr(mwDumpView, 14, 2, L"---+---------------------+---------------------+");
+	mvwaddwstr(mwDumpView, 15, 2, L"           [Push SPACE Key to Cancel]           ");
 	wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpGauge));
 
 	for (int i=0; i<mDumpViewStatus.mTracks; i++) {
 		if (!0) { // mDumpViewStatus.mChanged[i]) {
 			int n = i%20;
 			int x =  (n+(n>=10)) * 2 + 7;
-			int y = (i/20) + 4;
+			int y = (i/20) + 5;
 			switch (mDumpViewStatus.mStatus[i]) {
 			  default:
 				break;

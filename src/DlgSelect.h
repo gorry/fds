@@ -78,6 +78,8 @@ private:	// var
 	bool mCanEscape = false;
 	int mOfsX = 0;
 	int mOfsY = 0;
+	bool mYesNo = false;
+	bool mDisableEnter;
 
 };
 

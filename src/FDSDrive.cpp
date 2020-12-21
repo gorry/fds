@@ -89,7 +89,7 @@ int
 FDSDrive::findDumpByType(const std::string& type) const
 {
 	for (int i=0; i<(int)mVecDump.size(); i++) {
-		if (mVecDump[i].type().compare(type) == 0) {
+		if (std::string::npos != mVecDump[i].type().find(type)) {
 			return i;
 		}
 	}
@@ -103,7 +103,7 @@ int
 FDSDrive::findRestoreByType(const std::string& type) const
 {
 	for (int i=0; i< (int)mVecRestore.size(); i++) {
-		if (mVecRestore[i].type().compare(type) == 0) {
+		if (std::string::npos != mVecRestore[i].type().find(type)) {
 			return i;
 		}
 	}

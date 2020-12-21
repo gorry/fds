@@ -85,8 +85,8 @@ FDSSystem::helpViewRefresh()
 		mvwaddstr(mwHelpView, 16, 1, (0 ? "1: Set 1st Drive" : ""));
 		mvwaddstr(mwHelpView, 17, 1, (0 ? "2: Set 2nd Drive" : ""));
 		mvwaddstr(mwHelpView, 18, 1, (1 ? "0: Eject All" : ""));
-		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Disk" : ""));
-		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Disk" : ""));
+		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Media" : ""));
+		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Media" : ""));
 		break;
 	  case HelpViewMode::ParentDir:
 		mvwaddstr(mwHelpView,  3, 1, (0 ? "A: Auto Set Disk" : ""));
@@ -104,8 +104,8 @@ FDSSystem::helpViewRefresh()
 		mvwaddstr(mwHelpView, 16, 1, (0 ? "1: Set 1st Drive" : ""));
 		mvwaddstr(mwHelpView, 17, 1, (0 ? "2: Set 2nd Drive" : ""));
 		mvwaddstr(mwHelpView, 18, 1, (1 ? "0: Eject All" : ""));
-		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Disk" : ""));
-		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Disk" : ""));
+		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Media" : ""));
+		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Media" : ""));
 		break;
 	  case HelpViewMode::FdxFile:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "A: Auto Set" : ""));
@@ -123,8 +123,8 @@ FDSSystem::helpViewRefresh()
 		mvwaddstr(mwHelpView, 16, 1, (1 ? "1: Set 1st Drive" : ""));
 		mvwaddstr(mwHelpView, 17, 1, (1 ? "2: Set 2nd Drive" : ""));
 		mvwaddstr(mwHelpView, 18, 1, (1 ? "0: Eject All" : ""));
-		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Disk" : ""));
-		mvwaddstr(mwHelpView, 21, 1, (1 ? ">: Restore Disk" : ""));
+		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Media" : ""));
+		mvwaddstr(mwHelpView, 21, 1, (1 ? ">: Restore Media" : ""));
 		break;
 	  case HelpViewMode::OtherFile:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "A: Auto Set" : ""));
@@ -142,8 +142,8 @@ FDSSystem::helpViewRefresh()
 		mvwaddstr(mwHelpView, 16, 1, (0 ? "1: Set 1st Drive" : ""));
 		mvwaddstr(mwHelpView, 17, 1, (0 ? "2: Set 2nd Drive" : ""));
 		mvwaddstr(mwHelpView, 18, 1, (1 ? "0: Eject All" : ""));
-		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Disk" : ""));
-		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Disk" : ""));
+		mvwaddstr(mwHelpView, 20, 1, (1 ? "<: Dump Media" : ""));
+		mvwaddstr(mwHelpView, 21, 1, (0 ? ">: Restore Media" : ""));
 		break;
 	}
 

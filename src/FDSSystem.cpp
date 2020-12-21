@@ -133,7 +133,11 @@ FDSSystem::start()
 						std::wstring cmd = L"mkdir " + wrootdir;
 						_wsystem(cmd.c_str());
 #else
-						std::string cmd = "mkdir -p "+mRootDir;
+						std::string cmd = "mkdir -p ";
+						if (!mNoRoot) {
+							cmd += "-m777 ";
+						}
+						cmd += mRootDir;
 						system(cmd.c_str());
 #endif
 					} else {
@@ -593,14 +597,14 @@ FDSSystem::setViewLayout()
 
 	// ダンプビューは中央
 	mDumpViewXYWH.W = 52;
-	mDumpViewXYWH.H = 16;
+	mDumpViewXYWH.H = 17;
 	mDumpViewXYWH.X = (fullViewXYWH.w()-mDumpViewXYWH.w())/2;
 	mDumpViewXYWH.Y = (fullViewXYWH.h()-mDumpViewXYWH.h())/2;
 	mDumpViewXYWH.Y -= 2;
 
 	// リストアビューは中央
 	mRestoreViewXYWH.W = 52;
-	mRestoreViewXYWH.H = 16;
+	mRestoreViewXYWH.H = 17;
 	mRestoreViewXYWH.X = (fullViewXYWH.w()-mRestoreViewXYWH.w())/2;
 	mRestoreViewXYWH.Y = (fullViewXYWH.h()-mRestoreViewXYWH.h())/2;
 	mRestoreViewXYWH.Y -= 2;
