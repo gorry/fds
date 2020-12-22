@@ -80,6 +80,8 @@ FDSMachine::load(const std::string& filename)
 		dump.mType = mIniFile.getString(section, "TYPE");
 		dump.mFormat = mIniFile.getString(section, "FORMAT");
 		dump.mCylinders = mIniFile.getInt(section, "CYLINDERS");
+		dump.mHeads = mIniFile.getInt(section, "HEADS");
+		dump.mSteps = mIniFile.getInt(section, "STEPS");
 		dump.mFileName = mIniFile.getString(section, "FILENAME");
 	}
 
@@ -103,6 +105,9 @@ FDSMachine::load(const std::string& filename)
 		FDSMachineRestore& restore = mVecRestore[i-1];
 		restore.mName = mIniFile.getString(section, "NAME");
 		restore.mType = mIniFile.getString(section, "TYPE");
+		restore.mCylinders = mIniFile.getInt(section, "CYLINDERS");
+		restore.mHeads = mIniFile.getInt(section, "HEADS");
+		restore.mSteps = mIniFile.getInt(section, "STEPS");
 	}
 
 	return 0;

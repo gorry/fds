@@ -91,7 +91,7 @@ FDSSystem::cmdRename()
 
 		// ファイル名に"/"が含まれていたらやり直し
 		if (std::string::npos != newname.find('/')) {
-			FDS_ERROR("cmdRename: Can't use '/'!\n");
+			FDS_ERROR("cmdRenameDisk: Can't use '/'!\n");
 			FDS_ERROR(" newname=[%s]\n", newname.c_str());
 			DlgSelect dlg2;
 			dlg2.setItemsOk();
@@ -109,9 +109,26 @@ FDSSystem::cmdRename()
 			return;
 		}
 
-		// リネーム
+		// 先ファイルがすでにあったらやり直し
 		std::string src = mRootDir + mCurDir + mFiles[idx].filename();
 		std::string dst = mRootDir + mCurDir + newname;
+		FILE* fin = fopen(dst.c_str(), "rb");
+		if (fin != nullptr) {
+			fclose(fin);
+			FDS_ERROR("cmdRenameDisk: Disk Already Exist!\n");
+			FDS_ERROR(" newname=[%s]\n", newname.c_str());
+			DlgSelect dlg2;
+			dlg2.setItemsOk();
+			dlg2.setHeader("Disk Already Exist!");
+			dlg2.setCanEscape(true);
+			dlg2.start();
+			dlg2.end();
+			refreshAllView();
+			filename = newname;
+			continue;
+		}
+
+		// リネーム
 		int ret2 = rename(src.c_str(), dst.c_str());
 		if (ret2 != 0) {
 			FDS_ERROR("cmdRename: Rename Failed!\n");
@@ -473,7 +490,7 @@ FDSSystem::cmdDupDisk()
 		std::wstring wnewname = WStrUtil::str2wstr(newname);
 		size_t len = wnewname.length();
 		if ((len < 5) || (WStrUtil::wstricmp(&wnewname[len-4], L".FDX"))) {
-			FDS_ERROR("cmdRename: Use Extention \".FDX\"!\n");
+			FDS_ERROR("cmdDup: Use Extention \".FDX\"!\n");
 			FDS_ERROR(" newname=[%s]\n", newname.c_str());
 			DlgSelect dlg3;
 			dlg3.setItemsOk();
@@ -486,10 +503,42 @@ FDSSystem::cmdDupDisk()
 			continue;
 		}
 
-		// コピー
+		// ファイル名に"/"が含まれていたらやり直し
+		if (std::string::npos != newname.find('/')) {
+			FDS_ERROR("cmdDupDisk: Can't use '/'!\n");
+			FDS_ERROR(" newname=[%s]\n", newname.c_str());
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader("Can't use '/'!");
+			dlg3.setCanEscape(true);
+			dlg3.start();
+			dlg3.end();
+			refreshAllView();
+			filename = newname;
+			continue;
+		}
+
+		// 先ファイルがすでにあったらやり直し
 		newfile = dlg.getText();
 		std::string src = mRootDir + mCurDir + filename;
 		std::string dst = mRootDir + mCurDir + newfile;
+		FILE* fin = fopen(dst.c_str(), "rb");
+		if (fin != nullptr) {
+			fclose(fin);
+			FDS_ERROR("cmdDupDisk: Disk Already Exist!\n");
+			FDS_ERROR(" newname=[%s]\n", newname.c_str());
+			DlgSelect dlg2;
+			dlg2.setItemsOk();
+			dlg2.setHeader("Disk Already Exist!");
+			dlg2.setCanEscape(true);
+			dlg2.start();
+			dlg2.end();
+			refreshAllView();
+			filename = newname;
+			continue;
+		}
+
+		// コピー
 #if defined(FDS_WINDOWS)
 		int ret2 = (CopyFileA(src.c_str(), dst.c_str(), FALSE) ? 0 : -1);
 #else
@@ -1143,6 +1192,20 @@ FDSSystem::cmdDumpDisk()
 
 			// ダンプ形式を選択
 			mConfig.cfgMachineW().setDumpNo(selDump);
+			const std::string& type = mConfig.cfgMachine().dump().type();
+			int no = mConfig.cfgDrive().findDumpNoByType(type);
+			if (no < 0) {
+				FDS_ERROR("cmdDumpDisk: TYPE [%s] not found in [DRIVES] Config.\n", type.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader("TYPE [%s] not found in [DRIVES] Config.");
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				break;
+			}
+			mConfig.cfgDriveW().setDumpNoByType(type);
 
 			// 選択した設定を読み込む
 			std::string name = mConfig.cfgMachine().dump(selDump).name();
@@ -1231,14 +1294,37 @@ FDSSystem::cmdDumpDisk()
 				wtimeout(mwDumpView, 0);
 				nodelay(mwDumpView, true);
 
+				// C/H/Sのセット
+				int cylinders = mConfig.cfgMachine().dump().cylinders();
+				if (cylinders == 0) {
+					cylinders = mConfig.cfgDrive().dump().cylinders();
+				}
+				if (cylinders) {
+					mFdDump.setCylinders(cylinders);
+				}
+				int heads = mConfig.cfgMachine().dump().heads();
+				if (heads == 0) {
+					heads = mConfig.cfgDrive().dump().heads();
+				}
+				if (heads) {
+					mFdDump.setHeads(heads);
+				}
+				int steps = mConfig.cfgMachine().dump().steps();
+				if (steps == 0) {
+					steps = mConfig.cfgDrive().dump().steps();
+				}
+				if (steps) {
+					mFdDump.setSteps(steps);
+				}
+
 				// ディスクをダンプ
-				mFdDump.setCallback(&cmdDumpDiskCallback_, this);
-				std::string option = fddumpopt+" \""+dst.c_str()+"\"";
-				std::string cmd = mConfig.fdDumpCmd();
-				mFdDump.setCmd(cmd);
-				mFdDump.setOption(option);
+				mFdDump.setCmd(mConfig.fdDumpCmd());
+				mFdDump.setOption(fddumpopt);
 				mFdDump.setFormatName(name);
 				mFdDump.setDiskName(newname);
+				mFdDump.setFileName(dst);
+				mFdDump.setCallback(&cmdDumpDiskCallback_, this);
+
 				while (!0) {
 					int ret2 = mFdDump.run();
 					if (ret2 < 0) {
@@ -1268,7 +1354,6 @@ FDSSystem::cmdDumpDisk()
 					} else if (ret2 > 0) {
 						// 失敗
 						FDS_ERROR("cmdDumpDisk: Dump FDD Failed!\n");
-						FDS_ERROR(" dst=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", dst.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 						DlgSelect dlg3;
 						dlg3.setItemsYesNo();
 						dlg3.setHeader("Dump FDD Failed! Retry?");
@@ -1368,7 +1453,8 @@ FDSSystem::cmdRestoreDisk()
 	}
 
 	// 選択したFDXファイルで情報ビューを更新
-	std::string path = mRootDir + mCurDir + mFiles[idx].filename();
+	std::string src = mFiles[idx].filename();
+	std::string path = mRootDir + mCurDir + src;
 	if (mFiles[idx].isDir()) {
 		path += "/";
 	}
@@ -1438,15 +1524,64 @@ FDSSystem::cmdRestoreDisk()
 
 		// ドライブを選択
 		mConfig.setDriveNo(vecDrive[selDrive]);
+		std::string& driveName = items[selDrive];
+
+		// TYPEを設定
+		std::string type;
+		switch (mFdxHeader.mType) {
+		  case 0:
+			type = "2D-250KBPS-300RPM";
+			break;
+		  case 1:
+			type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+			break;
+		  case 2:
+			type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
+			break;
+		  case 9:
+			if (mFdxHeader.mCylinders < 60) {
+				type = "2D-250KBPS-300RPM";
+			} else {
+				if (mFdxHeader.mRate < 5000) {
+					type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+				} else {
+					type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
+				}
+			}
+			break;
+		  default:
+			break;
+		}
+		if (type.empty()) {
+			FDS_ERROR("cmdRestoreDisk: Restore TYPE Unknown!\n");
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader("Restore TYPE Unknown!");
+			dlg3.start();
+			dlg3.end();
+			goto selectDrive;
+		}
+		ret = mConfig.cfgDriveW().setDumpNoByType(type);
+		if (ret < 0) {
+			char buf[FDX_FILENAME_MAX];
+			sprintf(buf, "Restore TYPE [%s] Unknown!\n", type.c_str());
+			FDS_ERROR("cmdRestoreDisk: %s", buf);
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader(buf);
+			dlg3.start();
+			dlg3.end();
+			goto selectDrive;
+		}
 
 		// 選択した設定を読み込む
 		std::string name = mConfig.cfgDrive().name();
-		std::string fdrestoreopt = mConfig.makeRestoreOpt(0);
+		std::string fdrestoreopt = mConfig.makeRestoreOpt();
 
 		{
 			// "Yes/No"を選択
 			DlgSelect dlg;
-			std::string title = "Restore [" + name + "] to FDD. OK?";
+			std::string title = "Restore to ["+driveName+"]. OK?";
 			dlg.setHeader(title);
 			dlg.setItemsYesNo();
 			dlg.setCanEscape(true);
@@ -1478,14 +1613,34 @@ FDSSystem::cmdRestoreDisk()
 			wtimeout(mwRestoreView, 0);
 			nodelay(mwRestoreView, true);
 
+			// C/H/Sのセット
+			int cylinders = mConfig.cfgMachine().restore().cylinders();
+			if (cylinders == 0) {
+				cylinders = mConfig.cfgDrive().restore().cylinders();
+			}
+			if (cylinders) {
+				mFdRestore.setCylinders(cylinders);
+			}
+			int heads = mConfig.cfgMachine().restore().heads();
+			if (heads == 0) {
+				heads = mConfig.cfgDrive().restore().heads();
+			}
+			if (heads) {
+				mFdRestore.setHeads(heads);
+			}
+			int steps = mConfig.cfgMachine().restore().steps();
+			if (steps == 0) {
+				steps = mConfig.cfgDrive().restore().steps();
+			}
+			if (steps) {
+				mFdRestore.setSteps(steps);
+			}
+
 			// ディスクをリストア
-			char buf[16];
-			sprintf(buf, "-c%d", disk.mCylinders);
-			std::string option = fdrestoreopt+" "+buf+" \""+path.c_str()+"\"";
-			std::string cmd = mConfig.fdRestoreCmd();
-			mFdRestore.setCmd(cmd);
-			mFdRestore.setOption(option);
+			mFdRestore.setCmd(mConfig.fdRestoreCmd());
+			mFdRestore.setOption(fdrestoreopt);
 			mFdRestore.setFormatName(name);
+			mFdRestore.setFileName(path);
 			mFdRestore.setCallback(&cmdRestoreDiskCallback_, this);
 
 			while (!0) {
@@ -1518,7 +1673,6 @@ FDSSystem::cmdRestoreDisk()
 				} else if (ret2 > 0) {
 					// 失敗
 					FDS_ERROR("cmdRestoreDisk: Restore FDD Failed!\n");
-					FDS_ERROR(" path=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", path.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
 					DlgSelect dlg3;
 					dlg3.setItemsYesNo();
 					dlg3.setHeader("Restore FDD Failed! Retry?");

@@ -58,6 +58,42 @@ FdDump::setFormatName(const std::string& name)
 }
 
 // -------------------------------------------------------------
+// FdDumpの入力ファイル名設定
+// -------------------------------------------------------------
+void
+FdDump::setFileName(const std::string& name)
+{
+	mStatus.mFileName = name;
+}
+
+// -------------------------------------------------------------
+// FdDumpのシリンダ数設定
+// -------------------------------------------------------------
+void
+FdDump::setCylinders(int num)
+{
+	mStatus.mCylinders = num;
+}
+
+// -------------------------------------------------------------
+// FdDumpのヘッド数設定
+// -------------------------------------------------------------
+void
+FdDump::setHeads(int num)
+{
+	mStatus.mHeads = num;
+}
+
+// -------------------------------------------------------------
+// FdDumpのステップ数設定
+// -------------------------------------------------------------
+void
+FdDump::setSteps(int num)
+{
+	mStatus.mSteps = num;
+}
+
+// -------------------------------------------------------------
 // FdDumpのコールバック設定
 // -------------------------------------------------------------
 void
@@ -75,12 +111,23 @@ FdDump::run()
 {
 	bool escape = false;
 
-	// -cオプションからトラック数を得ておく
-	mStatus.mTracks = 40*2;
-	size_t pos = mOption.find("-c");
+#if 0
+	size_t pos;
+	// オプションからC/H/Sを得ておく
+	pos = mOption.find("-c");
 	if (pos != std::string::npos) {
-		mStatus.mTracks = atoi(mOption.c_str()+pos+2)*2;
+		mStatus.mCylinders = atoi(mOption.c_str()+pos+2);
 	}
+	pos = mOption.find("-h");
+	if (pos != std::string::npos) {
+		mStatus.mHeads = atoi(mOption.c_str()+pos+2);
+	}
+	pos = mOption.find("-s");
+	if (pos != std::string::npos) {
+		mStatus.mSteps = atoi(mOption.c_str()+pos+2);
+	}
+#endif
+	mStatus.mTracks = mStatus.mCylinders * mStatus.mHeads / mStatus.mSteps;
 	if (mStatus.mTracks > MAX_TRACKS) {
 		mStatus.mTracks = MAX_TRACKS;
 	}
@@ -98,6 +145,12 @@ FdDump::run()
 	if (mCallbackFunc) {
 		mCallbackFunc(mStatus, mCallbackParam);
 	}
+
+	// FdDumpコマンドライン作成
+	char opt[FDX_FILENAME_MAX];
+	sprintf(opt, "%s -c%d -h%d -s%d \"%s\"", mOption.c_str(), mStatus.mCylinders, mStatus.mHeads, mStatus.mSteps, mStatus.mFileName.c_str());
+	std::vector<const char*> argv = makeArgv(mCmd, opt, mArgv);
+	FDS_LOG("cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
 
 #if !defined(FDS_WINDOWS)
 	// 出力をパイプに差し替える準備
@@ -125,9 +178,11 @@ FdDump::run()
 		close(mPipe[1]);
 
 		// FdDumpを起動
-		std::vector<const char*> argv = makeArgv(mCmd, mOption, mArgv);
-		FDS_LOG("child: run cmd=[%s], option=[%s]\n", mCmd.c_str(), mOption.c_str());
-		execvp(mCmd.c_str(), (char* const*)&argv[0]);
+		FDS_LOG("child: run cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
+		err = execvp(mCmd.c_str(), (char* const*)&argv[0]);
+		if (err != 0) {
+			FDS_ERROR("child: error %d: cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
+		}
 
 		// 起動
 		FDS_LOG("child: exit\n");

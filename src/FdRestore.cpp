@@ -76,12 +76,39 @@ FdRestore::setFormatName(const std::string& name)
 }
 
 // -------------------------------------------------------------
+// FdRestoreの入力ファイル名設定
+// -------------------------------------------------------------
+void
+FdRestore::setFileName(const std::string& name)
+{
+	mStatus.mFileName = name;
+}
+
+// -------------------------------------------------------------
 // FdRestoreのシリンダ数設定
 // -------------------------------------------------------------
 void
 FdRestore::setCylinders(int num)
 {
-	mStatus.mTracks = num*2;
+	mStatus.mCylinders = num;
+}
+
+// -------------------------------------------------------------
+// FdRestoreのヘッド数設定
+// -------------------------------------------------------------
+void
+FdRestore::setHeads(int num)
+{
+	mStatus.mHeads = num;
+}
+
+// -------------------------------------------------------------
+// FdRestoreのステップ数設定
+// -------------------------------------------------------------
+void
+FdRestore::setSteps(int num)
+{
+	mStatus.mSteps = num;
 }
 
 // -------------------------------------------------------------
@@ -102,12 +129,23 @@ FdRestore::run()
 {
 	bool escape = false;
 
-	// -cオプションからトラック数を得ておく
-	mStatus.mTracks = 40*2;
-	size_t pos = mOption.find("-c");
+	// オプションからC/H/Sを得ておく
+#if 0
+	size_t pos;
+	pos = mOption.find("-c");
 	if (pos != std::string::npos) {
-		mStatus.mTracks = atoi(mOption.c_str()+pos+2)*2;
+		mStatus.mCylinders = atoi(mOption.c_str()+pos+2);
 	}
+	pos = mOption.find("-h");
+	if (pos != std::string::npos) {
+		mStatus.mHeads = atoi(mOption.c_str()+pos+2);
+	}
+	pos = mOption.find("-s");
+	if (pos != std::string::npos) {
+		mStatus.mSteps = atoi(mOption.c_str()+pos+2);
+	}
+#endif
+	mStatus.mTracks = mStatus.mCylinders * mStatus.mHeads / mStatus.mSteps;
 	if (mStatus.mTracks > MAX_TRACKS) {
 		mStatus.mTracks = MAX_TRACKS;
 	}
@@ -121,6 +159,12 @@ FdRestore::run()
 	if (mCallbackFunc) {
 		mCallbackFunc(mStatus, mCallbackParam);
 	}
+
+	// FdRestoreコマンドライン作成
+	char opt[FDX_FILENAME_MAX];
+	sprintf(opt, "%s -c%d -h%d -s%d \"%s\"", mOption.c_str(), mStatus.mCylinders, mStatus.mHeads, mStatus.mSteps, mStatus.mFileName.c_str());
+	std::vector<const char*> argv = makeArgv(mCmd, opt, mArgv);
+	FDS_LOG("cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
 
 #if !defined(FDS_WINDOWS)
 	// 出力をパイプに差し替える準備
@@ -148,9 +192,11 @@ FdRestore::run()
 		close(mPipe[1]);
 
 		// FdRestoreを起動
-		std::vector<const char*> argv = makeArgv(mCmd, mOption, mArgv);
-		FDS_LOG("child: run cmd=[%s], option=[%s]\n", mCmd.c_str(), mOption.c_str());
-		execvp(mCmd.c_str(), (char* const*)&argv[0]);
+		FDS_LOG("child: run cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
+		err = execvp(mCmd.c_str(), (char* const*)&argv[0]);
+		if (err != 0) {
+			FDS_ERROR("child: error %d: cmd=[%s], option=[%s]\n", mCmd.c_str(), opt);
+		}
 
 		// 起動
 		FDS_LOG("child: exit\n");
@@ -188,6 +234,12 @@ FdRestore::run()
 	}
 
 #else
+
+	// ダミーのステータスをセット
+	for (int i=0; i<mStatus.mTracks; i++) {
+		mStatus.mStatus[i] = TrackStatus::Finish;
+		mStatus.mChanged[i] = 1;
+	}
 
 	// ダミーのリストア
 	for (int i=0; i<mStatus.mTracks; i++) {

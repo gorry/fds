@@ -99,6 +99,9 @@
     <ClCompile Include="FDSMachine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MakeArgv.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent\dirent.h">
@@ -156,6 +159,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FDSMachine.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MakeArgv.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>

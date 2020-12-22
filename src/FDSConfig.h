@@ -68,8 +68,8 @@ public:
 
 	std::string makeDumpOpt(int machineno, int driveno, int dumpno) const;
 	std::string makeDumpOpt(int dumpno) const { return makeDumpOpt(machineNo(), driveNo(), dumpno); }
-	std::string makeRestoreOpt(int machineno, int driveno, int restoreno) const;
-	std::string makeRestoreOpt(int restoreno) const { return makeRestoreOpt(machineNo(), driveNo(), restoreno); }
+	std::string makeRestoreOpt(int machineno, int driveno) const;
+	std::string makeRestoreOpt() const { return makeRestoreOpt(machineNo(), driveNo()); }
 
 private:
 	std::string mCmdDir;

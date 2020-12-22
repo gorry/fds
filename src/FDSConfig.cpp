@@ -100,18 +100,16 @@ FDSConfig::makeDumpOpt(int machineno, int driveno, int dumpno) const
 {
 	char buf[FDX_STRING_MAX];
 
-	cfgMachine(machineno);
 	const std::string& type = cfgMachine(machineno).dump(dumpno).type();
-	int no = cfgDrive(driveno).findDumpByType(type);
+	int no = cfgDrive(driveno).findDumpNoByType(type);
 	if (no < 0) {
 		std::string str;
 		return str;
 	}
 
-	sprintf(buf, "-i%d -r%d -c%d %s -f %s",
+	sprintf(buf, "-i%d -r%d %s -f %s",
 	  cfgDrive(driveno).id(),
 	  cfgDrive(driveno).retry(),
-	  cfgMachine(machineno).dump(dumpno).cylinders(),
 	  cfgDrive(driveno).dump(no).fdDumpOpt().c_str(),
 	  cfgMachine(machineno).dump(dumpno).format().c_str()
 	);
@@ -124,12 +122,12 @@ FDSConfig::makeDumpOpt(int machineno, int driveno, int dumpno) const
 // リストアオプション文字列作成
 // -------------------------------------------------------------
 std::string
-FDSConfig::makeRestoreOpt(int machineno, int driveno, int restoreno) const
+FDSConfig::makeRestoreOpt(int machineno, int driveno) const
 {
 	char buf[FDX_STRING_MAX];
 
-	const std::string& type = cfgMachine(machineno).restore(restoreno).type();
-	int no = cfgDrive(driveno).findRestoreByType(type);
+	const std::string& type = cfgMachine(machineno).restore().type();
+	int no = cfgDrive(driveno).findRestoreNoByType(type);
 	if (no < 0) {
 		std::string str;
 		return str;

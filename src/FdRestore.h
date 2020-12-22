@@ -56,6 +56,9 @@ public:		// struct, enum
 	};
 
 	struct Status {
+		int mCylinders = 40;
+		int mHeads = 2;
+		int mSteps = 1;
 		int mTracks = 0;
 		int mNowTrack = -1;
 		bool mFinished = false;
@@ -63,6 +66,7 @@ public:		// struct, enum
 		char mChanged[MAX_TRACKS];
 		TrackStatus mStatus_Backup[MAX_TRACKS];
 		char mChanged_Backup[MAX_TRACKS];
+		std::string mFileName;
 		std::string mName;
 		std::string mFormat;
 	};
@@ -94,7 +98,10 @@ public:		// function
 	void setAnalyzeOption(const std::string& option);
 	void setDiskName(const std::string& name);
 	void setFormatName(const std::string& name);
+	void setFileName(const std::string& name);
 	void setCylinders(int num);
+	void setHeads(int num);
+	void setSteps(int num);
 	int run();
 	void kill();
 	const Status& getStatus() const { return mStatus; }

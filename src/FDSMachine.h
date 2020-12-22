@@ -56,6 +56,8 @@ class FDSMachineDump
 public:
 	FDSMachineDump() {
 		mCylinders = 0;
+		mHeads = 0;
+		mSteps = 0;
 	}
 	virtual ~FDSMachineDump() {}
 
@@ -63,6 +65,8 @@ public:
 	const std::string& type() const { return mType; }
 	const std::string& format() const { return mFormat; }
 	int cylinders() const { return mCylinders; }
+	int heads() const { return mHeads; }
+	int steps() const { return mSteps; }
 	const std::string& fileName() const{ return mFileName; }
 
 private:
@@ -70,6 +74,8 @@ private:
 	std::string mType;
 	std::string mFormat;
 	int mCylinders;
+	int mHeads;
+	int mSteps;
 	std::string mFileName;
 };
 
@@ -78,7 +84,11 @@ class FDSMachineRestore
 	friend class FDSMachine;
 
 public:
-	FDSMachineRestore() {}
+	FDSMachineRestore() {
+		mCylinders = 0;
+		mHeads = 0;
+		mSteps = 0;
+	}
 	virtual ~FDSMachineRestore() {}
 
 	const std::string& name() const { return mName; }
@@ -86,16 +96,26 @@ public:
 
 	void setName(const std::string& name) { mName = name; }
 	void setType(const std::string& type) { mType = type; }
+	int cylinders() const { return mCylinders; }
+	int heads() const { return mHeads; }
+	int steps() const { return mSteps; }
 
 private:
 	std::string mName;
 	std::string mType;
+	int mCylinders;
+	int mHeads;
+	int mSteps;
 };
 
 class FDSMachine
 {
 public:
-	FDSMachine() {}
+	FDSMachine() {
+		mFormatNo = 0;
+		mDumpNo = 0;
+		mRestoreNo = 0;
+	}
 	virtual ~FDSMachine() {}
 
 	int load(const std::string& filename);
@@ -107,16 +127,19 @@ public:
 
 	int numFormat() const { return mVecFormat.size(); }
 	const FDSMachineFormat& format(int num) const { return mVecFormat[num]; }
+	const FDSMachineFormat& format() const { return format(mFormatNo); }
 	int formatNo() const { return mFormatNo; }
 	void setFormatNo(int num) { mFormatNo = num; }
 
 	int numDump() const { return mVecDump.size(); }
 	const FDSMachineDump& dump(int num) const { return mVecDump[num]; }
+	const FDSMachineDump& dump() const { return dump(mDumpNo); }
 	int dumpNo() const { return mDumpNo; }
 	void setDumpNo(int num) { mDumpNo = num; }
 
 	int numRestore() const { return mVecRestore.size(); }
 	const FDSMachineRestore& restore(int num) const { return mVecRestore[num]; }
+	const FDSMachineRestore& restore() const { return restore(mDumpNo); }
 	int restoreNo() const { return mRestoreNo; }
 	void setRestoreNo(int num) { mRestoreNo = num; }
 

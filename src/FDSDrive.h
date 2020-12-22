@@ -34,12 +34,19 @@ class FDSDriveDump
 	friend class FDSDrive;
 
 public:
-	FDSDriveDump() {}
+	FDSDriveDump() {
+		mCylinders = 0;
+		mHeads = 0;
+		mSteps = 0;
+	}
 	virtual ~FDSDriveDump() {}
 
 	const std::string& name() const { return mName; }
 	const std::string& type() const { return mType; }
 	const std::string& fdDumpOpt() const { return mFdDumpOpt; }
+	int cylinders() const { return mCylinders; }
+	int heads() const { return mHeads; }
+	int steps() const { return mSteps; }
 
 	void setName(const std::string& name) { mName = name; }
 	void setType(const std::string& type) { mType = type; }
@@ -49,6 +56,9 @@ private:
 	std::string mName;
 	std::string mType;
 	std::string mFdDumpOpt;
+	int mCylinders;
+	int mHeads;
+	int mSteps;
 };
 
 class FDSDriveRestore
@@ -56,12 +66,19 @@ class FDSDriveRestore
 	friend class FDSDrive;
 
 public:
-	FDSDriveRestore() {}
+	FDSDriveRestore() {
+		mCylinders = 0;
+		mHeads = 0;
+		mSteps = 0;
+	}
 	virtual ~FDSDriveRestore() {}
 
 	const std::string& name() const { return mName; }
 	const std::string& type() const { return mType; }
 	const std::string& fdRestoreOpt() const { return mFdRestoreOpt; }
+	int cylinders() const { return mCylinders; }
+	int heads() const { return mHeads; }
+	int steps() const { return mSteps; }
 
 	void setName(const std::string& name) { mName = name; }
 	void setType(const std::string& type) { mType = type; }
@@ -71,6 +88,9 @@ private:
 	std::string mName;
 	std::string mType;
 	std::string mFdRestoreOpt;
+	int mCylinders;
+	int mHeads;
+	int mSteps;
 };
 
 class FDSDrive
@@ -78,7 +98,7 @@ class FDSDrive
 public:
 	FDSDrive() {
 		mId = 0;
-		mRetry = 0;
+		mRetry = 3;
 		mDumpNo = 0;
 		mRestoreNo = 0;
 	}
@@ -91,16 +111,20 @@ public:
 	int retry() const { return mRetry; }
 
 	int numDump() const { return mVecDump.size(); }
-	int findDumpByType(const std::string& type) const;
+	int findDumpNoByType(const std::string& type) const;
 	const FDSDriveDump& dump(int num) const { return mVecDump[num]; }
+	const FDSDriveDump& dump() const { return dump(mDumpNo); }
 	int dumpNo() const { return mDumpNo; }
 	void setDumpNo(int num) { mDumpNo = num; }
+	int setDumpNoByType(const std::string& type);
 
 	int numRestore() const { return mVecRestore.size(); }
-	int findRestoreByType(const std::string& type) const;
+	int findRestoreNoByType(const std::string& type) const;
 	const FDSDriveRestore& restore(int num) const { return mVecRestore[num]; }
+	const FDSDriveRestore& restore() const { return restore(mRestoreNo); }
 	int restoreNo() const { return mRestoreNo; }
 	void setRestoreNo(int num) { mRestoreNo = num; }
+	int setRestoreNoByType(const std::string& type);
 
 private:
 	IniFile mIniFile;
