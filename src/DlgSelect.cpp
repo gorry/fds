@@ -249,11 +249,6 @@ DlgSelect::start(int x, int y, int sel)
 			FDS_LOG("DlgSelect: key=%d\n", key);
 			break;
 
-
-		  default:
-			FDS_LOG("DlgSelect: key=%d\n", key);
-			break;
-
 		}
 	}
 
