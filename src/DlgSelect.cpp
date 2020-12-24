@@ -240,7 +240,7 @@ DlgSelect::start(int x, int y, int sel)
 		  case 'N':
 		  case 'n':
 			if (mYesNo) {
-				menuRet = 0;
+				menuRet = 1;
 				finish = true;
 			}
 			break;

@@ -67,9 +67,9 @@ class FDSDriveRestore
 
 public:
 	FDSDriveRestore() {
-		mCylinders = 0;
-		mHeads = 0;
-		mSteps = 0;
+		mCylinders = 40;
+		mHeads = 2;
+		mSteps = 1;
 	}
 	virtual ~FDSDriveRestore() {}
 

@@ -145,7 +145,7 @@ FdRestore::run()
 		mStatus.mSteps = atoi(mOption.c_str()+pos+2);
 	}
 #endif
-	mStatus.mTracks = mStatus.mCylinders * mStatus.mHeads / mStatus.mSteps;
+	mStatus.mTracks = mStatus.mCylinders * mStatus.mHeads;
 	if (mStatus.mTracks > MAX_TRACKS) {
 		mStatus.mTracks = MAX_TRACKS;
 	}

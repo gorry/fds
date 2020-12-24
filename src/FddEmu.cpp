@@ -133,6 +133,8 @@ FddEmu::kill()
 		return;
 	}
 	::kill(mPid, SIGHUP);
+	int status;
+	waitpid(mPid, &status, 0);
 	mPid = 0;
 #endif  // !defined(FDS_NOROOT)
 }
