@@ -37,7 +37,7 @@ FDSMachine::load(const std::string& filename)
 
 	// [FORMAT-n]セクション読み込み
 	for (num=1; ; num++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "FORMAT-%d", num);
 		if (!mIniFile.hasKey(section, "NAME")) {
 			break;
@@ -50,7 +50,7 @@ FDSMachine::load(const std::string& filename)
 	}
 	mVecFormat.resize(num-1);
 	for (int i=1; i<num; i++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "FORMAT-%d", i);
 		FDSMachineFormat& format = mVecFormat[i-1];
 		format.mName = mIniFile.getString(section, "NAME");
@@ -60,7 +60,7 @@ FDSMachine::load(const std::string& filename)
 
 	// [DUMP-n]セクション読み込み
 	for (num=1; ; num++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "DUMP-%d", num);
 		if (!mIniFile.hasKey(section, "NAME")) {
 			break;
@@ -73,7 +73,7 @@ FDSMachine::load(const std::string& filename)
 	}
 	mVecDump.resize(num-1);
 	for (int i=1; i<num; i++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "DUMP-%d", i);
 		FDSMachineDump& dump = mVecDump[i-1];
 		dump.mName = mIniFile.getString(section, "NAME");
@@ -87,7 +87,7 @@ FDSMachine::load(const std::string& filename)
 
 	// [RESTORE-n]セクション読み込み
 	for (num=1; ; num++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "RESTORE-%d", num);
 		if (!mIniFile.hasKey(section, "NAME")) {
 			break;
@@ -100,7 +100,7 @@ FDSMachine::load(const std::string& filename)
 	}
 	mVecRestore.resize(num-1);
 	for (int i=1; i<num; i++) {
-		char section[16];
+		char section[FDX_FILENAME_MAX];
 		sprintf(section, "RESTORE-%d", i);
 		FDSMachineRestore& restore = mVecRestore[i-1];
 		restore.mName = mIniFile.getString(section, "NAME");

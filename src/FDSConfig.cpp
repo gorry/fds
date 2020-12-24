@@ -37,7 +37,7 @@ FDSConfig::load(const std::string& filename)
 
 	// [DRIVES]セクション読み込み
 	for (num=1; ; num++) {
-		char key[16];
+		char key[FDX_FILENAME_MAX];
 		sprintf(key, "DRIVE-%d", num);
 		if (!mIniFile.hasKey("DRIVES", key)) {
 			break;
@@ -51,7 +51,7 @@ FDSConfig::load(const std::string& filename)
 	mVecDrives.resize(num-1);
 	mDrivesDir = mIniFile.getString("DRIVES", "DIR");
 	for (int i=1; i<num; i++) {
-		char key[16];
+		char key[FDX_FILENAME_MAX];
 		sprintf(key, "DRIVE-%d", i);
 		std::string vfilename = mIniFile.getString("DRIVES", key);
 		std::string path = mDrivesDir + "/" + vfilename;
@@ -64,7 +64,7 @@ FDSConfig::load(const std::string& filename)
 
 	// [MACHINES]セクション読み込み
 	for (num=1; ; num++) {
-		char key[16];
+		char key[FDX_FILENAME_MAX];
 		sprintf(key, "MACHINE-%d", num);
 		if (!mIniFile.hasKey("MACHINES", key)) {
 			break;
@@ -78,7 +78,7 @@ FDSConfig::load(const std::string& filename)
 	mVecMachines.resize(num-1);
 	mMachinesDir = mIniFile.getString("MACHINES", "DIR");
 	for (int i=1; i<num; i++) {
-		char key[16];
+		char key[FDX_FILENAME_MAX];
 		sprintf(key, "MACHINE-%d", i);
 		std::string vfilename = mIniFile.getString("MACHINES", key);
 		std::string path = mMachinesDir + "/" + vfilename;
