@@ -8,7 +8,7 @@
 #if !defined(__FDSSYSTEM_H__)
 #define __FDSSYSTEM_H__
 
-#define FDS_VERSION "20201219a"
+#define FDS_VERSION "20201224a"
 
 #include <stdio.h>
 #include <stdlib.h>
