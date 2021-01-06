@@ -387,7 +387,7 @@ FdRestore::recvStatus(void)
 		if (size <= 0) {
 			int st;
 			if (waitpid(mPid, &st, WNOHANG)) {
-				if (WIFEXITED(mPid) || WIFSIGNALED(mPid)) {
+				if (WIFEXITED(st) || WIFSIGNALED(st)) {
 					break;
 				}
 			}
@@ -671,7 +671,7 @@ FdRestore::recvAnalyzeStatus(void)
 		if (size <= 0) {
 			int st;
 			if (waitpid(mPid, &st, WNOHANG)) {
-				if (WIFEXITED(mPid) || WIFSIGNALED(mPid)) {
+				if (WIFEXITED(st) || WIFSIGNALED(st)) {
 					break;
 				}
 			}

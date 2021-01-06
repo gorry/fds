@@ -199,7 +199,7 @@ FdDump::run()
 	mPid = pid;
 
 	// 起動したFdDumpの終了まで待つ
-	FDS_LOG("parent: wait finished\n");
+	FDS_LOG("parent: wait finished: pid=%d\n", mPid);
 	while (!mStatus.mFinished) {
 		// 経過のコールバック発行
 		bool b = updateStatus();
@@ -409,6 +409,7 @@ FdDump::clearLogLine(void)
 bool
 FdDump::recvStatus(void)
 {
+	FDS_LOG("recvStatus: start\n");
 #if !defined(FDS_WINDOWS)
 #if 0
 	if (mPid == 0) {
@@ -428,7 +429,7 @@ FdDump::recvStatus(void)
 		if (size <= 0) {
 			int st;
 			if (waitpid(mPid, &st, WNOHANG)) {
-				if (WIFEXITED(mPid) || WIFSIGNALED(mPid)) {
+				if (WIFEXITED(st) || WIFSIGNALED(st)) {
 					break;
 				}
 			}
