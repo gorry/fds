@@ -61,33 +61,30 @@ FDSSystem::dumpViewRefresh()
 
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
-	std::wstring wbuf;
-	wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpHeader)|A_BOLD);
+	wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpHeader)|A_BOLD);
 	sprintf(buf, "[Dump : %s]", mDumpViewStatus.mFormat.c_str());
-	wbuf = WStrUtil::str2wstr(buf);
-	mvwaddwstr(mwDumpView, 1, 2, wbuf.c_str());
-	wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpHeader)|A_BOLD);
+	mvwaddstr(mwDumpView, 1, 2, buf);
+	wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpHeader)|A_BOLD);
 	sprintf(buf, "%s", mDumpViewStatus.mName.c_str());
-	wbuf = WStrUtil::str2wstr(buf);
-	mvwaddwstr(mwDumpView, 2, 2, wbuf.c_str());
+	mvwaddstr(mwDumpView, 2, 2, buf);
 
 	// ゲージ
-	wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpGauge));
-	//                           01234567890123456789012345678901234567890123456789
-	mvwaddwstr(mwDumpView,  3, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
-	mvwaddwstr(mwDumpView,  4, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwDumpView,  5, 2, L"  0|                     |                     |");
-	mvwaddwstr(mwDumpView,  6, 2, L" 20|                     |                     |");
-	mvwaddwstr(mwDumpView,  7, 2, L" 40|                     |                     |");
-	mvwaddwstr(mwDumpView,  8, 2, L" 60|                     |                     |");
-	mvwaddwstr(mwDumpView,  9, 2, L" 80|                     |                     |");
-	mvwaddwstr(mwDumpView, 10, 2, L"100|                     |                     |");
-	mvwaddwstr(mwDumpView, 11, 2, L"120|                     |                     |");
-	mvwaddwstr(mwDumpView, 12, 2, L"140|                     |                     |");
-	mvwaddwstr(mwDumpView, 13, 2, L"160|                     |                     |");
-	mvwaddwstr(mwDumpView, 14, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwDumpView, 15, 2, L"           [Push SPACE Key to Cancel]           ");
-	wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpGauge));
+	wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpGauge));
+	//                              01234567890123456789012345678901234567890123456789
+	mvwaddstr(mwDumpView,  3, 2, "   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
+	mvwaddstr(mwDumpView,  4, 2, "---+---------------------+---------------------+");
+	mvwaddstr(mwDumpView,  5, 2, "  0|                     |                     |");
+	mvwaddstr(mwDumpView,  6, 2, " 20|                     |                     |");
+	mvwaddstr(mwDumpView,  7, 2, " 40|                     |                     |");
+	mvwaddstr(mwDumpView,  8, 2, " 60|                     |                     |");
+	mvwaddstr(mwDumpView,  9, 2, " 80|                     |                     |");
+	mvwaddstr(mwDumpView, 10, 2, "100|                     |                     |");
+	mvwaddstr(mwDumpView, 11, 2, "120|                     |                     |");
+	mvwaddstr(mwDumpView, 12, 2, "140|                     |                     |");
+	mvwaddstr(mwDumpView, 13, 2, "160|                     |                     |");
+	mvwaddstr(mwDumpView, 14, 2, "---+---------------------+---------------------+");
+	mvwaddstr(mwDumpView, 15, 2, "           [Push SPACE Key to Cancel]           ");
+	wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpGauge));
 
 	for (int i=0; i<mDumpViewStatus.mTracks; i++) {
 		if (!0) { // mDumpViewStatus.mChanged[i]) {
@@ -98,9 +95,9 @@ FDSSystem::dumpViewRefresh()
 			  default:
 				break;
 			  case FdDump::TrackStatus::None:
-				wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusNone));
+				wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusNone));
 				mvwaddch(mwDumpView, y, x, '.');
-				wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusNone));
+				wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusNone));
 				break;
 			  case FdDump::TrackStatus::Retry1:
 			  case FdDump::TrackStatus::Retry2:
@@ -111,24 +108,24 @@ FDSSystem::dumpViewRefresh()
 			  case FdDump::TrackStatus::Retry7:
 			  case FdDump::TrackStatus::Retry8:
 			  case FdDump::TrackStatus::Retry9:
-				wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusFinish));
+				wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusFinish));
 				mvwaddch(mwDumpView, y, x, '0'+(int)mDumpViewStatus.mStatus[i]);
-				wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusFinish));
+				wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusFinish));
 				break;
 			  case FdDump::TrackStatus::Finish:
-				wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusFinish));
+				wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusFinish));
 				mvwaddch(mwDumpView, y, x, 'o');
-				wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusFinish));
+				wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusFinish));
 				break;
 			  case FdDump::TrackStatus::Error:
-				wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusError));
+				wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusError));
 				mvwaddch(mwDumpView, y, x, 'E');
-				wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusError));
+				wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusError));
 				break;
 			  case FdDump::TrackStatus::Unformat:
-				wattron(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusUnformat));
+				wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusUnformat));
 				mvwaddch(mwDumpView, y, x, '-');
-				wattroff(mwDumpView, COLOR_PAIR(ColorPair::DumpStatusUnformat));
+				wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpStatusUnformat));
 				break;
 			}
 		}

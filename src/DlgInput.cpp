@@ -154,9 +154,9 @@ DlgInput::start(int x, int y, int w)
 	// 表示準備
 	mwFrame = newwin(h2, w2, y+mOfsY, x+mOfsX);
 	wborder(mwFrame, 0,0,0,0,0,0,0,0);
-	wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::InputHeader)|A_BOLD);
+	wattron(mwFrame, COLOR_PAIR(fds::ColorPair::InputHeader)|A_BOLD);
 	mvwaddstr(mwFrame, 1, 2, mHeader.c_str());
-	wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::InputHeader)|A_BOLD);
+	wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::InputHeader)|A_BOLD);
 
 	// 入力準備
 	keypad(mwFrame, TRUE);
@@ -175,7 +175,7 @@ DlgInput::start(int x, int y, int w)
 		  case 0x1b: // ESC
 			{
 				nodelay(mwFrame, true);
-				if (FDSSystem::doEscKeyW(mwFrame)) {
+				if (fds::doEscKeyW(mwFrame)) {
 					if (mCanEscape) {
 						mFinish = true;
 					}
@@ -240,13 +240,15 @@ void
 DlgInput::show()
 {
 	std::wstring wstr;
+	std::string str;
 
 	// 枠内に表示可能な部分を表示
 	int w = WStrUtil::copyByWidth(wstr, mWInputText, mTextBoxOfsX, mTextBoxW);
 	wstr += std::wstring(mTextBoxW - w, L' ');
-	wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::InputEdit)|A_BOLD);
-	mvwaddnwstr(mwFrame, 3, 2, wstr.c_str(), mTextBoxW);
-	wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::InputEdit) | A_BOLD);
+	str = WStrUtil::wstr2str(wstr);
+	wattron(mwFrame, COLOR_PAIR(fds::ColorPair::InputEdit)|A_BOLD);
+	mvwaddnstr(mwFrame, 3, 2, str.c_str(), mTextBoxW);
+	wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::InputEdit) | A_BOLD);
 
 	// カーソルを設定
 	wmove(mwFrame, 3, 2+WStrUtil::widthN(wstr, 0, mTextBoxCsrX));

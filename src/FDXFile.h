@@ -12,7 +12,8 @@
 // FDXファイル構造
 // =====================================================================
 
-typedef struct {
+class FdxHeader {
+  public:
 	uint8_t mSignature[3];	// $00: 識別子（"FDX"）
 	uint8_t mRevision;		// $03: リビジョン（現在は３）
 	uint8_t mName[60];		// $04: ディスク名
@@ -28,7 +29,27 @@ typedef struct {
 	uint32_t mUnused;		// $40: 未使用
 	int32_t mTrackSize;		// $44: トラックデータ長
 	uint8_t mReserve[152];	// $48: 構造体サイズ合計256バイト
-} FdxHeader;
+
+  public:
+	FdxHeader() { Clear(); }
+	void Clear(void) {
+		memset(&mSignature[0], 0, sizeof(mSignature));
+		mRevision = 0;
+		memset(mName, 0, sizeof(mName));
+		memset(mPad20, 0, sizeof(mPad20));
+		mType = 0;
+		mCylinders = 0;
+		mHeads = 0;
+		mRate = 0;
+		mRpm = 0;
+		mWriteProtect = 0;
+		memset(mPad39, 0, sizeof(mPad39));
+		mOption = 0;
+		mUnused = 0;
+		mTrackSize = 0;
+		memset(mReserve, 0, sizeof(mReserve));
+	}
+};
 
 
 #endif  // __FDXFILE_H__

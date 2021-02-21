@@ -70,30 +70,29 @@ FDSSystem::fddViewRefresh()
 
 		if (!st.mInsert) {
 			// ドライブは空
-			wattron(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddHeaderOff));
+			wattron(mwFddView, COLOR_PAIR(fds::ColorPair::FddHeaderOff));
 			sprintf(buf, " %s ", drive.c_str());
 			mvwaddstr(mwFddView, 1+i, 1, buf);
-			wattroff(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddHeaderOff));
+			wattroff(mwFddView, COLOR_PAIR(fds::ColorPair::FddHeaderOff));
 			waddstr(mwFddView, "      -- [EMPTY] --");
 		} else {
 			// ドライブの情報を表示
-			wattron(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddHeaderOn)|A_BOLD);
+			wattron(mwFddView, COLOR_PAIR(fds::ColorPair::FddHeaderOn)|A_BOLD);
 			sprintf(buf, " %s ", drive.c_str());
 			mvwaddstr(mwFddView, 1+i, 1, buf);
-			wattroff(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddHeaderOn)|A_BOLD);
-			wattron(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddCluster)|A_BOLD);
+			wattroff(mwFddView, COLOR_PAIR(fds::ColorPair::FddHeaderOn)|A_BOLD);
+			wattron(mwFddView, COLOR_PAIR(fds::ColorPair::FddCluster)|A_BOLD);
 			sprintf(buf, " %02d", st.mCluster);
 			waddstr(mwFddView, buf);
-			wattroff(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddCluster)|A_BOLD);
+			wattroff(mwFddView, COLOR_PAIR(fds::ColorPair::FddCluster)|A_BOLD);
 			if (st.mProtect) {
-				wattron(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddProtect)|A_BOLD);
+				wattron(mwFddView, COLOR_PAIR(fds::ColorPair::FddProtect)|A_BOLD);
 				waddstr(mwFddView, "* ");
-				wattroff(mwFddView, COLOR_PAIR(FDSSystem::ColorPair::FddProtect)|A_BOLD);
+				wattroff(mwFddView, COLOR_PAIR(fds::ColorPair::FddProtect)|A_BOLD);
 			} else {
 				waddstr(mwFddView, ": ");
 			}
-			std::wstring str = WStrUtil::str2wstr(st.mFileName);
-			waddwstr(mwFddView, str.c_str());
+			waddstr(mwFddView, st.mFileName.c_str());
 			mvwaddstr(mwFddView, 1+i, mFddViewXYWH.w()-2, " ");
 		}
 	}

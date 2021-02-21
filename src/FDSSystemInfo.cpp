@@ -83,7 +83,7 @@ FDSSystem::infoViewRefresh()
 
 	{
 		char buf2[64];
-		const char* disktype = "???";
+		std::string disktype = fds:: getDiskType(mFdxHeader);
 
 		// ファイル名
 		size_t pos = mInfoViewFileName.rfind('/');
@@ -97,34 +97,10 @@ FDSSystem::infoViewRefresh()
 		// ディスクタイプ判別
 		memcpy(buf2, &mFdxHeader.mName[0], sizeof(mFdxHeader.mName));
 		buf2[sizeof(mFdxHeader.mName)] = '\0';
-		switch (mFdxHeader.mType) {
-		  case 0:
-			disktype = "2D";
-			break;
-		  case 1:
-			disktype = ((mFdxHeader.mRpm == 300) ? "2DD(720KB)" : "2DD(640KB)");
-			break;
-		  case 2:
-			disktype = ((mFdxHeader.mRpm == 300) ? "2HD(1.4MB,PC/AT)" : "2HD(1.2MB,JP)");
-			break;
-		  case 9:
-			if (mFdxHeader.mCylinders < 60) {
-				disktype = "2D[RAW]";
-			} else {
-				if (mFdxHeader.mRate < 5000) {
-					disktype = ((mFdxHeader.mRpm == 300) ? "2DD(720KB)[RAW]" : "2DD(640KB)[RAW]");
-				} else {
-					disktype = ((mFdxHeader.mRpm == 300) ? "2HD(1.4MB,PC/AT)[RAW]" : "2HD(1.2MB,JP)[RAW]");
-				}
-			}
-			break;
-		  default:
-			break;
-		}
 
 		// リビジョン・タイプ・シリンダ・ヘッド
 		sprintf(&buf[1][0], "Rev:%d Format:%s Cyl:%d Head:%d", 
-		  (int)mFdxHeader.mRevision, disktype, 
+		  (int)mFdxHeader.mRevision, disktype.c_str(), 
 		  mFdxHeader.mCylinders,
 		  mFdxHeader.mHeads
 		);
@@ -185,9 +161,9 @@ FDSSystem::infoViewRefresh()
 
 	// 情報を表示
   end:;
-	wattron(mwInfoView, COLOR_PAIR(FDSSystem::ColorPair::InfoHeader)|A_BOLD);
+	wattron(mwInfoView, COLOR_PAIR(fds::ColorPair::InfoHeader)|A_BOLD);
 	mvwaddstr(mwInfoView, 1, 1, &buf[0][0]);
-	wattroff(mwInfoView, COLOR_PAIR(FDSSystem::ColorPair::InfoHeader)|A_BOLD);
+	wattroff(mwInfoView, COLOR_PAIR(fds::ColorPair::InfoHeader)|A_BOLD);
 	for (int i=1; i<4; i++) {
 		mvwaddstr(mwInfoView, i+1, 1, &buf[i][0]);
 	}
@@ -215,7 +191,7 @@ FDSSystem::infoViewLoadFile()
 {
 	// 情報ビューで使うファイルを読み込む
 	mDiskInfoResult = 0;
-	memset(&mFdxHeader, 0, sizeof(mFdxHeader));
+	mFdxHeader = {};
 FDS_LOG("infoViewLoadFile: mInfoViewFileName=[%s]\n", mInfoViewFileName.c_str());
 	if (mInfoViewFileName.empty()) {
 		mDiskInfoResult = -1;

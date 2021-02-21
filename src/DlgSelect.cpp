@@ -180,9 +180,9 @@ DlgSelect::start(int x, int y, int sel)
 	// 表示準備
 	mwFrame = newwin(h, w, y+mOfsY, x+mOfsX);
 	wborder(mwFrame, 0,0,0,0,0,0,0,0);
-	wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectHeader)|A_BOLD);
+	wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectHeader)|A_BOLD);
 	mvwaddstr(mwFrame, 1, 2, mHeader.c_str());
-	wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectHeader)|A_BOLD);
+	wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectHeader)|A_BOLD);
 
 	// 入力準備
 	keypad(mwFrame, TRUE);
@@ -261,28 +261,28 @@ DlgSelect::start(int x, int y, int sel)
 void
 DlgSelect::show()
 {
-	std::wstring buf(mInnerWidth, L' ');
+	std::string buf(mInnerWidth, ' ');
 
 	for (int i=0; i<(int)mSelectTxt.size(); i++) {
 		// 選択肢カーソルを表示
 		if ((i == mSelect) && (!mDisableEnter)) {
-			wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor));
+			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor));
 		}
-		mvwaddwstr(mwFrame, mInnerOfsY+i, mInnerOfsX, buf.c_str());
+		mvwaddstr(mwFrame, mInnerOfsY+i, mInnerOfsX, buf.c_str());
 		if ((i == mSelect) && (!mDisableEnter)) {
-			wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor));
+			wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor));
 		}
 
 		// 選択肢を表示
 		wmove(mwFrame, mInnerOfsY+i, mInnerOfsX+1);
 		if ((i == mSelect) && (!mDisableEnter)) {
-			wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor)|A_BOLD);
+			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor)|A_BOLD);
 			waddstr(mwFrame, mSelectTxt[i].c_str());
-			wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItemCursor)|A_BOLD);
+			wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor)|A_BOLD);
 		} else {
-			wattron(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItem));
+			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItem));
 			waddstr(mwFrame, mSelectTxt[i].c_str());
-			wattroff(mwFrame, COLOR_PAIR(FDSSystem::ColorPair::SelectItem));
+			wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItem));
 		}
 
 	}

@@ -29,11 +29,19 @@ FDSConfig::load(const std::string& filename)
 	}
 
 	// SYSTEMセクション読み込み
+#if defined(FDS_WINDOWS)
+	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIRWIN");
+	std::string separator = "\\";
+#else
 	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIR");
-	mFddEmuCmd = mCmdDir + "/" + mIniFile.getString("SYSTEM", "FDDEMUCMD");
-	mFdxToolCmd = mCmdDir + "/" + mIniFile.getString("SYSTEM", "FDXTOOLCMD");
-	mFdDumpCmd = mCmdDir + "/" + mIniFile.getString("SYSTEM", "FDDUMPCMD");
-	mFdRestoreCmd = mCmdDir + "/" + mIniFile.getString("SYSTEM", "FDRESTORECMD");
+	std::string separator = "/";
+#endif
+	mFddEmuCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDEMUCMD");
+	mFdxConvCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXCONVCMD");
+	mFdxToolCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXTOOLCMD");
+	mFdxViewCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXVIEWCMD");
+	mFdDumpCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDUMPCMD");
+	mFdRestoreCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDRESTORECMD");
 
 	// [DRIVES]セクション読み込み
 	for (num=1; ; num++) {

@@ -1425,7 +1425,7 @@ FDSSystem::cmdDumpDiskCallback(FdDump::Status& st)
 		escape = true;
 	}
 	if (key == 0x1b) {
-		if (doEscKey(mwDumpView)) {
+		if (fds::doEscKey(mwDumpView)) {
 			escape = true;
 		}
 	}
@@ -1730,12 +1730,47 @@ FDSSystem::cmdRestoreDiskCallback(FdRestore::Status& st)
 		escape = true;
 	}
 	if (key == 0x1b) {
-		if (doEscKey(mwRestoreView)) {
+		if (fds::doEscKey(mwRestoreView)) {
 			escape = true;
 		}
 	}
 
 	return ((escape == true) ? -1 : 0);
+}
+
+// -------------------------------------------------------------
+// アナライザを起動
+// -------------------------------------------------------------
+void
+FDSSystem::cmdAnalyzeDisk()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return;
+	}
+
+	std::string src = mFiles[idx].filename();
+	std::string path = mRootDir + mCurDir + src;
+
+#if 0
+	// FddEmuを終了
+	mFddEmu.kill();
+#endif
+
+	// アナライザを起動
+	FDSAnalyzer analyzer;
+	analyzer.start(path);
+
+#if 0
+	// FddEmuを再開
+	mFddEmu.run();
+#endif
+
+	// 新しいファイルリストを取得
+	mFiles.getFiles(mCurDir.empty());
+	mFiles.sortFiles();
+	filerViewSetIdx(idx);
 }
 
 

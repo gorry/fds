@@ -61,24 +61,23 @@ FDSSystem::pathViewRefresh()
 	werase(mwPathView);
 
 	// ヘッダ
-	wattron(mwPathView, COLOR_PAIR(ColorPair::PathHeader)|A_BOLD);
+	wattron(mwPathView, COLOR_PAIR(fds::ColorPair::PathHeader)|A_BOLD);
 	mvwaddstr(mwPathView, 1, 1, "[DIR] ");
-	wattroff(mwPathView, COLOR_PAIR(ColorPair::PathHeader)|A_BOLD);
+	wattroff(mwPathView, COLOR_PAIR(fds::ColorPair::PathHeader)|A_BOLD);
 
 	// ルートディレクトリ
-	wattron(mwPathView, COLOR_PAIR(ColorPair::PathRoot));
-	std::wstring wroot = WStrUtil::str2wstr(mRootDir);
-	waddwstr(mwPathView, wroot.c_str());
-	wattroff(mwPathView, COLOR_PAIR(ColorPair::PathRoot));
+	wattron(mwPathView, COLOR_PAIR(fds::ColorPair::PathRoot));
+	waddstr(mwPathView, mRootDir.c_str());
+	wattroff(mwPathView, COLOR_PAIR(fds::ColorPair::PathRoot));
 
 	// ファイラー操作ディレクトリ
-	wattron(mwPathView, COLOR_PAIR(ColorPair::PathCurrent)|A_BOLD);
-	std::wstring wcurrent = WStrUtil::str2wstr(mCurDir);
-	if (wcurrent.empty()) {
-		wcurrent = L"/";
+	wattron(mwPathView, COLOR_PAIR(fds::ColorPair::PathCurrent)|A_BOLD);
+	const char* curdir = mCurDir.c_str();
+	if (curdir[0] == '\0') {
+		curdir = "/";
 	}
-	mvwaddwstr(mwPathView, 2, 7, wcurrent.c_str());
-	wattroff(mwPathView, COLOR_PAIR(ColorPair::PathCurrent)|A_BOLD);
+	mvwaddstr(mwPathView, 2, 7, curdir);
+	wattroff(mwPathView, COLOR_PAIR(fds::ColorPair::PathCurrent)|A_BOLD);
 
 	mvwaddstr(mwPathView, 2, mPathViewXYWH.w()-2, " ");
 

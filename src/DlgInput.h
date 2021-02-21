@@ -20,8 +20,9 @@
 #include <vector>
 #include <string>
 
-#include "FDSSystem.h"
+#include "FDSCommon.h"
 #include "FDSMacro.h"
+#include "FDSSystem.h"
 
 // =====================================================================
 // １行入力ダイアログ

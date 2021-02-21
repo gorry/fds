@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "FDSCommon.h"
 #include "FDSMacro.h"
 #include "Log.h"
 

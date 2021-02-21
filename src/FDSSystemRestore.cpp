@@ -61,33 +61,30 @@ FDSSystem::restoreViewRefresh()
 
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
-	std::wstring wbuf;
-	wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreHeader)|A_BOLD);
+	wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreHeader)|A_BOLD);
 	sprintf(buf, "[Restore : %s]", mRestoreViewStatus.mFormat.c_str());
-	wbuf = WStrUtil::str2wstr(buf);
-	mvwaddwstr(mwRestoreView, 1, 2, wbuf.c_str());
-	wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreHeader)|A_BOLD);
+	mvwaddstr(mwRestoreView, 1, 2, buf);
+	wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreHeader)|A_BOLD);
 	sprintf(buf, "%s", mRestoreViewStatus.mName.c_str());
-	wbuf = WStrUtil::str2wstr(buf);
-	mvwaddwstr(mwRestoreView, 2, 2, wbuf.c_str());
+	mvwaddstr(mwRestoreView, 2, 2, buf);
 
 	// ゲージ
-	wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreGauge));
-	//                           01234567890123456789012345678901234567890123456789
-	mvwaddwstr(mwRestoreView,  3, 2, L"   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
-	mvwaddwstr(mwRestoreView,  4, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwRestoreView,  5, 2, L"  0|                     |                     |");
-	mvwaddwstr(mwRestoreView,  6, 2, L" 20|                     |                     |");
-	mvwaddwstr(mwRestoreView,  7, 2, L" 40|                     |                     |");
-	mvwaddwstr(mwRestoreView,  8, 2, L" 60|                     |                     |");
-	mvwaddwstr(mwRestoreView,  9, 2, L" 80|                     |                     |");
-	mvwaddwstr(mwRestoreView, 10, 2, L"100|                     |                     |");
-	mvwaddwstr(mwRestoreView, 11, 2, L"120|                     |                     |");
-	mvwaddwstr(mwRestoreView, 12, 2, L"140|                     |                     |");
-	mvwaddwstr(mwRestoreView, 13, 2, L"160|                     |                     |");
-	mvwaddwstr(mwRestoreView, 14, 2, L"---+---------------------+---------------------+");
-	mvwaddwstr(mwRestoreView, 15, 2, L"           [Push SPACE Key to Cancel]           ");
-	wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreGauge));
+	wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreGauge));
+	//                                 01234567890123456789012345678901234567890123456789
+	mvwaddstr(mwRestoreView,  3, 2, "   | 0 1 2 3 4 5 6 7 8 9 | 0 1 2 3 4 5 6 7 8 9 |");
+	mvwaddstr(mwRestoreView,  4, 2, "---+---------------------+---------------------+");
+	mvwaddstr(mwRestoreView,  5, 2, "  0|                     |                     |");
+	mvwaddstr(mwRestoreView,  6, 2, " 20|                     |                     |");
+	mvwaddstr(mwRestoreView,  7, 2, " 40|                     |                     |");
+	mvwaddstr(mwRestoreView,  8, 2, " 60|                     |                     |");
+	mvwaddstr(mwRestoreView,  9, 2, " 80|                     |                     |");
+	mvwaddstr(mwRestoreView, 10, 2, "100|                     |                     |");
+	mvwaddstr(mwRestoreView, 11, 2, "120|                     |                     |");
+	mvwaddstr(mwRestoreView, 12, 2, "140|                     |                     |");
+	mvwaddstr(mwRestoreView, 13, 2, "160|                     |                     |");
+	mvwaddstr(mwRestoreView, 14, 2, "---+---------------------+---------------------+");
+	mvwaddstr(mwRestoreView, 15, 2, "           [Push SPACE Key to Cancel]           ");
+	wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreGauge));
 
 	for (int i=0; i<mRestoreViewStatus.mTracks; i++) {
 		if (!0) { // mRestoreViewStatus.mChanged[i]) {
@@ -98,9 +95,9 @@ FDSSystem::restoreViewRefresh()
 			  default:
 				break;
 			  case FdRestore::TrackStatus::None:
-				wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusNone));
+				wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusNone));
 				mvwaddch(mwRestoreView, y, x, '.');
-				wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusNone));
+				wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusNone));
 				break;
 			  case FdRestore::TrackStatus::Retry1:
 			  case FdRestore::TrackStatus::Retry2:
@@ -111,24 +108,24 @@ FDSSystem::restoreViewRefresh()
 			  case FdRestore::TrackStatus::Retry7:
 			  case FdRestore::TrackStatus::Retry8:
 			  case FdRestore::TrackStatus::Retry9:
-				wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusFinish));
+				wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusFinish));
 				mvwaddch(mwRestoreView, y, x, '0'+(int)mRestoreViewStatus.mStatus[i]);
-				wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusFinish));
+				wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusFinish));
 				break;
 			  case FdRestore::TrackStatus::Finish:
-				wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusFinish));
+				wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusFinish));
 				mvwaddch(mwRestoreView, y, x, 'o');
-				wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusFinish));
+				wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusFinish));
 				break;
 			  case FdRestore::TrackStatus::Error:
-				wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusError));
+				wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusError));
 				mvwaddch(mwRestoreView, y, x, 'E');
-				wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusError));
+				wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusError));
 				break;
 			  case FdRestore::TrackStatus::Unformat:
-				wattron(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusUnformat));
+				wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusUnformat));
 				mvwaddch(mwRestoreView, y, x, '-');
-				wattroff(mwRestoreView, COLOR_PAIR(ColorPair::RestoreStatusUnformat));
+				wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreStatusUnformat));
 				break;
 			}
 		}

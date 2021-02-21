@@ -1,6 +1,6 @@
 ﻿// ◇
 // fds: fdx68 selector
-// FddMacro: マクロ定義
+// FdsMacro: マクロ定義
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 // =====================================================================

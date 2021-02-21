@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <array>
 
+#include "FDSCommon.h"
 #include "FDSMacro.h"
 #include "IniFile.h"
 #include "FDSDrive.h"
@@ -74,7 +75,9 @@ public:
 private:
 	std::string mCmdDir;
 	std::string mFddEmuCmd;
+	std::string mFdxConvCmd;
 	std::string mFdxToolCmd;
+	std::string mFdxViewCmd;
 	std::string mFdDumpCmd;
 	std::string mFdRestoreCmd;
 

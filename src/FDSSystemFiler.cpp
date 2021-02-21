@@ -67,54 +67,68 @@ FDSSystem::filerViewRefresh()
 	// ビューのクリア
 	werase(mwFilerView);
 
-	std::wstring buf(mFilerViewInnerW, L' ');
+	// std::string buf(mFilerViewInnerW, ' ');
+	std::wstring wbuf(mFilerViewInnerW, ' ');
 	FDSSystem::HelpViewMode md = FDSSystem::HelpViewMode::Dir;
 	int y = mFilerViewOfsY;
 	for (int i=0; i<mFilerViewInnerH; i++) {
 		// 選択肢カーソルを表示
 		bool sel = false;
-		FDSSystem::ColorPair col = FDSSystem::ColorPair::Normal;
+		fds::ColorPair col = fds::ColorPair::Normal;
 		if (y < (int)mFiles.size()) {
-			col = (FDSSystem::ColorPair)((int)ColorPair::FilerUnknown + (int)mFiles[y].type());
+			col = (fds::ColorPair)((int)fds::ColorPair::FilerUnknown + (int)mFiles[y].type());
 			wattron(mwFilerView, COLOR_PAIR(col));
 		}
 		if (i == mFilerViewCsrY) {
-			col = (FDSSystem::ColorPair)((int)col + (int)DirEntry::Type::Max);
+			col = (fds::ColorPair)((int)col + (int)DirEntry::Type::Max);
 			wattron(mwFilerView, COLOR_PAIR(col)|A_BOLD);
 			sel = true;
 		}
-		mvwaddwstr(mwFilerView, mFilerViewWindowOfsY+i, mFilerViewWindowOfsX, buf.c_str());
 
 		// アイテムを表示
 		if (y < (int)mFiles.size()) {
-			std::wstring line;
+			std::wstring wline;
+			std::string line;
+			int w;
 			wmove(mwFilerView, mFilerViewWindowOfsY+i, mFilerViewWindowOfsX+2);
 			switch (mFiles[y].type()) {
 			  case DirEntry::Type::ParentDir:
-				WStrUtil::copyByWidth(line, mFiles[y].wfilename()+L"/", 0, mFilerViewInnerW-3);
-				waddwstr(mwFilerView, line.c_str());
+				w = mFilerViewInnerW-3;
+				w -= WStrUtil::copyByWidth(wline, mFiles[y].wfilename()+L"/", 0, w);
+				wline += std::wstring(w, ' ');
+				line = WStrUtil::wstr2str(wline);
+				waddstr(mwFilerView, line.c_str());
 				if (sel) {
 					md = FDSSystem::HelpViewMode::ParentDir;
 				}
 				break;
 			  case DirEntry::Type::Dir:
-				WStrUtil::copyByWidth(line, mFiles[y].wfilename()+L"/", 0, mFilerViewInnerW-3);
-				waddwstr(mwFilerView, line.c_str());
+				w = mFilerViewInnerW-3;
+				w -= WStrUtil::copyByWidth(wline, mFiles[y].wfilename()+L"/", 0, w);
+				wline += std::wstring(w, ' ');
+				line = WStrUtil::wstr2str(wline);
+				waddstr(mwFilerView, line.c_str());
 				if (sel) {
 					md = FDSSystem::HelpViewMode::Dir;
 				}
 				break;
 			  case DirEntry::Type::FdxFile:
-				WStrUtil::copyByWidth(line, mFiles[y].wfilename(), 0, mFilerViewInnerW-3);
-				waddwstr(mwFilerView, line.c_str());
+				w = mFilerViewInnerW-3;
+				w -= WStrUtil::copyByWidth(wline, mFiles[y].wfilename(), 0, w);
+				wline += std::wstring(w, ' ');
+				line = WStrUtil::wstr2str(wline);
+				waddstr(mwFilerView, line.c_str());
 				if (sel) {
 					md = FDSSystem::HelpViewMode::FdxFile;
 				}
 				break;
 			  default:
 			  case DirEntry::Type::OtherFile:
-				WStrUtil::copyByWidth(line, mFiles[y].wfilename(), 0, mFilerViewInnerW-3);
-				waddwstr(mwFilerView, line.c_str());
+				w = mFilerViewInnerW-3;
+				w -= WStrUtil::copyByWidth(wline, mFiles[y].wfilename(), 0, w);
+				wline += std::wstring(w, ' ');
+				line = WStrUtil::wstr2str(wline);
+				waddstr(mwFilerView, line.c_str());
 				if (sel) {
 					md = FDSSystem::HelpViewMode::OtherFile;
 				}
@@ -123,16 +137,16 @@ FDSSystem::filerViewRefresh()
 			// プロテクトマークを表示
 			if (mFiles[y].isProtect()) {
 				if (sel) {
-					wattron(mwFilerView, COLOR_PAIR(ColorPair::FilerProtectedCsr));
+					wattron(mwFilerView, COLOR_PAIR(fds::ColorPair::FilerProtectedCsr));
 				} else {
-					wattron(mwFilerView, COLOR_PAIR(ColorPair::FilerProtected));
+					wattron(mwFilerView, COLOR_PAIR(fds::ColorPair::FilerProtected));
 				}
 				wmove(mwFilerView, mFilerViewWindowOfsY+i, mFilerViewWindowOfsX+1);
 				mvwaddstr(mwFilerView, mFilerViewWindowOfsY+i, mFilerViewWindowOfsX+1, "*");
 				if (sel) {
-					wattroff(mwFilerView, COLOR_PAIR(ColorPair::FilerProtectedCsr));
+					wattroff(mwFilerView, COLOR_PAIR(fds::ColorPair::FilerProtectedCsr));
 				} else {
-					wattroff(mwFilerView, COLOR_PAIR(ColorPair::FilerProtected));
+					wattroff(mwFilerView, COLOR_PAIR(fds::ColorPair::FilerProtected));
 				}
 			}
 		}

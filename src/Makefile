@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20201224a.tar.gz
+FDSARC = fds68k_20210212a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
@@ -12,6 +12,11 @@ CPPSRCS = \
 	FddEmu.cpp \
 	FdDump.cpp \
 	FdRestore.cpp \
+	FDSAnalyzer.cpp \
+	FDSAnalyzerDisk.cpp \
+	FDSAnalyzerHelp.cpp \
+	FDSAnalyzerTrack.cpp \
+	FDSCommon.cpp \
 	FDSConfig.cpp \
 	FDSDrive.cpp \
 	FDSMachine.cpp \

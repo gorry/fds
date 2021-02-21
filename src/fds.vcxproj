@@ -88,14 +88,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dirent;..\pdcurses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pdcurses</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pdcurses_wide.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>pdcurses</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -107,14 +107,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dirent;..\pdcurses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pdcurses</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pdcurses_wide.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>pdcurses</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,7 +127,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dirent;..\pdcurses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -135,8 +135,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pdcurses</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pdcurses_wide.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>pdcurses</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,7 +149,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>dirent;..\pdcurses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -157,14 +157,19 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pdcurses</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pdcurses_wide.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>pdcurses</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dirent\dirent.c" />
     <ClCompile Include="FdDump.cpp" />
     <ClCompile Include="FdRestore.cpp" />
+    <ClCompile Include="FDSAnalyzer.cpp" />
+    <ClCompile Include="FDSAnalyzerDisk.cpp" />
+    <ClCompile Include="FDSAnalyzerHelp.cpp" />
+    <ClCompile Include="FDSAnalyzerTrack.cpp" />
+    <ClCompile Include="FDSCommon.cpp" />
     <ClCompile Include="FDSConfig.cpp" />
     <ClCompile Include="FDSDrive.cpp" />
     <ClCompile Include="FDSMachine.cpp" />
@@ -194,6 +199,8 @@
     <ClInclude Include="dirent\dirent.h" />
     <ClInclude Include="FdDump.h" />
     <ClInclude Include="FdRestore.h" />
+    <ClInclude Include="FDSAnalyzer.h" />
+    <ClInclude Include="FDSCommon.h" />
     <ClInclude Include="FDSConfig.h" />
     <ClInclude Include="FDSDrive.h" />
     <ClInclude Include="FDSMachine.h" />

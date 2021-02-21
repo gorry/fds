@@ -94,8 +94,17 @@ int main(int argc, char **argv)
 	FDSLog::setOutputLog(log);
 
 	// ロケール設定
+#if defined(FDS_WINDOWS)
+	const char* env = getenv("LANG");
+	if ((env == nullptr) || (env[0] == '\0')) {
+		// env = "ja-JP";
+		env = ".utf8";
+	}
+	env = setlocale(LC_ALL, env);
+#else
 	char* env = getenv("LANG");
 	setlocale(LC_ALL, env);
+#endif
 	FDS_LOG("env: LANG=[%s]\n", env);
 
 	// Curses用にESCキー押下時ディレイ値を設定

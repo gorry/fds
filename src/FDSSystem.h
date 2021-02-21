@@ -8,8 +8,6 @@
 #if !defined(__FDSSYSTEM_H__)
 #define __FDSSYSTEM_H__
 
-#define FDS_VERSION "20201224a"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -26,6 +24,7 @@
 #include <algorithm>
 #include <array>
 
+#include "FDSCommon.h"
 #include "FDSMacro.h"
 #include "DirEntry.h"
 #include "DirStack.h"
@@ -40,6 +39,7 @@
 #include "DlgInput.h"
 #include "WStrUtil.h"
 #include "Log.h"
+#include "FDSAnalyzer.h"
 
 #if defined(FDS_WINDOWS)
 #include <direct.h>
@@ -53,74 +53,11 @@
 class FDSSystem
 {
 public:		// struct, enum
-	enum class ColorPair : short {
-		Normal = 1,
-		FilerUnknown,
-		FilerParentDir,
-		FilerDir,
-		FilerFdxFile,
-		FilerOtherFile,
-		FilerUnknownCsr,
-		FilerParentDirCsr,
-		FilerDirCsr,
-		FilerFdxFileCsr,
-		FilerOtherFileCsr,
-		FilerProtected,
-		FilerProtectedCsr,
-		Header,
-		PathHeader,
-		PathRoot,
-		PathCurrent,
-		SelectHeader,
-		SelectItem,
-		SelectItemCursor,
-		InputHeader,
-		InputEdit,
-		FddHeaderOff,
-		FddHeaderOn,
-		FddProtect,
-		FddCluster,
-		HelpHeader,
-		InfoHeader,
-		DumpHeader,
-		DumpGauge,
-		DumpStatusNone,
-		DumpStatusFinish,
-		DumpStatusUnformat,
-		DumpStatusError,
-		RestoreHeader,
-		RestoreGauge,
-		RestoreStatusNone,
-		RestoreStatusFinish,
-		RestoreStatusUnformat,
-		RestoreStatusError,
-	};
-
 	enum class HelpViewMode : int {
 		ParentDir=0,
 		Dir,
 		FdxFile,
 		OtherFile,
-	};
-
-	struct XYWH {
-		int X = 0;
-		int Y = 0;
-		int W = 0;
-		int H = 0;
-		int x() const { return X; }
-		int y() const { return Y; }
-		int w() const { return W; }
-		int h() const { return H; }
-		int l() const { return X; }
-		int t() const { return Y; }
-		int r() const { return X+W; }
-		int b() const { return Y+H; }
-	};
-
-	struct ESCKEYMAP {
-		const char* keys = nullptr;
-		int newkey = 0;
 	};
 
 	static const int FddViewRefreshInterval = 500;
@@ -135,17 +72,8 @@ public:		// function
 	void start();
 	void end();
 
-	static bool doEscKey(WINDOW* window);
-	static bool doEscKeyW(WINDOW* window);
-	static const ESCKEYMAP sEscKeyMap[];
-
 private:	// function
 	void mainLoop();
-
-	void updateFiles();
-	void getFiles();
-	void sortFiles();
-	void showFiles();
 
 	void initView();
 	void destroyView();
@@ -176,6 +104,7 @@ private:	// function
 	void cmdShell();
 	void cmdDumpDisk();
 	void cmdRestoreDisk();
+	void cmdAnalyzeDisk();
 
 	static int cmdDumpDiskCallback_(FdDump::Status& st, void* p);
 	int cmdDumpDiskCallback(FdDump::Status& st);
@@ -268,7 +197,7 @@ private:	// var
 
 	// filer view
 	WINDOW *mwFilerView = nullptr;
-	XYWH mFilerViewXYWH = {};
+	fds::XYWH mFilerViewXYWH = {};
 	int mFilerViewInnerW = 0;
 	int mFilerViewInnerH = 0;
 	int mFilerViewOfsY = 0;
@@ -278,22 +207,22 @@ private:	// var
 
 	// path view
 	WINDOW *mwPathView = nullptr;
-	XYWH mPathViewXYWH = {};
+	fds::XYWH mPathViewXYWH = {};
 
 	// info view
 	WINDOW *mwInfoView = nullptr;
-	XYWH mInfoViewXYWH = {};
+	fds::XYWH mInfoViewXYWH = {};
 	std::string mInfoViewFileName;
 	FdxHeader mFdxHeader = {};
 	int mDiskInfoResult = 0;
 
 	// fdd view
 	WINDOW *mwFddView = nullptr;
-	XYWH mFddViewXYWH = {};
+	fds::XYWH mFddViewXYWH = {};
 
 	// help view
 	WINDOW *mwHelpView = nullptr;
-	XYWH mHelpViewXYWH = {};
+	fds::XYWH mHelpViewXYWH = {};
 	HelpViewMode mHelpViewMode = HelpViewMode::ParentDir;
 
 	// dump dialog
@@ -301,7 +230,7 @@ private:	// var
 
 	// dump view
 	WINDOW *mwDumpView = nullptr;
-	XYWH mDumpViewXYWH = {};
+	fds::XYWH mDumpViewXYWH = {};
 	FdDump::Status mDumpViewStatus;
 
 	// restore dialog
@@ -309,7 +238,7 @@ private:	// var
 
 	// restore view
 	WINDOW *mwRestoreView = nullptr;
-	XYWH mRestoreViewXYWH = {};
+	fds::XYWH mRestoreViewXYWH = {};
 	FdRestore::Status mRestoreViewStatus;
 
 };

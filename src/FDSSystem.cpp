@@ -248,7 +248,7 @@ FDSSystem::mainLoop()
 			break;
 		  case 0x1b: // ESC
 			wtimeout(mwFilerView, 0);
-			if (doEscKey(mwFilerView)) {
+			if (fds::doEscKey(mwFilerView)) {
 				finish = true;
 			}
 			wtimeout(mwFilerView, FddViewRefreshInterval);
@@ -328,6 +328,9 @@ FDSSystem::mainLoop()
 			goto refreshScreen;
 		  case 'P':
 			cmdProtectDrive();
+			goto refreshScreen;
+		  case 'Q':
+			cmdAnalyzeDisk();
 			goto refreshScreen;
 		  case 'R':
 		  case '?':
@@ -410,98 +413,7 @@ FDSSystem::initView()
 	noecho();
 	curs_set(0);
 
-	// カラー設定
-#if defined(FDS_WINDOWS)
-	char* env = "";
-#else
-	char* env = getenv("TERM");
-#endif
-	if (env && strstr(env, "256color")) {
-		use_default_colors();
-		#define MyColor(r,g,b) (((r)*36)+((g)*6)+(b)+16)
-		init_pair((short)ColorPair::Normal,                MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::FilerUnknown,          MyColor(3,3,3), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerParentDir,        MyColor(0,5,5), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerDir,              MyColor(0,5,0), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerFdxFile,          MyColor(5,5,5), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerOtherFile,        MyColor(3,3,3), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerUnknownCsr,       MyColor(3,3,3), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerParentDirCsr,     MyColor(0,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerDirCsr,           MyColor(0,5,0), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerFdxFileCsr,       MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerOtherFileCsr,     MyColor(3,3,3), MyColor(0,0,5));
-		init_pair((short)ColorPair::FilerProtected,        MyColor(5,0,0), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerProtectedCsr,     MyColor(5,0,0), MyColor(0,0,5));
-		init_pair((short)ColorPair::Header,                MyColor(0,0,0), MyColor(5,3,0));
-		init_pair((short)ColorPair::PathHeader,            MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::PathRoot,              MyColor(3,5,0), MyColor(0,0,0));
-		init_pair((short)ColorPair::PathCurrent,           MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectHeader,          MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectItem,            MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::SelectItemCursor,      MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::InputHeader,           MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::InputEdit,             MyColor(5,5,5), MyColor(0,0,5));
-		init_pair((short)ColorPair::FddHeaderOff,          MyColor(0,0,0), MyColor(2,2,2));
-		init_pair((short)ColorPair::FddHeaderOn,           MyColor(0,5,0), MyColor(2,2,2));
-		init_pair((short)ColorPair::FddProtect,            MyColor(5,0,0), MyColor(0,0,0));
-		init_pair((short)ColorPair::FddCluster,            MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::HelpHeader,            MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::InfoHeader,            MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::DumpHeader,            MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::DumpGauge,             MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::DumpStatusNone,        MyColor(3,3,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::DumpStatusFinish,      MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::DumpStatusUnformat,    MyColor(0,0,0), MyColor(5,5,5));
-		init_pair((short)ColorPair::DumpStatusError,       MyColor(0,5,5), MyColor(5,0,0));
-		init_pair((short)ColorPair::RestoreHeader,         MyColor(0,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::RestoreGauge,          MyColor(0,5,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::RestoreStatusNone,     MyColor(3,3,3), MyColor(0,0,0));
-		init_pair((short)ColorPair::RestoreStatusFinish,   MyColor(5,5,5), MyColor(0,0,0));
-		init_pair((short)ColorPair::RestoreStatusUnformat, MyColor(0,0,0), MyColor(5,5,5));
-		init_pair((short)ColorPair::RestoreStatusError,    MyColor(0,5,5), MyColor(5,0,0));
-
-	} else {
-		init_pair((short)ColorPair::Normal,                COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerUnknown,          COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerParentDir,        COLOR_YELLOW, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerDir,              COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerFdxFile,          COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerOtherFile,        COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerUnknownCsr,       COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerParentDirCsr,     COLOR_YELLOW, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerDirCsr,           COLOR_GREEN, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerFdxFileCsr,       COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerOtherFileCsr,     COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FilerProtected,        COLOR_RED, COLOR_BLACK);
-		init_pair((short)ColorPair::FilerProtectedCsr,     COLOR_RED, COLOR_BLUE);
-		init_pair((short)ColorPair::Header,                COLOR_BLACK, COLOR_YELLOW);
-		init_pair((short)ColorPair::PathHeader,            COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::PathRoot,              COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::PathCurrent,           COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectHeader,          COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectItem,            COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::SelectItemCursor,      COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::InputHeader,           COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::InputEdit,             COLOR_WHITE, COLOR_BLUE);
-		init_pair((short)ColorPair::FddHeaderOff,          COLOR_BLACK, COLOR_WHITE);
-		init_pair((short)ColorPair::FddHeaderOn,           COLOR_GREEN, COLOR_WHITE);
-		init_pair((short)ColorPair::FddProtect,            COLOR_RED, COLOR_BLACK);
-		init_pair((short)ColorPair::FddCluster,            COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::HelpHeader,            COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::InfoHeader,            COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::DumpHeader,            COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::DumpGauge,             COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::DumpStatusNone,        COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::DumpStatusFinish,      COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::DumpStatusUnformat,    COLOR_BLACK, COLOR_WHITE);
-		init_pair((short)ColorPair::DumpStatusError,       COLOR_WHITE, COLOR_RED);
-		init_pair((short)ColorPair::RestoreHeader,         COLOR_CYAN, COLOR_BLACK);
-		init_pair((short)ColorPair::RestoreGauge,          COLOR_GREEN, COLOR_BLACK);
-		init_pair((short)ColorPair::RestoreStatusNone,     COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::RestoreStatusFinish,   COLOR_WHITE, COLOR_BLACK);
-		init_pair((short)ColorPair::RestoreStatusUnformat, COLOR_BLACK, COLOR_WHITE);
-		init_pair((short)ColorPair::RestoreStatusError,    COLOR_WHITE, COLOR_RED);
-	}
+	fds::initColorPair();
 }
 
 // -------------------------------------------------------------
@@ -539,7 +451,7 @@ FDSSystem::drawHeader()
 
 	// ヘッダー描画
 	clear();
-	attron(COLOR_PAIR(ColorPair::Header));
+	attron(COLOR_PAIR(fds::ColorPair::Header));
 	memset(buf, ' ', _countof(buf));
 	const char* s1 = "FDS: FDX68 File Selector";
 	int l1 = strlen(s1);
@@ -549,7 +461,7 @@ FDSSystem::drawHeader()
 	memcpy(buf+COLS-1-l2, s2, l2);
 	buf[COLS] = '\0';
 	mvaddstr(0, 0, buf);
-	attroff(COLOR_PAIR(ColorPair::Header));
+	attroff(COLOR_PAIR(fds::ColorPair::Header));
 	refresh();
 }
 
@@ -574,7 +486,7 @@ void
 FDSSystem::setViewLayout()
 {
 	// 画面全体
-	const XYWH fullViewXYWH = {
+	const fds::XYWH fullViewXYWH = {
 	  0,
 	  1,
 	  COLS,
@@ -635,85 +547,6 @@ FDSSystem::getDriveName(int id)
 {
 	return mConfig.cfgMachine().driveName(id);
 }
-
-// -------------------------------------------------------------
-// コマンドキー設定
-// -------------------------------------------------------------
-const FDSSystem::ESCKEYMAP FDSSystem::sEscKeyMap[] = {
-	{ "[11~", 265 },
-	{ "[12~", 266 },
-	{ "[13~", 267 },
-	{ "[14~", 268 },
-	{ "[1~", KEY_HOME },
-	{ "[4~", KEY_END },
-	{ "Ol", '+' },
-	{ "On", '.' },
-	{ "Op", '0' },
-	{ "Oq", '1' },
-	{ "Or", '2' },
-	{ "Os", '3' },
-	{ "Ot", '4' },
-	{ "Ou", '5' },
-	{ "Ov", '6' },
-	{ "Ow", '7' },
-	{ "Ox", '8' },
-	{ "Oy", '9' },
-};
-
-// -------------------------------------------------------------
-// ESCキー（と各コマンドキー）入力時の処理
-// -------------------------------------------------------------
-bool
-FDSSystem::doEscKey(WINDOW* window)
-{
-	std::string keys;
-	int key2 = wgetch(window);
-	if (key2 == ERR) {
-		return true;
-	} else {
-		keys.push_back((char)key2);
-		while ((key2 = wgetch(window)) != ERR) {
-			keys.push_back((char)key2);
-		}
-		for (int i=0; i<(int)_countof(sEscKeyMap); i++) {
-			if (keys == sEscKeyMap[i].keys) {
-				ungetch(sEscKeyMap[i].newkey);
-				return false;
-			}
-		}
-		FDS_LOG("doEscKey: keys=[%s]\n", keys.c_str());
-	}
-	return false;
-}
-
-// -------------------------------------------------------------
-// ESCキー（と各コマンドキー）入力時の処理: ワイド用
-// -------------------------------------------------------------
-bool
-FDSSystem::doEscKeyW(WINDOW* window)
-{
-	std::wstring wkeys;
-	wint_t wch;
-	int wkey = wget_wch(window, &wch);
-	if (wkey == ERR) {
-		return true;
-	} else {
-		wkeys.push_back((wchar_t)wch);
-		while ((wkey = wget_wch(window, &wch)) != ERR) {
-			wkeys.push_back((wchar_t)wch);
-		}
-		std::string keys = WStrUtil::wstr2str(wkeys);
-		for (int i=0; i<(int)_countof(sEscKeyMap); i++) {
-			if (keys == sEscKeyMap[i].keys) {
-				unget_wch((wchar_t)sEscKeyMap[i].newkey);
-				return false;
-			}
-		}
-		FDS_LOG("doEscKeyW: wkeys=[%ls]\n", wkeys.c_str());
-	}
-	return false;
-}
-
 
 // =====================================================================
 // [EOF]

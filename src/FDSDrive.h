@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <array>
 
+#include "FDSCommon.h"
 #include "FDSMacro.h"
 #include "IniFile.h"
 #include "WStrUtil.h"
