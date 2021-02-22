@@ -27,7 +27,7 @@
 #include "IniFile.h"
 #include "DlgSelect.h"
 #include "FdDump.h"
-#include "FdxTool.h"
+#include "FdxView.h"
 #include "FDXFile.h"
 #include "FDSConfig.h"
 #include "DlgInput.h"
@@ -111,6 +111,7 @@ private:	// function
 	int diskViewGetIdx();
 	void diskViewRefresh();
 	void diskViewRedraw();
+	void diskViewRedrawBorder();
 	void diskViewSelectEntry();
 	void diskViewShowTrack();
 
@@ -131,11 +132,13 @@ private:	// function
 	int trackViewGetIdx();
 	void trackViewRefresh();
 	void trackViewRedraw();
+	void trackViewRedrawBorder();
 	void trackViewSelectEntry();
 	void trackViewBackDisk();
 	void trackViewShowSector();
 	void trackViewSetCylinder(int cylinder);
 	void trackViewSetHead(int head);
+	void trackViewSetLoad(void);
 
 	// sector view
 	void sectorViewCreateWindow();
@@ -166,7 +169,7 @@ public:		// var
 
 private:	// var
 	std::string mFilename;
-	FdxTool mFdxTool;
+	FdxView mFdxView;
 	FdDump mFdDump;
 
 	FDSConfig mConfig;
@@ -192,6 +195,8 @@ private:	// var
 	int mTrackViewTrackNo = 0;
 	int mTrackViewCylinderNo = 0;
 	int mTrackViewHeadNo = 0;
+	bool mTrackViewReqLoad = false;
+	bool mTrackViewClear = false;
 
 	// sector view
 	WINDOW *mwSectorView = nullptr;

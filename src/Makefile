@@ -30,6 +30,7 @@ CPPSRCS = \
 	FDSSystemPath.cpp \
 	FDSSystemRestore.cpp \
 	FdxTool.cpp \
+	FdxView.cpp \
 	IniFile.cpp \
 	Log.cpp \
 	MakeArgv.cpp \
@@ -47,6 +48,7 @@ OUTDIR_RELEASE = Release
 LD = g++
 
 CXXFLAGS = -c -g -D NCURSES_WIDECHAR=1 -Wall
+CXXFLAGS += -Wno-psabi  # to avoid warning > note: parameter passing for argument of type ‘std::move_iterator<>’ changed in GCC 7.1
 LDFLAGS = -lncursesw
 
 ifneq ($(NOSUDO),)

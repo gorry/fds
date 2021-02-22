@@ -46,6 +46,7 @@ public:
 	const std::string& cmdDir() const { return mCmdDir; }
 	const std::string& fddEmuCmd() const { return mFddEmuCmd; }
 	const std::string& fdxToolCmd() const { return mFdxToolCmd; }
+	const std::string& fdxViewCmd() const { return mFdxViewCmd; }
 	const std::string& fdDumpCmd() const { return mFdDumpCmd; }
 	const std::string& fdRestoreCmd() const { return mFdRestoreCmd; }
 

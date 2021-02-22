@@ -34,6 +34,7 @@
 #include "FdDump.h"
 #include "FdRestore.h"
 #include "FdxTool.h"
+#include "FdxView.h"
 #include "FDXFile.h"
 #include "FDSConfig.h"
 #include "DlgInput.h"
@@ -188,6 +189,7 @@ private:	// var
 	DirStack mDirStack;
 	IniFile mSavFile;
 	FdxTool mFdxTool;
+	FdxView mFdxView;
 	FddEmu mFddEmu;
 	FdDump mFdDump;
 	FdRestore mFdRestore;

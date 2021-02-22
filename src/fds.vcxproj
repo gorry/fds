@@ -176,6 +176,7 @@
     <ClCompile Include="FDSSystemDump.cpp" />
     <ClCompile Include="FDSSystemRestore.cpp" />
     <ClCompile Include="FdxTool.cpp" />
+    <ClCompile Include="FdxView.cpp" />
     <ClCompile Include="MakeArgv.cpp" />
     <ClCompile Include="wcwidth\wcwidth.c" />
     <ClCompile Include="DirEntry.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="FDSDrive.h" />
     <ClInclude Include="FDSMachine.h" />
     <ClInclude Include="FdxTool.h" />
+    <ClInclude Include="FdxView.h" />
     <ClInclude Include="MakeArgv.h" />
     <ClInclude Include="wcwidth\wcwidth.h" />
     <ClInclude Include="DirEntry.h" />

@@ -59,41 +59,63 @@ FDSAnalyzer::trackViewRedraw()
 }
 
 // -------------------------------------------------------------
+// ビューの枠だけ再描画
+// -------------------------------------------------------------
+void
+FDSAnalyzer::trackViewRedrawBorder()
+{
+	wborder(mwTrackView, 0,0,0,0,ACS_LTEE,0,0,0);
+	diskViewRedrawBorder();
+}
+
+// -------------------------------------------------------------
 // ビュー更新
 // -------------------------------------------------------------
 void
 FDSAnalyzer::trackViewRefresh()
 {
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	FdxTool::DiskInfo& disk2 = mFdxTool.diskInfoVerbose();
-	int tracksize = disk2.TrackSize();
-	mTrackViewTrackNo = mTrackViewCylinderNo * disk.mFdxInfo.mHeads + mTrackViewHeadNo;
-
 	char line[256];
+
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	mTrackViewTrackNo = mTrackViewCylinderNo * disk.mFdxInfo.mHeads + mTrackViewHeadNo;
+	if (mTrackViewReqLoad && !mTrackViewClear) {
+		mTrackViewReqLoad = false;
+		std::string cmd = mConfig.fdxViewCmd();
+		mFdxView.readFDXTrack(cmd, mFilename, mTrackViewTrackNo);
+	}
+	FdxView::TrackInfo* track = nullptr;
 
 	// ビューのクリア
 	werase(mwTrackView);
 
-	// ゲージ
-	std::string disktype = fds:: getDiskType(disk.mFdxInfo);
+	// トラック情報
+	std::string disktype = fds::getDiskType(disk.mFdxInfo);
 	wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatus));
-	if (tracksize) {
-		FdxTool::TrackInfo& track2 = disk2.Track(mTrackViewTrackNo);
-		sprintf(line, "[MFM] Gap4a%4d : IAM%4d : Gap1%4d : Gap4b%4d : [Format:%s]",
-		  track2.mSizeGap4a, track2.mCellIAM, track2.mSizeGap1, track2.mSizeGap4b, disktype.c_str()
+	if (mFdxView.trackInfo().TrackSize() /* && !mTrackViewClear */) {
+		track = &(mFdxView.trackInfo().Track(0));
+		sprintf(line, "[MFM]Rate=%6.2f Gap4a=%-4dIAM=%-4dGap1=%-4dGap4b=%-4d[%s]",
+		  track->mDRate, track->mSizeGap4a, track->mCellIAM, track->mSizeGap1, track->mSizeGap4b, disktype.c_str()
 		);
 		mvwaddstr(mwTrackView,  1, 2, line);
-		if (disk.Track(mTrackViewTrackNo).mStatus.InfoIMIX()) {
+		if (track->mStatus.InfoIMIX()) {
 			wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatusFM));
 			mvwaddstr(mwTrackView,  1, 2, "[MIX]");
 			wattroff(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatusFM));
-		}else if (disk.Track(mTrackViewTrackNo).mStatus.InfoIFM()) {
+		} else if (track->mStatus.InfoIFM()) {
 			wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatusFM));
 			mvwaddstr(mwTrackView,  1, 2, "[ FM]");
 			wattroff(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatusFM));
 		}
+		if ((track->mDRate < 99.0) || (101.0 < track->mDRate)) {
+			wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackAbnormalItem)|A_BOLD);
+			sprintf(line, "%6.2f", track->mDRate);
+			mvwaddstr(mwTrackView,  1, 12, line);
+			wattroff(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackAbnormalItem)|A_BOLD);
+		}
 	}
 	wattroff(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackStatus));
+
+	// ゲージ
 	wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackGauge));
 	//                          01234567890123456789012345678901234567890123456789012345678901234567890
 	mvwaddstr(mwTrackView,  2, 2, " Sec  Cell   Time   C  H  R  N  CRC GAP2 DAM  DATA CRC GAP3 D-Rate");
@@ -106,10 +128,9 @@ FDSAnalyzer::trackViewRefresh()
 		// 選択肢カーソルを表示
 		bool sel = false;
 		fds::ColorPair col = fds::ColorPair::Normal;
-		if (tracksize) {
-			FdxTool::TrackInfo& track2 = disk2.Track(mTrackViewTrackNo);
-			if (y < (int)track2.SectorSize()) {
-				FdxTool::SectorInfo& sector = track2.Sector(y);
+		if (track && !mTrackViewClear) {
+			if (y < (int)track->SectorSize()) {
+				FdxView::SectorInfo& sector = track->Sector(y);
 				col = fds::ColorPair::TrackNormalSec;
 				if (sector.mStatus.Err()) {
 					col = fds::ColorPair::TrackErrorSec;
@@ -119,7 +140,7 @@ FDSAnalyzer::trackViewRefresh()
 				}
 			}
 		}
-		if (i == mTrackViewCsrY) {
+		if (i == mTrackViewCsrY && !mTrackViewClear) {
 			col = (fds::ColorPair)((int)col + (int)fds::ColorPair::TrackNormalSecCsr - (int)fds::ColorPair::TrackNormalSec);
 			wattron(mwTrackView, COLOR_PAIR(col)|A_BOLD);
 			sel = true;
@@ -129,33 +150,32 @@ FDSAnalyzer::trackViewRefresh()
 		mvwaddstr(mwTrackView, mTrackViewWindowOfsY+i, mTrackViewWindowOfsX+1, buf.c_str());
 
 		// アイテムを表示
-		if (tracksize) {
-			FdxTool::TrackInfo& track2 = disk2.Track(mTrackViewTrackNo);
-			if (y < (int)track2.SectorSize()) {
-				FdxTool::SectorInfo& sector = track2.Sector(y);
+		if (track && !mTrackViewClear) {
+			if (y < (int)(track->SectorSize())) {
+				FdxView::SectorInfo& sector = track->Sector(y);
 
 				int secfm = 'M';
 				if (sector.mStatus.InfoIFM()) secfm = 'F';
 				if (sector.mStatus.InfoIMIX()) secfm = 'X';
 
-				int diskrate = disk2.mFdxInfo.mRate;
-				int trackcellsize = disk2.mFdxInfo.mTrackSize / 2 / 8;
-				if (disk2.mFdxInfo.mType == 9) {  // RAW
+				int diskrate = disk.mFdxInfo.mRate;
+				int trackcellsize = disk.mFdxInfo.mTrackSize / 2 / 8;
+				if (disk.mFdxInfo.mType == 9) {  // RAW
 					diskrate /= 8;
 					trackcellsize /= 8;
 				}
-				if (disk.Track(mTrackViewTrackNo).mStatus.InfoIFM()) {
+				if (track->mStatus.InfoIFM()) {
 					diskrate /= 2;
 				}
 				// int seccells = sector.mCellEnd - sector.mCellStart - sector.mGap2 - sector.mGap3;
 				int nextseccells = 0;
-				if (y < (int)track2.SectorSize()-1) {
-					nextseccells = track2.Sector(y+1).mCellStart;
+				if (y < (int)track->SectorSize()-1) {
+					nextseccells = track->Sector(y+1).mCellStart;
 					if (nextseccells < sector.mCellStart) {
 						nextseccells += trackcellsize;
 					}
 				} else {
-					nextseccells = track2.Sector(0).mCellStart;
+					nextseccells = track->Sector(0).mCellStart;
 					nextseccells += trackcellsize;
 				}
 				int cellend = sector.mCellEnd;
@@ -173,14 +193,8 @@ FDSAnalyzer::trackViewRefresh()
 				if (secsize < 1) {
 					secsize = 1;
 				}
-				int elapse = sector.mElapse;
-				if (elapse < 1) {
-					elapse = 1;
-				}
 				double secsizerate = (double)(seccells-44) / (double)secsize * 1.000 * 100.0;
-				// double sectimerate = (double)secsize / (double)elapse * 16130 / diskrate * 100.0;
-				double sectimerate = (double)(seccells-44) / (double)elapse * 16000 / diskrate * 100.0;
-				FDS_LOG("Track=%d, Sector=%d, CellStart=%d, CellEnd=%d, seccells=%d, Time=%d, CHRN=%08x, SecSize=%d, Gap2=%d, Gap3=%d, Elapse=%d, secsizerate=%f, sectimerate=%f, diskrate=%d\n", mTrackViewTrackNo, y+1, sector.mCellStart, sector.mCellEnd, seccells, sector.mTime, sector.mCHRN, sector.mSecSize, sector.mGap2, sector.mGap3, sector.mElapse, secsizerate, sectimerate, diskrate);
+				FDS_LOG("Track=%d, Sector=%d, CellStart=%d, CellEnd=%d, seccells=%d, Time=%d, CHRN=%08x, SecSize=%d, Gap2=%d, Gap3=%d, secsizerate=%f, diskrate=%d\n", mTrackViewTrackNo, y+1, sector.mCellStart, sector.mCellEnd, seccells, sector.mTime, sector.mCHRN, sector.mSecSize, sector.mGap2, sector.mGap3, secsizerate, diskrate);
 
 				wmove(mwTrackView, mTrackViewWindowOfsY+i, mTrackViewWindowOfsX+2);
 				//                     1         2         3         4         5         6         7
@@ -199,7 +213,7 @@ FDSAnalyzer::trackViewRefresh()
 				  sector.mGap2,
 				  sector.mSecSize,
 				  sector.mGap3,
-				  sectimerate
+				  sector.mDRate
 				);
 				waddstr(mwTrackView, line);
 				wattron(mwTrackView, COLOR_PAIR(fds::ColorPair::TrackAbnormalItem)|A_BOLD);
@@ -207,8 +221,8 @@ FDSAnalyzer::trackViewRefresh()
 				// 前セクタのmCellEnd > 今セクタのmCellStartなら、前セクタの長さがおかしい
 				cellend = 0;
 				if (y > 0) {
-					cellend = track2.Sector(y-1).mCellEnd;
-					if (cellend < track2.Sector(y - 1).mCellStart) {
+					cellend = track->Sector(y-1).mCellEnd;
+					if (cellend < track->Sector(y - 1).mCellStart) {
 						cellend += trackcellsize;
 					}
 				}
@@ -268,8 +282,8 @@ FDSAnalyzer::trackViewRefresh()
 				}
 
 				// 回転速度チェック
-				if ((sectimerate < 98.0) || (102.0 < sectimerate)) {
-					sprintf(line, "%6.2f", sectimerate);
+				if ((sector.mDRate < 99.0) || (101.0 < sector.mDRate)) {
+					sprintf(line, "%6.2f", sector.mDRate);
 					mvwaddstr(mwTrackView, mTrackViewWindowOfsY+i, mTrackViewWindowOfsX+61, line);
 				}
 
@@ -283,9 +297,10 @@ FDSAnalyzer::trackViewRefresh()
 		}
 		y++;
 	}
+	mTrackViewClear = false;
 
 	// 枠を追加して更新
-	wborder(mwTrackView, 0,0,0,0,ACS_LTEE,0,0,0);
+	trackViewRedrawBorder();
 	wrefresh(mwTrackView);
 
 }
@@ -302,8 +317,8 @@ FDSAnalyzer::trackViewSetViewOfsY(int idx)
 	}
 
 	// 表示開始位置が（ファイルリスト末尾－ビュー表示幅）より後を差さないよう調整
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	int h = disk.Track(mTrackViewTrackNo).SectorSize() - mTrackViewInnerH;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	int h = track.SectorSize() - mTrackViewInnerH;
 	if (h < 0) {
 		h = 0;
 	}
@@ -335,8 +350,8 @@ FDSAnalyzer::trackViewSetCsrY(int y)
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	int h = disk.Track(mTrackViewTrackNo).SectorSize()-mTrackViewOfsY;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	int h = track.SectorSize()-mTrackViewOfsY;
 	if (h > mTrackViewInnerH) {
 		h = mTrackViewInnerH;
 	}
@@ -361,14 +376,14 @@ FDSAnalyzer::trackViewSetIdx(int idx)
 	}
 
 	// idxがファイルリスト末尾より後を差さないよう調整
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	int h = disk.Track(mTrackViewTrackNo).SectorSize()-1;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	int h = track.SectorSize()-1;
 	if (idx > h) {
 		idx = h;
 	}
 
 	// 現在見えているビュー内にあれば、カーソルを移動して終了
-	if (mTrackViewOfsY <= (int)disk.Track(mTrackViewTrackNo).SectorSize()-mTrackViewInnerH) {
+	if (mTrackViewOfsY <= (int)track.SectorSize()-mTrackViewInnerH) {
 		int y = idx-mTrackViewOfsY;
 		if ((0 <= y) && (y < mTrackViewInnerH)) {
 			mTrackViewCsrY = y;
@@ -411,8 +426,8 @@ FDSAnalyzer::trackViewDownCursor()
 	mTrackViewCsrY++;
 
 	// カーソルがファイルリスト末尾より後を差さないよう調整
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	int idx = disk.Track(mTrackViewTrackNo).SectorSize()-1;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	int idx = track.SectorSize()-1;
 	if (mTrackViewCsrY > idx) {
 		mTrackViewCsrY = idx;
 	}
@@ -449,14 +464,14 @@ FDSAnalyzer::trackViewPageUpCursor()
 void
 FDSAnalyzer::trackViewPageDownCursor()
 {
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
 	int h = mTrackViewInnerH-1;
 	if (mTrackViewCsrY < h) {
 		// カーソルがビュー最下段でなければ最下段へ移動
 		mTrackViewCsrY = h;
 
 		// カーソルがファイルリスト末尾を超えないよう調整
-		h = disk.Track(mTrackViewTrackNo).SectorSize()-1;
+		h = track.SectorSize()-1;
 		if (mTrackViewCsrY > h) {
 			mTrackViewCsrY = h;
 		}
@@ -466,7 +481,7 @@ FDSAnalyzer::trackViewPageDownCursor()
 		mTrackViewOfsY += mTrackViewInnerH;
 
 		// 表示開始位置が（ファイルリスト末尾－ビュー表示幅）より後を差さないよう調整
-		int h2 = disk.Track(mTrackViewTrackNo).SectorSize()-mTrackViewInnerH;
+		int h2 = track.SectorSize()-mTrackViewInnerH;
 		if (h2 < 0) {
 			h2 = 0;
 		}
@@ -492,12 +507,12 @@ FDSAnalyzer::trackViewPageTopCursor()
 void
 FDSAnalyzer::trackViewPageBottomCursor()
 {
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	mTrackViewOfsY = disk.Track(mTrackViewTrackNo).SectorSize()-mTrackViewInnerH;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	mTrackViewOfsY = track.SectorSize()-mTrackViewInnerH;
 	if (mTrackViewOfsY < 0) {
 		mTrackViewOfsY = 0;
 	}
-	mTrackViewCsrY = disk.Track(mTrackViewTrackNo).SectorSize()-mTrackViewOfsY-1;
+	mTrackViewCsrY = track.SectorSize()-mTrackViewOfsY-1;
 }
 
 // -------------------------------------------------------------
@@ -507,11 +522,11 @@ void
 FDSAnalyzer::trackViewSelectEntry()
 {
 #if 0
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
 
 	// 選択位置をチェック
 	int idx = trackViewGetIdx();
-	if ((idx < 0) || (idx >= (int)disk.Track(mTrackViewTrackNo).SectorSize())) {
+	if ((idx < 0) || (idx >= (int)track->SectorSize())) {
 		return;
 	}
 
@@ -635,8 +650,8 @@ int
 FDSAnalyzer::trackViewGetIdx()
 {
 	int idx = mTrackViewOfsY + mTrackViewCsrY;
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	int h = (int)disk.Track(mTrackViewTrackNo).SectorSize()-1;
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	int h = (int)track.SectorSize()-1;
 	if (idx > h) {
 		idx = h;
 	}
@@ -652,8 +667,8 @@ FDSAnalyzer::trackViewShowSector()
 #if 0
 	// 選択位置をチェック
 	int idx = trackViewGetIdx();
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
-	if (idx >= (int)disk.Track(mTrackViewTrackNo).SectorSize()) {
+	FdxView::TrackInfo& track = mFdxView.trackInfo().Track();
+	if (idx >= (int)track.SectorSize()) {
 		return;
 	}
 
@@ -677,6 +692,12 @@ void
 FDSAnalyzer::trackViewSetHead(int head)
 {
 	mTrackViewHeadNo = head;
+}
+
+void
+FDSAnalyzer::trackViewSetLoad(void)
+{
+	mTrackViewReqLoad = true;
 }
 
 

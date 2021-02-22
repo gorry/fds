@@ -1750,6 +1750,11 @@ FDSSystem::cmdAnalyzeDisk()
 		return;
 	}
 
+	// FDXファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile()) {
+		return;
+	}
+
 	std::string src = mFiles[idx].filename();
 	std::string path = mRootDir + mCurDir + src;
 

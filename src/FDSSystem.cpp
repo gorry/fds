@@ -209,7 +209,7 @@ FDSSystem::mainLoop()
 	// ファイラービューのキー入力ループ
 	bool finish = false;
 	bool filerRefresh = true;
-	bool infoRefresh = true;
+	bool infoRefreshDelay = true;
 	while (!finish) {
 		// ファイラービューの更新依頼があれば更新
 		if (filerRefresh) {
@@ -228,7 +228,7 @@ FDSSystem::mainLoop()
 			fddViewRefresh();
 
 			// 情報ビューの更新依頼があれば更新
-			if (infoRefresh) {
+			if (infoRefreshDelay) {
 				int idx = filerViewGetIdx();
 				if (idx >= (int)mFiles.size()) {
 					break;
@@ -241,7 +241,7 @@ FDSSystem::mainLoop()
 					infoViewSetFile(path);
 					infoViewRefresh();
 				}
-				infoRefresh = false;
+				infoRefreshDelay = false;
 			}
 
 			filerRefresh = false;
@@ -258,14 +258,14 @@ FDSSystem::mainLoop()
 		  case KEY_A2:
 #endif
 			filerViewUpCursor();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case KEY_DOWN:
 #if defined(KEY_C2)
 		  case KEY_C2:
 #endif
 			filerViewDownCursor();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case 10: // ENTER
 			filerViewSelectEntry();
@@ -273,25 +273,25 @@ FDSSystem::mainLoop()
 		  case 8: // BS
 		  case KEY_BACKSPACE:
 			filerViewBackDir();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case KEY_PPAGE:
 			filerViewPageUpCursor();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case KEY_NPAGE:
 			filerViewPageDownCursor();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 			break;
 		  case KEY_HOME:
 			filerViewPageTopCursor();
 			infoViewSetFile("");
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case KEY_END:
 			filerViewPageBottomCursor();
-			infoRefresh = true;
+			infoRefreshDelay = true;
 			goto clearInfoView;
 		  case '\\':
 		  case '/':

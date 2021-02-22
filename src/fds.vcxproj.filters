@@ -117,6 +117,9 @@
     <ClCompile Include="FDSAnalyzerTrack.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="FdxView.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent\dirent.h">
@@ -183,6 +186,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FDSCommon.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="FdxView.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>

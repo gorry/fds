@@ -49,15 +49,16 @@ FDSAnalyzer::mainLoop()
 	sectorViewCreateWindow();
 #endif
 
+	mTrackViewClear = true;
 	refreshAllView();
 
-	std::string cmd = mConfig.fdxToolCmd();
-	mFdxTool.readFDXDiskInfo(cmd, mFilename);
-	mFdxTool.readFDXDiskInfoVerbose(cmd, mFilename);
-	mFdxTool.copyFDXDiskInfoTrackStatus();
+	std::string cmd = mConfig.fdxViewCmd();
+	mFdxView.readFDXDiskInfo(cmd, mFilename);
+	diskViewShowTrack();
 
 	diskViewSetIdx(0);
-	refreshAllView();
+	diskViewRefresh();
+	trackViewRefresh();
 
 	// キー入力設定
 	nodelay(mwDiskView, true);
@@ -66,19 +67,13 @@ FDSAnalyzer::mainLoop()
 	// ディスクビューのキー入力ループ
 	bool finish = false;
 	bool diskRefresh = true;
-	bool trackRefresh = true;
+	bool trackRefreshDelay = true;
 	while (!finish) {
-		// ファイラービューの更新依頼があれば更新
+		// ディスクビューの更新依頼があれば更新
 		if (diskRefresh) {
 			diskViewRefresh();
 		}
 		diskRefresh = true;
-
-		// トラックビューの更新依頼があれば更新
-		if (trackRefresh) {
-			trackRefresh = false;
-			trackViewRefresh();
-		}
 
 		// キー入力
 		int key = wgetch(mwDiskView);
@@ -88,6 +83,11 @@ FDSAnalyzer::mainLoop()
 		switch (key) {
 		  case ERR:
 			diskRefresh = false;
+			// トラックビューの更新依頼があれば更新
+			if (trackRefreshDelay) {
+				trackRefreshDelay = false;
+				trackViewRefresh();
+			}
 			break;
 		  case 0x1b: // ESC
 			wtimeout(mwDiskView, 0);
@@ -102,6 +102,7 @@ FDSAnalyzer::mainLoop()
 #endif
 			diskViewUpCursor();
 			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case KEY_DOWN:
 #if defined(KEY_C2)
@@ -109,6 +110,7 @@ FDSAnalyzer::mainLoop()
 #endif
 			diskViewDownCursor();
 			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case KEY_LEFT:
 #if defined(KEY_B1)
@@ -116,6 +118,7 @@ FDSAnalyzer::mainLoop()
 #endif
 			diskViewLeftCursor();
 			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case KEY_RIGHT:
 #if defined(KEY_B3)
@@ -123,6 +126,7 @@ FDSAnalyzer::mainLoop()
 #endif
 			diskViewRightCursor();
 			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case 10: // ENTER
 			diskViewSelectEntry();
@@ -131,46 +135,53 @@ FDSAnalyzer::mainLoop()
 		  case 8: // BS
 		  case KEY_BACKSPACE:
 			diskViewBackDir();
-			trackRefresh = true;
-			goto clearTrackView;
+			trackRefreshDelay = true;
+			break;
 #endif
 		  case KEY_PPAGE:
 			diskViewPageUpCursor();
-			trackRefresh = true;
+			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case KEY_NPAGE:
 			diskViewPageDownCursor();
-			trackRefresh = true;
+			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
-			break;
 		  case KEY_HOME:
 			diskViewPageTopCursor();
-			trackRefresh = true;
+			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case KEY_END:
 			diskViewPageBottomCursor();
-			trackRefresh = true;
+			diskViewShowTrack();
+			trackRefreshDelay = true;
 			goto clearTrackView;
 		  case 'A':
 			trackViewUpCursor();
-			trackRefresh = true;
+			trackRefreshDelay = false;
 			diskRefresh = false;
-			goto clearTrackView;
+			trackViewRefresh();
+			break;
 		  case 'Z':
 			trackViewDownCursor();
-			trackRefresh = true;
+			trackRefreshDelay = false;
 			diskRefresh = false;
-			goto clearTrackView;
+			trackViewRefresh();
+			break;
 		  case 'S':
 			trackViewPageTopCursor();
-			trackRefresh = true;
+			trackRefreshDelay = false;
 			diskRefresh = false;
-			goto clearTrackView;
+			trackViewRefresh();
+			break;
 		  case 'X':
 			trackViewPageBottomCursor();
-			trackRefresh = true;
+			trackRefreshDelay = false;
 			diskRefresh = false;
-			goto clearTrackView;
+			trackViewRefresh();
+			break;
 #if 0
 		  case '\\':
 		  case '/':
@@ -245,10 +256,8 @@ FDSAnalyzer::mainLoop()
 #endif
 
 		  clearTrackView:;
-#if 0
-			trackViewSetFile("");
+			mTrackViewClear = true;
 			trackViewRefresh();
-#endif
 			break;
 
 		  refreshScreen:;

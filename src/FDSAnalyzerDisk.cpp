@@ -58,6 +58,15 @@ FDSAnalyzer::diskViewRedraw()
 }
 
 // -------------------------------------------------------------
+// ビューの枠だけ再描画
+// -------------------------------------------------------------
+void
+FDSAnalyzer::diskViewRedrawBorder()
+{
+	wborder(mwDiskView, 0,0,0,0,0,0,ACS_LTEE,ACS_BTEE);
+}
+
+// -------------------------------------------------------------
 // ビュー更新
 // -------------------------------------------------------------
 void
@@ -81,7 +90,7 @@ FDSAnalyzer::diskViewRefresh()
 	mvwaddstr(mwDiskView, 10, 2, "160|                     |                     ");
 	wattroff(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpGauge));
 
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	for (int i=0; i<(int)disk.TrackSize(); i++) {
 		int n = i%20;
 		int x =  (n+(n>=10)) * 2 + 7;
@@ -118,7 +127,7 @@ FDSAnalyzer::diskViewRefresh()
 	helpViewRefresh();
 
 	// 枠を追加して更新
-	wborder(mwDiskView, 0,0,0,0,0,0,ACS_LTEE,ACS_BTEE);
+	diskViewRedrawBorder();
 	wrefresh(mwDiskView);
 
 }
@@ -145,7 +154,7 @@ FDSAnalyzer::diskViewSetIdx(int idx)
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (idx > h) {
 		idx = h;
@@ -169,7 +178,7 @@ FDSAnalyzer::diskViewUpCursor()
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -188,7 +197,7 @@ FDSAnalyzer::diskViewDownCursor()
 	i += 20;
 
 	// カーソルがビュー末尾より後を差さないよう調整
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i -= 20;
@@ -217,7 +226,7 @@ FDSAnalyzer::diskViewLeftCursor()
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -236,7 +245,7 @@ FDSAnalyzer::diskViewRightCursor()
 	i++;
 
 	// カーソルがビュー末尾より後を差さないよう調整
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -283,7 +292,7 @@ FDSAnalyzer::diskViewPageTopCursor()
 void
 FDSAnalyzer::diskViewPageBottomCursor()
 {
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 
 	mDiskViewCsr = h;
@@ -304,7 +313,7 @@ int
 FDSAnalyzer::diskViewGetIdx()
 {
 	int idx = mDiskViewCsr;
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (idx >= h) {
 		idx = h;
@@ -319,10 +328,10 @@ FDSAnalyzer::diskViewGetIdx()
 void
 FDSAnalyzer::diskViewShowTrack()
 {
-	FdxTool::DiskInfo& disk = mFdxTool.diskInfo();
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
 	trackViewSetCylinder(mDiskViewCsr / disk.mFdxInfo.mHeads);
 	trackViewSetHead(mDiskViewCsr % disk.mFdxInfo.mHeads);
-	trackViewRefresh();
+	trackViewSetLoad();
 }
 
 
