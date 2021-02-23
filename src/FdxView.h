@@ -94,6 +94,22 @@ public:		// struct, enum
 	  private:
 		Status mStatus;
 	};
+	class SectorData {
+	  public:
+		std::vector<uint8_t> mData;
+		std::vector<uint8_t> mEncode;
+		int mOffset;
+	  public:
+		SectorData() { Clear(); }
+		virtual ~SectorData() {}
+		void Clear(void) {
+			mData.clear();
+			mEncode.clear();
+			mOffset = -1;
+		}
+		std::vector<uint8_t>& Data(void) { return mData; }
+		std::vector<uint8_t>& Encode(void) { return mEncode; }
+	};
 	class SectorInfo {
 	  public:
 		int mCellStart;
@@ -104,11 +120,12 @@ public:		// struct, enum
 		int mGap2;
 		int mGap3;
 		FdxStatus mStatus;
+		SectorData mSectorData;
 		double mDRate;
 	  public:
 		SectorInfo() { Clear(); }
 		virtual ~SectorInfo() {}
-		SectorInfo(SectorInfo&& o) = default;
+		// SectorInfo(SectorInfo&& o) = default;
 		void Clear(void) {
 			mCellStart = -1;
 			mCellEnd = 0;
@@ -120,6 +137,8 @@ public:		// struct, enum
 			mStatus = FdxStatus::Status::None;
 			mDRate = 0.0;
 		}
+		std::vector<uint8_t>& Data(void) { return mSectorData.Data(); }
+		std::vector<uint8_t>& Encode(void) { return mSectorData.Encode(); }
 		bool SecF5F6F7(void) const { int r = CHRN_R(); return ((r==0xf5)||(r==0xf6)||(r==0xf7)); }
 		int CHRN_C(void) const { return (mCHRN>>24)&0xff; }
 		int CHRN_H(void) const { return (mCHRN>>16)&0xff; }
@@ -145,11 +164,12 @@ public:		// struct, enum
 		int mSizeGap4b;
 		FdxStatus mStatus;
 		std::vector<SectorInfo> mSector;
+		int mLastSectorNo;
 
 	  public:
 		TrackInfo() { Clear(); }
 		virtual ~TrackInfo() {}
-		TrackInfo(TrackInfo&& o) = default;
+		// TrackInfo(TrackInfo&& o) = default;
 		void Clear(void) {
 			mCylinder = 0;
 			mHead = 0;
@@ -162,50 +182,60 @@ public:		// struct, enum
 			mSizeGap4b = -1;
 			mStatus = FdxView::FdxStatus::Status::None;
 			mSector.clear();
+			mLastSectorNo = -1;
 		}
 		size_t SectorSize(void) const { return mSector.size(); }
-		SectorInfo& Sector(int i=0) { return mSector[i]; }
+		SectorInfo& Sector(int sectorno) { return mSector[sectorno]; }
+		bool isSectorReady(int sectorno);
 	};
 
 	class DiskInfo {
 	  public:
 		FdxHeader mFdxInfo;
 		std::vector<TrackInfo> mTrack;
+		int mLastTrackNo;
 
 	  public:
 		DiskInfo() { Clear(); }
 		void Clear(void) {
 			mTrack.clear();
+			mLastTrackNo = -1;
 		}
 		size_t TrackSize(void) const { return mTrack.size(); }
-		TrackInfo& Track(int i=0) { return mTrack[i]; }
+		TrackInfo& Track(int trackno) { return mTrack[trackno]; }
+		bool isTrackReady(int trackno);
+		bool isSectorReady(int trackno, int sectorno);
 	};
 
 public:		// function
-	FdxView();
+	FdxView() { Clear(); }
 	virtual ~FdxView() {}
 	FdxView(FdxView&& o) = default;
+	void Clear(void) {
+	}
 
 	bool execCmd(const std::string& cmd, const std::string& option);
 
 	bool readFDXDiskInfo(const std::string& cmd, const std::string& filename);
-	bool readFDXTrack(const std::string& cmd, const std::string& filename, int track);
+	bool readFDXTrack(const std::string& cmd, const std::string& filename, int trackno);
+	bool readFDXSector(const std::string& cmd, const std::string& filename, int trackno, int sectorno);
 
 	DiskInfo& diskInfo(void) { return mDiskInfo; }
-	DiskInfo& trackInfo(void) { return mTrackInfo; }
+	bool isTrackReady(int trackno);
+	TrackInfo& Track(int trackno) { return mDiskInfo.Track(trackno); }
+	SectorInfo& Sector(int trackno, int sectorno) { return mDiskInfo.Track(trackno).Sector(sectorno); }
+	bool isSectorReady(int trackno, int sectorno);
 
 private:	// function
 	int readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s);
-	int readFDXDiskInfoBody(DiskInfo& diskinfo, char* s, int mode);
+	int readFDXDiskInfoBody(DiskInfo& diskinfo, char* s);
+	int readFDXDiskInfoDump(DiskInfo& diskinfo, char* s);
 	bool execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std::string& filename, const char* option);
 
 
 public:		// var
 	DiskInfo mDiskInfo;
-	DiskInfo mTrackInfo;
-	TrackInfo* mLastTrackInfo;
-	int mLastTrackNo;
-	int mLastSectorNo;
+	// DiskInfo mTrackInfo;
 
 private:	// var
 

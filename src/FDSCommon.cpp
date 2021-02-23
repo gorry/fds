@@ -77,6 +77,13 @@ void initColorPair(void)
 		init_pair((short)ColorPair::TrackGauge,            MyColor(0,5,3), MyColor(0,0,0));
 		init_pair((short)ColorPair::SectorNormal,          MyColor(5,5,5), MyColor(0,0,1));
 		init_pair((short)ColorPair::SectorNormalCsr,       MyColor(5,5,5), MyColor(0,0,4));
+		init_pair((short)ColorPair::SectorBit0,            MyColor(5,0,0), MyColor(5,5,5));
+		init_pair((short)ColorPair::SectorBit3,            MyColor(5,0,5), MyColor(5,5,5));
+		init_pair((short)ColorPair::SectorBit6,            MyColor(0,0,5), MyColor(5,5,5));
+		init_pair((short)ColorPair::SectorBit7,            MyColor(5,0,0), MyColor(5,5,0));
+		init_pair((short)ColorPair::SectorBit8,            MyColor(5,0,5), MyColor(5,5,0));
+		init_pair((short)ColorPair::SectorBitB,            MyColor(0,0,5), MyColor(5,5,0));
+		init_pair((short)ColorPair::SectorGauge,           MyColor(0,5,3), MyColor(0,0,0));
 
 	} else {
 		init_pair((short)ColorPair::Normal,                COLOR_WHITE, COLOR_BLACK);
@@ -132,6 +139,13 @@ void initColorPair(void)
 		init_pair((short)ColorPair::TrackGauge,            COLOR_GREEN, COLOR_BLACK);
 		init_pair((short)ColorPair::SectorNormal,          COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::SectorNormalCsr,       COLOR_WHITE, COLOR_BLUE);
+		init_pair((short)ColorPair::SectorBit0,            COLOR_RED, COLOR_WHITE);
+		init_pair((short)ColorPair::SectorBit3,            COLOR_MAGENTA, COLOR_WHITE);
+		init_pair((short)ColorPair::SectorBit6,            COLOR_BLUE, COLOR_WHITE);
+		init_pair((short)ColorPair::SectorBit7,            COLOR_RED, COLOR_YELLOW);
+		init_pair((short)ColorPair::SectorBit8,            COLOR_MAGENTA, COLOR_YELLOW);
+		init_pair((short)ColorPair::SectorBitB,            COLOR_BLUE,  COLOR_YELLOW);
+		init_pair((short)ColorPair::SectorGauge,           COLOR_GREEN, COLOR_BLACK);
 	}
 }
 

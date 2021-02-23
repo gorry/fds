@@ -240,14 +240,13 @@ void
 DlgInput::show()
 {
 	std::wstring wstr;
-	std::string str;
 
 	// 枠内に表示可能な部分を表示
 	int w = WStrUtil::copyByWidth(wstr, mWInputText, mTextBoxOfsX, mTextBoxW);
 	wstr += std::wstring(mTextBoxW - w, L' ');
-	str = WStrUtil::wstr2str(wstr);
 	wattron(mwFrame, COLOR_PAIR(fds::ColorPair::InputEdit)|A_BOLD);
-	mvwaddnstr(mwFrame, 3, 2, str.c_str(), mTextBoxW);
+	// addnstr()第４引数lenを桁数に合わせるにはutf8ではダメなのでaddnwstrを使う
+	mvwaddnwstr(mwFrame, 3, 2, wstr.c_str(), mTextBoxW);
 	wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::InputEdit) | A_BOLD);
 
 	// カーソルを設定

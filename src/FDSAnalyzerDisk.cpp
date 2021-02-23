@@ -63,7 +63,7 @@ FDSAnalyzer::diskViewRedraw()
 void
 FDSAnalyzer::diskViewRedrawBorder()
 {
-	wborder(mwDiskView, 0,0,0,0,0,0,ACS_LTEE,ACS_BTEE);
+	wborder(mwDiskView, 0,0,0,0,0,0,0,0);
 }
 
 // -------------------------------------------------------------

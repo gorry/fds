@@ -350,11 +350,17 @@ static struct width_interval ZERO_WIDTH[] = {
 // at commit 15efb1f02ba50f79f8905b9ef25fa9c50068b7b1 (2020-03-23):
 static struct width_interval WIDE_EASTASIAN[] = {
         {0x1100, 0x115f},  // Hangul Choseong Kiyeok  ..Hangul Choseong Filler
+#if defined(USE_WINDOWS)
+        {0x2000, 0x2319},  // Included Many Japanese JIS Character
+#endif
         {0x231a, 0x231b},  // Watch                   ..Hourglass
         {0x2329, 0x232a},  // Left-pointing Angle Brac..Right-pointing Angle Bra
         {0x23e9, 0x23ec},  // Black Right-pointing Dou..Black Down-pointing Doub
         {0x23f0, 0x23f0},  // Alarm Clock             ..Alarm Clock
         {0x23f3, 0x23f3},  // Hourglass With Flowing S..Hourglass With Flowing S
+#if defined(USE_WINDOWS)
+        {0x2460, 0x2473},  // Circled Digit One       ..Circled Digit Twenty
+#endif
         {0x25fd, 0x25fe},  // White Medium Small Squar..Black Medium Small Squar
         {0x2614, 0x2615},  // Umbrella With Rain Drops..Hot Beverage
         {0x2648, 0x2653},  // Aries                   ..Pisces

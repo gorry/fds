@@ -86,7 +86,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;USE_WINDOWS;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
@@ -105,7 +105,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;USE_WINDOWS;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
@@ -125,7 +125,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;USE_WINDOWS;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
@@ -147,7 +147,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FDS_WINDOWS;FDS_NOROOT;USE_WINDOWS;_CRT_SECURE_NO_WARNINGS;PDC_WIDE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>dirent;pdcurses</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4005</DisableSpecificWarnings>
@@ -168,6 +168,7 @@
     <ClCompile Include="FDSAnalyzer.cpp" />
     <ClCompile Include="FDSAnalyzerDisk.cpp" />
     <ClCompile Include="FDSAnalyzerHelp.cpp" />
+    <ClCompile Include="FDSAnalyzerSector.cpp" />
     <ClCompile Include="FDSAnalyzerTrack.cpp" />
     <ClCompile Include="FDSCommon.cpp" />
     <ClCompile Include="FDSConfig.cpp" />

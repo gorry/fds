@@ -41,13 +41,13 @@ FDSAnalyzer::start(const std::string& filename)
 void
 FDSAnalyzer::mainLoop()
 {
+	mAnalyzerMode = AnalyzerMode::Disk;
+
 	// 各ビューを起動
 	diskViewCreateWindow();
 	trackViewCreateWindow();
 	helpViewCreateWindow();
-#if 0
 	sectorViewCreateWindow();
-#endif
 
 	mTrackViewClear = true;
 	refreshAllView();
@@ -63,20 +63,42 @@ FDSAnalyzer::mainLoop()
 	// キー入力設定
 	nodelay(mwDiskView, true);
 	wtimeout(mwDiskView, DiskViewRefreshInterval);
+	nodelay(mwSectorView, true);
+	wtimeout(mwSectorView, DiskViewRefreshInterval);
 
 	// ディスクビューのキー入力ループ
 	bool finish = false;
 	bool diskRefresh = true;
 	bool trackRefreshDelay = true;
+	bool sectorRefresh = true;
+	bool sectorRefreshDelay = true;
 	while (!finish) {
-		// ディスクビューの更新依頼があれば更新
-		if (diskRefresh) {
-			diskViewRefresh();
+		if (mAnalyzerMode == AnalyzerMode::Disk) {
+			// ディスクビューの更新依頼があれば更新
+			if (diskRefresh) {
+				diskRefresh = false;
+				diskViewRefresh();
+			}
+		} else {
+			// セクタビューの更新依頼があれば更新
+			if (sectorRefresh) {
+				sectorRefresh = false;
+				if (trackRefreshDelay) {
+					// 先にトラックビューの更新依頼があれば更新
+					trackRefreshDelay = false;
+					trackViewRefresh();
+				}
+				sectorViewRefresh();
+			}
 		}
-		diskRefresh = true;
 
 		// キー入力
-		int key = wgetch(mwDiskView);
+		int key = 0;
+		if (mAnalyzerMode == AnalyzerMode::Disk) {
+			key = wgetch(mwDiskView);
+		} else {
+			key = wgetch(mwSectorView);
+		}
 		if (key < 256) {
 			key = toupper(key);
 		}
@@ -88,49 +110,83 @@ FDSAnalyzer::mainLoop()
 				trackRefreshDelay = false;
 				trackViewRefresh();
 			}
+			if (mAnalyzerMode == AnalyzerMode::Sector) {
+				// セクタビューの更新依頼があれば更新
+				if (sectorRefreshDelay) {
+					sectorRefreshDelay = false;
+					sectorViewRefresh();
+				}
+			}
 			break;
 		  case 0x1b: // ESC
-			wtimeout(mwDiskView, 0);
-			if (fds::doEscKey(mwDiskView)) {
-				finish = true;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				wtimeout(mwDiskView, 0);
+				if (fds::doEscKey(mwDiskView)) {
+					// exit
+					finish = true;
+				}
+				wtimeout(mwDiskView, DiskViewRefreshInterval);
+			} else {
+				wtimeout(mwSectorView, 0);
+				if (fds::doEscKey(mwSectorView)) {
+					// ディスクビューに切り替え
+					mAnalyzerMode = AnalyzerMode::Disk;
+					diskRefresh = true;
+				}
+				wtimeout(mwSectorView, DiskViewRefreshInterval);
 			}
-			wtimeout(mwDiskView, DiskViewRefreshInterval);
 			break;
 		  case KEY_UP:
 #if defined(KEY_A2)
 		  case KEY_A2:
 #endif
-			diskViewUpCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewUpCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewUpCursor();
+			}
+			goto updateView;
 		  case KEY_DOWN:
 #if defined(KEY_C2)
 		  case KEY_C2:
 #endif
-			diskViewDownCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewDownCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewDownCursor();
+			}
+			goto updateView;
 		  case KEY_LEFT:
 #if defined(KEY_B1)
 		  case KEY_B1:
 #endif
-			diskViewLeftCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewLeftCursor();
+				diskRefresh = true;
+			}
+			goto updateView;
 		  case KEY_RIGHT:
 #if defined(KEY_B3)
 		  case KEY_B3:
 #endif
-			diskViewRightCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewRightCursor();
+				diskRefresh = true;
+			}
+			goto updateView;
 		  case 10: // ENTER
-			diskViewSelectEntry();
-			break;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				// セクタビューに切り替え
+				mAnalyzerMode = AnalyzerMode::Sector;
+				sectorRefresh = true;
+			} else {
+				// ディスクビューに切り替え
+				mAnalyzerMode = AnalyzerMode::Disk;
+				diskRefresh = true;
+			}
+			goto updateView;
 #if 0
 		  case 8: // BS
 		  case KEY_BACKSPACE:
@@ -139,49 +195,49 @@ FDSAnalyzer::mainLoop()
 			break;
 #endif
 		  case KEY_PPAGE:
-			diskViewPageUpCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewPageUpCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewPageUpCursor();
+			}
+			goto updateView;
 		  case KEY_NPAGE:
-			diskViewPageDownCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewPageDownCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewPageDownCursor();
+			}
+			goto updateView;
 		  case KEY_HOME:
-			diskViewPageTopCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewPageTopCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewPageTopCursor();
+			}
+			goto updateView;
 		  case KEY_END:
-			diskViewPageBottomCursor();
-			diskViewShowTrack();
-			trackRefreshDelay = true;
-			goto clearTrackView;
+			if (mAnalyzerMode == AnalyzerMode::Disk) {
+				diskViewPageBottomCursor();
+				diskRefresh = true;
+			} else {
+				sectorViewPageBottomCursor();
+			}
+			goto updateView;
 		  case 'A':
 			trackViewUpCursor();
-			trackRefreshDelay = false;
-			diskRefresh = false;
-			trackViewRefresh();
-			break;
+			goto updateView;
 		  case 'Z':
 			trackViewDownCursor();
-			trackRefreshDelay = false;
-			diskRefresh = false;
-			trackViewRefresh();
-			break;
+			goto updateView;
 		  case 'S':
 			trackViewPageTopCursor();
-			trackRefreshDelay = false;
-			diskRefresh = false;
-			trackViewRefresh();
-			break;
+			goto updateView;
 		  case 'X':
 			trackViewPageBottomCursor();
-			trackRefreshDelay = false;
-			diskRefresh = false;
-			trackViewRefresh();
-			break;
+			goto updateView;
 #if 0
 		  case '\\':
 		  case '/':
@@ -255,18 +311,25 @@ FDSAnalyzer::mainLoop()
 			break;
 #endif
 
-		  clearTrackView:;
-			mTrackViewClear = true;
+		  updateView:;
+			diskViewShowTrack();
+			if (trackViewDataIsReady()) {
+				trackViewRefresh();
+			} else {
+				trackRefreshDelay = true;
+				mTrackViewClear = true;
+			}
 			trackViewRefresh();
-			break;
-
-		  refreshScreen:;
-			trackViewRefresh();
-			helpViewRefresh();
-#if 0
-			sectorViewRefresh();
-#endif
-			diskRefresh = true;
+			if (mAnalyzerMode == AnalyzerMode::Sector) {
+				trackViewShowSector();
+				if (sectorViewDataIsReady()) {
+					sectorViewRefresh();
+				} else {
+					sectorRefreshDelay = true;
+					mSectorViewClear = true;
+				}
+				sectorViewRefresh();
+			}
 			break;
 		}
 	}
@@ -275,9 +338,7 @@ FDSAnalyzer::mainLoop()
 	diskViewDestroyWindow();
 	trackViewDestroyWindow();
 	helpViewDestroyWindow();
-#if 0
 	sectorViewDestroyWindow();
-#endif
 }
 
 // -------------------------------------------------------------
@@ -317,12 +378,13 @@ void
 FDSAnalyzer::refreshAllView()
 {
 	drawHeader();
-	diskViewRefresh();
 	trackViewRefresh();
 	helpViewRefresh();
-#if 0
-	sectorViewRefresh();
-#endif
+	if (mAnalyzerMode == AnalyzerMode::Disk) {
+		diskViewRefresh();
+	} else {
+		sectorViewRefresh();
+	}
 }
 
 // -------------------------------------------------------------
@@ -377,31 +439,29 @@ FDSAnalyzer::setViewLayout()
 	  LINES-1,
 	};
 
-	// 画面全体の右端19桁・上端9行
+	// 画面全体の右端19桁・上端12行
 	mHelpViewXYWH.W = 19;
-	mHelpViewXYWH.H = 11;
-	mHelpViewXYWH.X = fullViewXYWH.r()-mHelpViewXYWH.w();
+	mHelpViewXYWH.H = 12;
+	mHelpViewXYWH.X = fullViewXYWH.r() - mHelpViewXYWH.w();
 	mHelpViewXYWH.Y = fullViewXYWH.y();
 
 	// 画面全体の左端残り・上端12行
-	mDiskViewXYWH.W = 50;
-	mDiskViewXYWH.H = 12;
+	mDiskViewXYWH.W = fullViewXYWH.w() - mHelpViewXYWH.w();
+	mDiskViewXYWH.H = mHelpViewXYWH.h();
 	mDiskViewXYWH.X = fullViewXYWH.x();
 	mDiskViewXYWH.Y = fullViewXYWH.y();
 
-	// 残りの下端（上辺重なり）
+	// 残りの下端
 	mTrackViewXYWH.W = fullViewXYWH.w();
-	mTrackViewXYWH.H = fullViewXYWH.h() - mDiskViewXYWH.h() + 1;
+	mTrackViewXYWH.H = fullViewXYWH.h() - mDiskViewXYWH.h();
 	mTrackViewXYWH.X = fullViewXYWH.x();
-	mTrackViewXYWH.Y = fullViewXYWH.y() + mDiskViewXYWH.h() - 1;
+	mTrackViewXYWH.Y = fullViewXYWH.y() + mDiskViewXYWH.h();
 
-#if 0
-	// 残りの下半分（上辺重なり）
-	mSectorViewXYWH.W = mTrackViewXYWH.w();
-	mSectorViewXYWH.H = fullViewXYWH.h() - mTrackViewXYWH.h() + 1;
-	mSectorViewXYWH.X = mTrackViewXYWH.x();
-	mSectorViewXYWH.Y = fullViewXYWH.y() + mTrackViewXYWH.h() - 1;
-#endif
+	// 画面全体の左端残り・上端12行
+	mSectorViewXYWH.W = mDiskViewXYWH.w();
+	mSectorViewXYWH.H = mDiskViewXYWH.h();
+	mSectorViewXYWH.X = fullViewXYWH.x();
+	mSectorViewXYWH.Y = fullViewXYWH.y();
 }
 
 // =====================================================================

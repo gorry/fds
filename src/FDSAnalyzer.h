@@ -43,8 +43,29 @@ class FDSAnalyzer
 public:		// struct, enum
 	enum class HelpViewMode : int {
 		Disk=0,
-		Track,
+		Data,
+		Encode,
+		Max,
+	};
+
+	enum class AnalyzerMode : int {
+		Disk=0,
 		Sector,
+		Max,
+	};
+
+	enum class SectorViewMode : int {
+		Data=0,
+		Encode,
+		Max,
+	};
+
+	enum class SectorViewStringEncode : int {
+		Ascii=0,
+		Sjis,
+		Utf16,
+		Utf8,
+		Max,
 	};
 
 	static const int DiskViewRefreshInterval = 500;
@@ -139,6 +160,7 @@ private:	// function
 	void trackViewSetCylinder(int cylinder);
 	void trackViewSetHead(int head);
 	void trackViewSetLoad(void);
+	bool trackViewDataIsReady(void);
 
 	// sector view
 	void sectorViewCreateWindow();
@@ -153,10 +175,18 @@ private:	// function
 	void sectorViewPageDownCursor();
 	void sectorViewPageTopCursor();
 	void sectorViewPageBottomCursor();
+	int sectorViewGetCsrY();
+	int sectorViewGetIdx();
 	void sectorViewRefresh();
 	void sectorViewRedraw();
-	void sectorViewBackTrack();
+	void sectorViewRedrawBorder();
+	void sectorViewBackDisk();
+	void sectorViewSetTrack(int track);
 	void sectorViewSetSector(int sector);
+	void sectorViewSetLoad(void);
+	bool sectorViewDataIsReady(void);
+	void sectorViewSetViewMode(SectorViewMode mode);
+	void sectorViewSetStringEncode(SectorViewStringEncode enc);
 
 	// help view
 	void helpViewCreateWindow();
@@ -197,6 +227,7 @@ private:	// var
 	int mTrackViewHeadNo = 0;
 	bool mTrackViewReqLoad = false;
 	bool mTrackViewClear = false;
+	int mTrackViewListLines = 0;
 
 	// sector view
 	WINDOW *mwSectorView = nullptr;
@@ -207,11 +238,20 @@ private:	// var
 	int mSectorViewCsrY = 0;
 	int mSectorViewWindowOfsX = 0;
 	int mSectorViewWindowOfsY = 0;
+	int mSectorViewTrackNo = 0;
+	int mSectorViewSectorNo = 0;
+	bool mSectorViewReqLoad = false;
+	SectorViewMode mSectorViewMode = SectorViewMode::Data;
+	SectorViewStringEncode mSectorViewStringEncode = SectorViewStringEncode::Ascii;
+	const int mSectorViewListColumns = 16;
+	bool mSectorViewClear = false;
+	int mSectorViewListLines = 0;
 
 	// help view
 	WINDOW *mwHelpView = nullptr;
 	fds::XYWH mHelpViewXYWH = {};
 	HelpViewMode mHelpViewMode = HelpViewMode::Disk;
+	AnalyzerMode mAnalyzerMode = AnalyzerMode::Disk;
 
 };
 

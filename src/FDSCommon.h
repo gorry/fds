@@ -109,6 +109,13 @@ enum class ColorPair : short {
 	TrackGauge,
 	SectorNormal,
 	SectorNormalCsr,
+	SectorBit0,
+	SectorBit3,
+	SectorBit6,
+	SectorBit7,
+	SectorBit8,
+	SectorBitB,
+	SectorGauge,
 };
 
 

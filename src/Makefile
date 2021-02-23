@@ -15,6 +15,7 @@ CPPSRCS = \
 	FDSAnalyzer.cpp \
 	FDSAnalyzerDisk.cpp \
 	FDSAnalyzerHelp.cpp \
+	FDSAnalyzerSector.cpp \
 	FDSAnalyzerTrack.cpp \
 	FDSCommon.cpp \
 	FDSConfig.cpp \
