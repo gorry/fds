@@ -140,7 +140,7 @@ public:
 
 	int numRestore() const { return mVecRestore.size(); }
 	const FDSMachineRestore& restore(int num) const { return mVecRestore[num]; }
-	const FDSMachineRestore& restore() const { return restore(mDumpNo); }
+	const FDSMachineRestore& restore() const { return restore(mRestoreNo); }
 	int restoreNo() const { return mRestoreNo; }
 	void setRestoreNo(int num) { mRestoreNo = num; }
 
