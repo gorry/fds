@@ -227,16 +227,10 @@ private:	// var
 	fds::XYWH mHelpViewXYWH = {};
 	HelpViewMode mHelpViewMode = HelpViewMode::ParentDir;
 
-	// dump dialog
-	int mLastDumpMode = 0;
-
 	// dump view
 	WINDOW *mwDumpView = nullptr;
 	fds::XYWH mDumpViewXYWH = {};
 	FdDump::Status mDumpViewStatus;
-
-	// restore dialog
-	int mLastRestoreMode = 0;
 
 	// restore view
 	WINDOW *mwRestoreView = nullptr;

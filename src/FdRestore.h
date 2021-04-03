@@ -50,6 +50,7 @@ public:		// struct, enum
 		Retry7 = 7,
 		Retry8 = 8,
 		Retry9 = 9,
+		Retry10 = 10,
 		Finish = 100,
 		Error = 101,
 		Unformat = 102,
@@ -83,6 +84,8 @@ public:		// struct, enum
 		None = 0,
 		NotFork,
 		NotConnect,
+		NotReady,
+		WriteProtect,
 		Max,
 	};
 

@@ -187,6 +187,7 @@ public:		// struct, enum
 		size_t SectorSize(void) const { return mSector.size(); }
 		SectorInfo& Sector(int sectorno) { return mSector[sectorno]; }
 		bool isSectorReady(int sectorno);
+		bool ReqSectorReload(int sectorno);
 	};
 
 	class DiskInfo {
@@ -204,7 +205,9 @@ public:		// struct, enum
 		size_t TrackSize(void) const { return mTrack.size(); }
 		TrackInfo& Track(int trackno) { return mTrack[trackno]; }
 		bool isTrackReady(int trackno);
+		bool ReqTrackReload(int trackno);
 		bool isSectorReady(int trackno, int sectorno);
+		bool ReqSectorReload(int trackno, int sectorno);
 	};
 
 public:		// function
@@ -222,9 +225,11 @@ public:		// function
 
 	DiskInfo& diskInfo(void) { return mDiskInfo; }
 	bool isTrackReady(int trackno);
+	bool ReqTrackReload(int trackno);
 	TrackInfo& Track(int trackno) { return mDiskInfo.Track(trackno); }
 	SectorInfo& Sector(int trackno, int sectorno) { return mDiskInfo.Track(trackno).Sector(sectorno); }
 	bool isSectorReady(int trackno, int sectorno);
+	bool ReqSectorReload(int trackno, int sectorno);
 
 private:	// function
 	int readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s);

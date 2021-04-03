@@ -616,6 +616,14 @@ FDSAnalyzer::sectorViewSetLoad(void)
 	mSectorViewReqLoad = true;
 }
 
+void
+FDSAnalyzer::sectorViewReqReload(void)
+{
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	disk.ReqSectorReload(mSectorViewTrackNo, mSectorViewSectorNo);
+	mSectorViewReqLoad = true;
+}
+
 bool
 FDSAnalyzer::sectorViewDataIsReady(void)
 {

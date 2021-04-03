@@ -1,21 +1,21 @@
 ﻿// ◇
 // fds: fdx68 selector
-// FDSSystem: リストア
+// FDSAnalyzer: リストア
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 // =====================================================================
 
-#include "FDSSystem.h"
+#include "FDSAnalyzer.h"
 
 // =====================================================================
-// FDSSystem: ダンプ
+// FDSAnalyzer: ダンプ
 // =====================================================================
 
 // -------------------------------------------------------------
 // ビュー作成
 // -------------------------------------------------------------
 void
-FDSSystem::restoreViewCreateWindow()
+FDSAnalyzer::restoreViewCreateWindow()
 {
 	if (mwRestoreView) {
 		dumpViewDestroyWindow();
@@ -32,7 +32,7 @@ FDSSystem::restoreViewCreateWindow()
 // ビュー破棄
 // -------------------------------------------------------------
 void
-FDSSystem::restoreViewDestroyWindow()
+FDSAnalyzer::restoreViewDestroyWindow()
 {
 	if (mwRestoreView) {
 		delwin(mwRestoreView);
@@ -44,7 +44,7 @@ FDSSystem::restoreViewDestroyWindow()
 // ビュー再描画
 // -------------------------------------------------------------
 void
-FDSSystem::restoreViewRedraw()
+FDSAnalyzer::restoreViewRedraw()
 {
 	redrawwin(mwRestoreView);
 	dumpViewRefresh();
@@ -54,7 +54,7 @@ FDSSystem::restoreViewRedraw()
 // ビュー更新
 // -------------------------------------------------------------
 void
-FDSSystem::restoreViewRefresh()
+FDSAnalyzer::restoreViewRefresh()
 {
 	// ビューのクリア
 	werase(mwRestoreView);
@@ -62,7 +62,7 @@ FDSSystem::restoreViewRefresh()
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
 	wattron(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreHeader)|A_BOLD);
-	sprintf(buf, "[Restore : %s]", mRestoreViewStatus.mFormat.c_str());
+	sprintf(buf, "[Restore Track : %s]", mRestoreViewStatus.mFormat.c_str());
 	mvwaddstr(mwRestoreView, 1, 2, buf);
 	wattroff(mwRestoreView, COLOR_PAIR(fds::ColorPair::RestoreHeader)|A_BOLD);
 	sprintf(buf, "%s", mRestoreViewStatus.mName.c_str());
@@ -141,7 +141,7 @@ FDSSystem::restoreViewRefresh()
 // ビュー状態更新
 // -------------------------------------------------------------
 void
-FDSSystem::restoreViewUpdate(FdRestore::Status& st)
+FDSAnalyzer::restoreViewUpdate(FdRestore::Status& st)
 {
 	mRestoreViewStatus = st;
 	memset(st.mChanged, 0, sizeof(st.mChanged));

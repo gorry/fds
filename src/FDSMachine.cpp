@@ -133,4 +133,61 @@ FDSMachine::fileNameWithTime(const std::string fileName)
 }
 
 
+// -------------------------------------------------------------
+// TypeからDUMPエントリを求める
+// -------------------------------------------------------------
+int 
+FDSMachine::findDumpNoByType(const std::string& type) const
+{
+	for (int i=0; i<(int)mVecDump.size(); i++) {
+		if (std::string::npos != mVecDump[i].type().find(type)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// -------------------------------------------------------------
+// TypeからDUMPエントリを設定する
+// -------------------------------------------------------------
+int 
+FDSMachine::setDumpNoByType(const std::string& type)
+{
+	int no = findDumpNoByType(type);
+	if (no < 0) {
+		return no;
+	}
+	mDumpNo = no;
+	return 0;
+}
+
+// -------------------------------------------------------------
+// TypeからRESTOREエントリを求める
+// -------------------------------------------------------------
+int 
+FDSMachine::findRestoreNoByType(const std::string& type) const
+{
+	for (int i=0; i< (int)mVecRestore.size(); i++) {
+		if (std::string::npos != mVecRestore[i].type().find(type)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// -------------------------------------------------------------
+// TypeからRESTOREエントリを設定する
+// -------------------------------------------------------------
+int 
+FDSMachine::setRestoreNoByType(const std::string& type)
+{
+	int no = findRestoreNoByType(type);
+	if (no < 0) {
+		return no;
+	}
+	mRestoreNo = no;
+	return 0;
+}
+
+
 // [EOF]

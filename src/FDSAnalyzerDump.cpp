@@ -1,21 +1,21 @@
 ﻿// ◇
 // fds: fdx68 selector
-// FDSSystem: ダンプ
+// FDSAnalyzer: ダンプ
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 // =====================================================================
 
-#include "FDSSystem.h"
+#include "FDSAnalyzer.h"
 
 // =====================================================================
-// FDSSystem: ダンプ
+// FDSAnalyzer: ダンプ
 // =====================================================================
 
 // -------------------------------------------------------------
 // ビュー作成
 // -------------------------------------------------------------
 void
-FDSSystem::dumpViewCreateWindow()
+FDSAnalyzer::dumpViewCreateWindow()
 {
 	if (mwDumpView) {
 		dumpViewDestroyWindow();
@@ -32,7 +32,7 @@ FDSSystem::dumpViewCreateWindow()
 // ビュー破棄
 // -------------------------------------------------------------
 void
-FDSSystem::dumpViewDestroyWindow()
+FDSAnalyzer::dumpViewDestroyWindow()
 {
 	if (mwDumpView) {
 		delwin(mwDumpView);
@@ -44,7 +44,7 @@ FDSSystem::dumpViewDestroyWindow()
 // ビュー再描画
 // -------------------------------------------------------------
 void
-FDSSystem::dumpViewRedraw()
+FDSAnalyzer::dumpViewRedraw()
 {
 	redrawwin(mwDumpView);
 	dumpViewRefresh();
@@ -54,7 +54,7 @@ FDSSystem::dumpViewRedraw()
 // ビュー更新
 // -------------------------------------------------------------
 void
-FDSSystem::dumpViewRefresh()
+FDSAnalyzer::dumpViewRefresh()
 {
 	// ビューのクリア
 	werase(mwDumpView);
@@ -62,7 +62,7 @@ FDSSystem::dumpViewRefresh()
 	// ヘッダ
 	char buf[FDX_STRING_MAX];
 	wattron(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpHeader)|A_BOLD);
-	sprintf(buf, "[Dump : %s]", mDumpViewStatus.mFormat.c_str());
+	sprintf(buf, "[Dump Track : %s]", mDumpViewStatus.mFormat.c_str());
 	mvwaddstr(mwDumpView, 1, 2, buf);
 	wattroff(mwDumpView, COLOR_PAIR(fds::ColorPair::DumpHeader)|A_BOLD);
 	sprintf(buf, "%s", mDumpViewStatus.mName.c_str());
@@ -141,7 +141,7 @@ FDSSystem::dumpViewRefresh()
 // ビュー状態更新
 // -------------------------------------------------------------
 void
-FDSSystem::dumpViewUpdate(FdDump::Status& st)
+FDSAnalyzer::dumpViewUpdate(FdDump::Status& st)
 {
 	mDumpViewStatus = st;
 	memset(st.mChanged, 0, sizeof(st.mChanged));

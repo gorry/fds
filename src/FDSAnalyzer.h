@@ -26,6 +26,7 @@
 #include "FDSMacro.h"
 #include "IniFile.h"
 #include "DlgSelect.h"
+#include "FddEmu.h"
 #include "FdDump.h"
 #include "FdxView.h"
 #include "FDXFile.h"
@@ -71,10 +72,11 @@ public:		// struct, enum
 	static const int DiskViewRefreshInterval = 500;
 
 public:		// function
-	FDSAnalyzer() {}
+	FDSAnalyzer();
 	virtual ~FDSAnalyzer() {}
 
-	void start(const std::string& filename);
+	void setFddEmu(FddEmu* pfddemu);
+	void start(const std::string& filename, int machineNo);
 	void end();
 
 private:	// function
@@ -91,30 +93,13 @@ private:	// function
 	void refreshAllView();
 
 	// cmd
-#if 0
-	void cmdRename();
-	void cmdAutoSet();
-	void cmdEjectAllDrive();
-	void cmdEjectDrive();
-	void cmdSetDrive(int id);
-	void cmdCreateDisk();
-	void cmdDupDisk();
-	void cmdMakeDirectory();
-	void cmdEditName();
-	void cmdEditProtect();
-	void cmdProtectDrive();
-	void cmdProtectDisk();
-	void cmdDelete();
-	void cmdShell();
-	void cmdDumpDisk();
-	void cmdRestoreDisk();
+	void cmdDumpTrack();
+	static int cmdDumpTrackCallback_(FdDump::Status& st, void* p);
+	int cmdDumpTrackCallback(FdDump::Status& st);
 
-	static int cmdDumpDiskCallback_(FdDump::Status& st, void* p);
-	int cmdDumpDiskCallback(FdDump::Status& st);
-
-	static int cmdRestoreDiskCallback_(FdRestore::Status& st, void* p);
-	int cmdRestoreDiskCallback(FdRestore::Status& st);
-#endif
+	void cmdRestoreTrack();
+	static int cmdRestoreTrackCallback_(FdRestore::Status& st, void* p);
+	int cmdRestoreTrackCallback(FdRestore::Status& st);
 
 	// disk view
 	void diskViewCreateWindow();
@@ -160,6 +145,7 @@ private:	// function
 	void trackViewSetCylinder(int cylinder);
 	void trackViewSetHead(int head);
 	void trackViewSetLoad(void);
+	void trackViewReqReload(void);
 	bool trackViewDataIsReady(void);
 
 	// sector view
@@ -184,6 +170,7 @@ private:	// function
 	void sectorViewSetTrack(int track);
 	void sectorViewSetSector(int sector);
 	void sectorViewSetLoad(void);
+	void sectorViewReqReload(void);
 	bool sectorViewDataIsReady(void);
 	void sectorViewSetViewMode(SectorViewMode mode);
 	void sectorViewSetStringEncode(SectorViewStringEncode enc);
@@ -195,14 +182,30 @@ private:	// function
 	void helpViewRedraw();
 	void helpViewSetMode(FDSAnalyzer::HelpViewMode md);
 
+	// dump view
+	void dumpViewCreateWindow();
+	void dumpViewDestroyWindow();
+	void dumpViewRefresh();
+	void dumpViewRedraw();
+	void dumpViewUpdate(FdDump::Status& st);
+
+	// restore view
+	void restoreViewCreateWindow();
+	void restoreViewDestroyWindow();
+	void restoreViewRefresh();
+	void restoreViewRedraw();
+	void restoreViewUpdate(FdRestore::Status& st);
+
 public:		// var
 
 private:	// var
 	std::string mFilename;
 	FdxView mFdxView;
 	FdDump mFdDump;
+	FdRestore mFdRestore;
 
 	FDSConfig mConfig;
+	FddEmu* mpFddEmu;
 
 	// disk view
 	WINDOW *mwDiskView = nullptr;
@@ -252,6 +255,17 @@ private:	// var
 	fds::XYWH mHelpViewXYWH = {};
 	HelpViewMode mHelpViewMode = HelpViewMode::Disk;
 	AnalyzerMode mAnalyzerMode = AnalyzerMode::Disk;
+
+	// dump view
+	WINDOW *mwDumpView = nullptr;
+	fds::XYWH mDumpViewXYWH = {};
+	FdDump::Status mDumpViewStatus;
+	int mRetryCount = 0;
+
+	// restore view
+	WINDOW *mwRestoreView = nullptr;
+	fds::XYWH mRestoreViewXYWH = {};
+	FdRestore::Status mRestoreViewStatus;
 
 };
 

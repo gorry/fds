@@ -1233,6 +1233,7 @@ FDSSystem::cmdDumpDisk()
 					refreshAllView();
 					continue;
 				}
+
 				// 入力結果の拡張子が".FDX"でなかったらやり直し
 				std::wstring wnewname = WStrUtil::str2wstr(newname);
 				size_t len = wnewname.length();
@@ -1353,10 +1354,20 @@ FDSSystem::cmdDumpDisk()
 						break;
 					} else if (ret2 > 0) {
 						// 失敗
-						FDS_ERROR("cmdDumpDisk: Dump FDD Failed!\n");
 						DlgSelect dlg3;
+						std::string errmsg = "Dump FDD Failed!";
+						switch (ret2) {
+						  default: break;
+						  case 1: errmsg = "Not Fork!"; break;
+						  case 2: errmsg = "Not Connect!"; break;
+						  case 3: errmsg = "Drive Not Ready!"; break;
+						  case 4: errmsg = "Write Protected!"; break;
+						}
+						FDS_ERROR("cmdDumpDisk: %s\n", errmsg.c_str());
+						char msgbuf[256];
+						sprintf(msgbuf, "%s Retry?", errmsg.c_str());
 						dlg3.setItemsYesNo();
-						dlg3.setHeader("Dump FDD Failed! Retry?");
+						dlg3.setHeader(msgbuf);
 						dlg3.setOffset(0, 8);
 						int ret3 = dlg3.start();
 						dlg3.end();
@@ -1552,6 +1563,7 @@ FDSSystem::cmdRestoreDisk()
 		  default:
 			break;
 		}
+		FDS_LOG("type=[%s]\n", type.c_str());
 		if (type.empty()) {
 			FDS_ERROR("cmdRestoreDisk: Restore TYPE Unknown!\n");
 			DlgSelect dlg3;
@@ -1561,10 +1573,24 @@ FDSSystem::cmdRestoreDisk()
 			dlg3.end();
 			goto selectDrive;
 		}
-		ret = mConfig.cfgDriveW().setDumpNoByType(type);
+
+		// ダンプ形式を選択
+		ret = mConfig.cfgMachineW().setRestoreNoByType(type);
 		if (ret < 0) {
 			char buf[FDX_FILENAME_MAX];
-			sprintf(buf, "Restore TYPE [%s] Unknown!\n", type.c_str());
+			sprintf(buf, "Restore TYPE [%s] not found in [MACHINES] Config.\n", type.c_str());
+			FDS_ERROR("cmdRestoreDisk: %s", buf);
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader(buf);
+			dlg3.start();
+			dlg3.end();
+			goto selectDrive;
+		}
+		ret = mConfig.cfgDriveW().setRestoreNoByType(type);
+		if (ret < 0) {
+			char buf[FDX_FILENAME_MAX];
+			sprintf(buf, "Restore TYPE [%s] not found in [DRIVES] Config.\n", type.c_str());
 			FDS_ERROR("cmdRestoreDisk: %s", buf);
 			DlgSelect dlg3;
 			dlg3.setItemsOk();
@@ -1575,7 +1601,7 @@ FDSSystem::cmdRestoreDisk()
 		}
 
 		// 選択した設定を読み込む
-		std::string name = mConfig.cfgDrive().name();
+		std::string name = mConfig.cfgMachine().restore().name();
 		std::string fdrestoreopt = mConfig.makeRestoreOpt();
 
 		{
@@ -1672,10 +1698,20 @@ FDSSystem::cmdRestoreDisk()
 					break;
 				} else if (ret2 > 0) {
 					// 失敗
-					FDS_ERROR("cmdRestoreDisk: Restore FDD Failed!\n");
 					DlgSelect dlg3;
+					std::string errmsg = "Restore FDD Failed!";
+					switch (ret2) {
+					  default: break;
+					  case 1: errmsg = "Not Fork!"; break;
+					  case 2: errmsg = "Not Connect!"; break;
+					  case 3: errmsg = "Drive Not Ready!"; break;
+					  case 4: errmsg = "Write Protected!"; break;
+					}
+					FDS_ERROR("cmdRestoreDisk: %s\n", errmsg.c_str());
+					char msgbuf[256];
+					sprintf(msgbuf, "%s Retry?", errmsg.c_str());
 					dlg3.setItemsYesNo();
-					dlg3.setHeader("Restore FDD Failed! Retry?");
+					dlg3.setHeader(msgbuf);
 					dlg3.setOffset(0, 8);
 					int ret3 = dlg3.start();
 					dlg3.end();
@@ -1758,19 +1794,10 @@ FDSSystem::cmdAnalyzeDisk()
 	std::string src = mFiles[idx].filename();
 	std::string path = mRootDir + mCurDir + src;
 
-#if 0
-	// FddEmuを終了
-	mFddEmu.kill();
-#endif
-
 	// アナライザを起動
 	FDSAnalyzer analyzer;
-	analyzer.start(path);
-
-#if 0
-	// FddEmuを再開
-	mFddEmu.run();
-#endif
+	analyzer.setFddEmu(&mFddEmu);
+	analyzer.start(path, mConfig.machineNo());
 
 	// 新しいファイルリストを取得
 	mFiles.getFiles(mCurDir.empty());

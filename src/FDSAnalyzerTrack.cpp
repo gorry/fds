@@ -687,6 +687,14 @@ FDSAnalyzer::trackViewSetLoad(void)
 	mTrackViewReqLoad = true;
 }
 
+void
+FDSAnalyzer::trackViewReqReload(void)
+{
+	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	disk.ReqTrackReload(mTrackViewTrackNo);
+	mTrackViewReqLoad = true;
+}
+
 bool
 FDSAnalyzer::trackViewDataIsReady(void)
 {

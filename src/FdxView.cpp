@@ -55,6 +55,29 @@ FdxView::isTrackReady(int trackno)
 }
 
 // -------------------------------------------------------------
+// トラックのリロードを要求
+// -------------------------------------------------------------
+bool
+FdxView::DiskInfo::ReqTrackReload(int trackno)
+{
+	// トラック範囲チェック
+	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
+		return false;
+	}
+
+	// トラックの情報をクリア
+	Track(trackno).mLastSectorNo = -1;
+
+	return true;
+}
+
+bool
+FdxView::ReqTrackReload(int trackno)
+{
+	return mDiskInfo.ReqTrackReload(trackno);
+}
+
+// -------------------------------------------------------------
 // セクタが読み込み済みか調べる
 // -------------------------------------------------------------
 bool
@@ -65,7 +88,7 @@ FdxView::TrackInfo::isSectorReady(int sectorno)
 		return false;
 	}
 
-	// トラックが読み込み済みなら即終了
+	// セクタが読み込み済みなら即終了
 	if (Sector(sectorno).mSectorData.mOffset < 0) {
 		return false;
 	}
@@ -88,6 +111,40 @@ bool
 FdxView::isSectorReady(int trackno, int sectorno)
 {
 	return mDiskInfo.isSectorReady(trackno, sectorno);
+}
+
+// -------------------------------------------------------------
+// セクタのリロードを要求
+// -------------------------------------------------------------
+bool
+FdxView::TrackInfo::ReqSectorReload(int sectorno)
+{
+	// セクタ範囲チェック
+	if ((sectorno < 0) || ((int)SectorSize() <= sectorno)) {
+		return false;
+	}
+
+	// セクタの情報をクリア
+	Sector(sectorno).mSectorData.mOffset = -1;
+
+	return true;
+}
+
+bool
+FdxView::DiskInfo::ReqSectorReload(int trackno, int sectorno)
+{
+	// トラック範囲チェック
+	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
+		return false;
+	}
+
+	return Track(trackno).ReqSectorReload(sectorno);
+}
+
+bool
+FdxView::ReqSectorReload(int trackno, int sectorno)
+{
+	return mDiskInfo.ReqSectorReload(trackno, sectorno);
 }
 
 // -------------------------------------------------------------

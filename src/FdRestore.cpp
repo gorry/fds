@@ -128,6 +128,7 @@ int
 FdRestore::run()
 {
 	bool escape = false;
+	mErrNo = ErrNo::None;
 
 	// オプションからC/H/Sを得ておく
 #if 0
@@ -268,6 +269,9 @@ FdRestore::run()
 	if (escape) {
 		return -1;
 	}
+	if (mErrNo != ErrNo::None) {
+		return (int)mErrNo;
+	}
 
 	return 0;
 }
@@ -293,7 +297,7 @@ FdRestore::analyzeLogLine(void)
 
 	// "Done"のときの処理
 	pos1 = mLineBuf.find("Done");
-	if (std::string::npos != pos1) {
+	if (0 == pos1) {
 		FDS_LOG("analyze: found [Done] on %d\n", (int)pos1);
 		if (mStatus.mNowTrack >= 0) {
 			if (mStatus.mStatus[mStatus.mNowTrack] != TrackStatus::None) {
@@ -307,7 +311,7 @@ FdRestore::analyzeLogLine(void)
 
 	// "Processing"のときの処理
 	pos1 = mLineBuf.find("Processing");
-	if (std::string::npos != pos1) {
+	if (0 == pos1) {
 		FDS_LOG("analyze: found [Processing] on %d\n", (int)pos1);
 		size_t pos2 = mLineBuf.find("(T", pos1);
 		if (std::string::npos != pos2) {
@@ -331,6 +335,28 @@ FdRestore::analyzeLogLine(void)
 			mStatus.mNowTrack = nowtrack;
 		}
 		return;
+	}
+
+	pos1 = mLineBuf.find("Write protect");
+	if (0 == pos1) {
+		FDS_LOG("analyze: found [Write protect] on %d\n", (int)pos1);
+		size_t pos2 = mLineBuf.find("Error", pos1);
+		if (std::string::npos != pos2) {
+			// Write protect      : Error : Disk is protected
+			mErrNo = ErrNo::WriteProtect;
+			return;
+		}
+	}
+
+	pos1 = mLineBuf.find("Index period");
+	if (0 == pos1) {
+		FDS_LOG("analyze: found [Index period] on %d\n", (int)pos1);
+		size_t pos2 = mLineBuf.find("Error", pos1);
+		if (std::string::npos != pos2) {
+			// Index period       : Error : Drive not ready
+			mErrNo = ErrNo::NotReady;
+			return;
+		}
 	}
 }
 
@@ -465,6 +491,9 @@ FdRestore::recvStatus(void)
 				continue;
 			}
 			mLineBuf.push_back(c);
+		}
+		if (mErrNo != ErrNo::None) {
+			return false;
 		}
 
 		return true;
@@ -730,6 +759,9 @@ FdRestore::recvAnalyzeStatus(void)
 				continue;
 			}
 			mLineBuf.push_back(c);
+		}
+		if (mErrNo != ErrNo::None) {
+			return false;
 		}
 
 		return true;

@@ -133,16 +133,20 @@ public:
 	void setFormatNo(int num) { mFormatNo = num; }
 
 	int numDump() const { return mVecDump.size(); }
+	int findDumpNoByType(const std::string& type) const;
 	const FDSMachineDump& dump(int num) const { return mVecDump[num]; }
 	const FDSMachineDump& dump() const { return dump(mDumpNo); }
 	int dumpNo() const { return mDumpNo; }
 	void setDumpNo(int num) { mDumpNo = num; }
+	int setDumpNoByType(const std::string& type);
 
 	int numRestore() const { return mVecRestore.size(); }
+	int findRestoreNoByType(const std::string& type) const;
 	const FDSMachineRestore& restore(int num) const { return mVecRestore[num]; }
 	const FDSMachineRestore& restore() const { return restore(mRestoreNo); }
 	int restoreNo() const { return mRestoreNo; }
 	void setRestoreNo(int num) { mRestoreNo = num; }
+	int setRestoreNoByType(const std::string& type);
 
 	static std::string fileNameWithTime(const std::string fileName);
 

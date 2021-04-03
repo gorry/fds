@@ -127,6 +127,33 @@ FDSConfig::makeDumpOpt(int machineno, int driveno, int dumpno) const
 
 
 // -------------------------------------------------------------
+// トラックダンプオプション文字列作成
+// -------------------------------------------------------------
+std::string
+FDSConfig::makeDumpTrackOpt(int machineno, int driveno, int dumpno, int trackno, int retrycount) const
+{
+	char buf[FDX_STRING_MAX];
+
+	const std::string& type = cfgMachine(machineno).dump(dumpno).type();
+	int no = cfgDrive(driveno).findDumpNoByType(type);
+	if (no < 0) {
+		std::string str;
+		return str;
+	}
+
+	sprintf(buf, "-i%d -r%d -t%d %s -f %s",
+	  cfgDrive(driveno).id(),
+	  retrycount,
+	  trackno,
+	  cfgDrive(driveno).dump(no).fdDumpOpt().c_str(),
+	  cfgMachine(machineno).dump(dumpno).format().c_str()
+	);
+	std::string str(buf);
+	return str;
+}
+
+
+// -------------------------------------------------------------
 // リストアオプション文字列作成
 // -------------------------------------------------------------
 std::string
@@ -143,6 +170,31 @@ FDSConfig::makeRestoreOpt(int machineno, int driveno) const
 
 	sprintf(buf, "-i%d %s",
 	  cfgDrive(driveno).id(),
+	  cfgDrive(driveno).restore(no).fdRestoreOpt().c_str()
+	);
+	std::string str(buf);
+	return str;
+}
+
+
+// -------------------------------------------------------------
+// リストアトラックオプション文字列作成
+// -------------------------------------------------------------
+std::string
+FDSConfig::makeRestoreTrackOpt(int machineno, int driveno, int trackno) const
+{
+	char buf[FDX_STRING_MAX];
+
+	const std::string& type = cfgMachine(machineno).restore().type();
+	int no = cfgDrive(driveno).findRestoreNoByType(type);
+	if (no < 0) {
+		std::string str;
+		return str;
+	}
+
+	sprintf(buf, "-i%d -t%d %s",
+	  cfgDrive(driveno).id(),
+	  trackno,
 	  cfgDrive(driveno).restore(no).fdRestoreOpt().c_str()
 	);
 	std::string str(buf);

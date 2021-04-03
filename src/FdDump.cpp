@@ -110,6 +110,7 @@ int
 FdDump::run()
 {
 	bool escape = false;
+	mErrNo = ErrNo::None;
 
 #if 0
 	size_t pos;
@@ -248,6 +249,9 @@ FdDump::run()
 	if (escape) {
 		return -1;
 	}
+	if (mErrNo != ErrNo::None) {
+		return (int)mErrNo;
+	}
 
 	// エラートラック数を勘定して返す
 	int errorcount = 0;
@@ -255,6 +259,9 @@ FdDump::run()
 		if (mStatus.mStatus[i] == TrackStatus::Error) {
 			errorcount++;
 		}
+	}
+	if (errorcount) {
+		errorcount += 10000;
 	}
 
 	return errorcount;
@@ -347,9 +354,11 @@ FdDump::analyzeLogLine(void)
 		int nowretry = atoi(mLineBuf.c_str()+pos1+5);
 		FDS_LOG("analyze: found [Retry] on %d: count=%d\n", (int)pos1, nowretry);
 
-		// リトライ回数が1～9ならその回数をステータスに
-		if ((nowretry > 0) && (nowretry < 10)) {
-			mStatus.mStatus[mStatus.mNowTrack] = (TrackStatus)((int)TrackStatus::None+nowretry);
+		// リトライ回数が1以上ならその回数をステータスに
+		if (nowretry > 0) {
+			int st = nowretry%10;
+			if (st == 0) st = 10;
+			mStatus.mStatus[mStatus.mNowTrack] = (TrackStatus)((int)TrackStatus::None+st);
 			mStatus.mChanged[mStatus.mNowTrack] = 1;
 		}
 
@@ -372,6 +381,17 @@ FdDump::analyzeLogLine(void)
 		}
 
 		return;
+	}
+
+	pos1 = mLineBuf.find("Index period");
+	if (0 == pos1) {
+		FDS_LOG("analyze: found [Index period] on %d\n", (int)pos1);
+		size_t pos2 = mLineBuf.find("Error", pos1);
+		if (std::string::npos != pos2) {
+			// Index period       : Error : Drive not ready
+			mErrNo = ErrNo::NotReady;
+			return;
+		}
 	}
 }
 
@@ -507,6 +527,9 @@ FdDump::recvStatus(void)
 				continue;
 			}
 			mLineBuf.push_back(c);
+		}
+		if (mErrNo != ErrNo::None) {
+			return false;
 		}
 
 		return true;

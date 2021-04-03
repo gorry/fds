@@ -166,8 +166,11 @@
     <ClCompile Include="FdDump.cpp" />
     <ClCompile Include="FdRestore.cpp" />
     <ClCompile Include="FDSAnalyzer.cpp" />
+    <ClCompile Include="FDSAnalyzerCmd.cpp" />
     <ClCompile Include="FDSAnalyzerDisk.cpp" />
+    <ClCompile Include="FDSAnalyzerDump.cpp" />
     <ClCompile Include="FDSAnalyzerHelp.cpp" />
+    <ClCompile Include="FDSAnalyzerRestore.cpp" />
     <ClCompile Include="FDSAnalyzerSector.cpp" />
     <ClCompile Include="FDSAnalyzerTrack.cpp" />
     <ClCompile Include="FDSCommon.cpp" />

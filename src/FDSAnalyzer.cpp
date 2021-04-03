@@ -12,16 +12,34 @@
 // =====================================================================
 
 // -------------------------------------------------------------
+// コンストラクタ
+// -------------------------------------------------------------
+FDSAnalyzer::FDSAnalyzer()
+ : mpFddEmu(nullptr)
+{
+}
+
+// -------------------------------------------------------------
+// FddEmuの設定
+// -------------------------------------------------------------
+void
+FDSAnalyzer::setFddEmu(FddEmu* pfddemu)
+{
+	mpFddEmu = pfddemu;
+}
+
+// -------------------------------------------------------------
 // ウィンドウ表示開始
 // -------------------------------------------------------------
 void
-FDSAnalyzer::start(const std::string& filename)
+FDSAnalyzer::start(const std::string& filename, int machineNo)
 {
 	// 設定ファイル読み込み
 	int err = loadIniFile();
 	if (err < 0) {
 		return;
 	}
+	mConfig.setMachineNo(machineNo);
 
 	mFilename = filename;
 
@@ -238,6 +256,14 @@ FDSAnalyzer::mainLoop()
 		  case 'X':
 			trackViewPageBottomCursor();
 			goto updateView;
+
+		  case '<':
+			cmdDumpTrack();
+			break;
+		  case '>':
+			cmdRestoreTrack();
+			break;
+
 #if 0
 		  case '\\':
 		  case '/':
@@ -300,16 +326,11 @@ FDSAnalyzer::mainLoop()
 			cmdEjectAllDrive();
 			goto refreshScreen;
 
-		  case '<':
-			cmdDumpDisk();
-			break;
-		  case '>':
-			cmdRestoreDisk();
-			break;
+#endif
+
 		  default:
 			FDS_LOG("mainLoop: key=%d\n", key);
 			break;
-#endif
 
 		  updateView:;
 			diskViewShowTrack();
@@ -396,7 +417,7 @@ FDSAnalyzer::drawHeader()
 	char buf[FDX_STRING_MAX];
 
 	// ヘッダー描画
-	clear();
+	// clear();
 	attron(COLOR_PAIR(fds::ColorPair::Header));
 	memset(buf, ' ', _countof(buf));
 	const char* s1 = "FDS: FDX68 File Selector";
@@ -462,6 +483,21 @@ FDSAnalyzer::setViewLayout()
 	mSectorViewXYWH.H = mDiskViewXYWH.h();
 	mSectorViewXYWH.X = fullViewXYWH.x();
 	mSectorViewXYWH.Y = fullViewXYWH.y();
+
+	// ダンプビューは中央
+	mDumpViewXYWH.W = 52;
+	mDumpViewXYWH.H = 17;
+	mDumpViewXYWH.X = (fullViewXYWH.w()-mDumpViewXYWH.w())/2;
+	mDumpViewXYWH.Y = (fullViewXYWH.h()-mDumpViewXYWH.h())/2;
+	mDumpViewXYWH.Y -= 2;
+
+	// リストアビューは中央
+	mRestoreViewXYWH.W = 52;
+	mRestoreViewXYWH.H = 17;
+	mRestoreViewXYWH.X = (fullViewXYWH.w()-mRestoreViewXYWH.w())/2;
+	mRestoreViewXYWH.Y = (fullViewXYWH.h()-mRestoreViewXYWH.h())/2;
+	mRestoreViewXYWH.Y -= 2;
+
 }
 
 // =====================================================================

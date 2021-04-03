@@ -13,8 +13,11 @@ CPPSRCS = \
 	FdDump.cpp \
 	FdRestore.cpp \
 	FDSAnalyzer.cpp \
+	FDSAnalyzerCmd.cpp \
 	FDSAnalyzerDisk.cpp \
+	FDSAnalyzerDump.cpp \
 	FDSAnalyzerHelp.cpp \
+	FDSAnalyzerRestore.cpp \
 	FDSAnalyzerSector.cpp \
 	FDSAnalyzerTrack.cpp \
 	FDSCommon.cpp \
