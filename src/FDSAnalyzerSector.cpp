@@ -93,6 +93,7 @@ FDSAnalyzer::sectorViewRefresh()
 		sector = &(mFdxView.Sector(mSectorViewTrackNo, mSectorViewSectorNo));
 		mSectorViewListLines = sector->mSecSize/mSectorViewListColumns;
 	}
+	sectorViewSetIdx(sectorViewGetIdx());
 
 	// ビューのクリア
 	werase(mwSectorView);

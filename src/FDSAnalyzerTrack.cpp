@@ -86,6 +86,7 @@ FDSAnalyzer::trackViewRefresh()
 		track = &(mFdxView.Track(mTrackViewTrackNo));
 		mTrackViewListLines = track->SectorSize();
 	}
+	trackViewSetIdx(trackViewGetIdx());
 
 	// ビューのクリア
 	werase(mwTrackView);

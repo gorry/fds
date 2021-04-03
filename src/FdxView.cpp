@@ -591,6 +591,7 @@ FdxView::readFDXTrack(const std::string& cmd, const std::string& filename, int t
 
 	// トラックが読み込み済みなら即終了
 	if (mDiskInfo.isTrackReady(trackno)) {
+		mDiskInfo.mLastTrackNo = trackno;
 		return true;
 	}
 
@@ -668,6 +669,8 @@ FdxView::readFDXSector(const std::string& cmd, const std::string& filename, int 
 
 	// セクタが読み込み済みなら即終了
 	if (mDiskInfo.isSectorReady(trackno, sectorno)) {
+		mDiskInfo.mLastTrackNo = trackno;
+		mDiskInfo.Track(trackno).mLastSectorNo = sectorno;
 		return true;
 	}
 
