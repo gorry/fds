@@ -49,6 +49,7 @@ class FdxHeader {
 		mTrackSize = 0;
 		memset(mReserve, 0, sizeof(mReserve));
 	}
+	bool isRaw(void) { return (mType == 9); }
 };
 
 

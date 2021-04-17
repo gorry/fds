@@ -29,7 +29,8 @@ void initColorPair(void)
 		init_pair((short)ColorPair::FilerParentDir,        MyColor(0,4,5), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerDir,              MyColor(0,5,0), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerFdxFile,          MyColor(5,5,5), MyColor(0,0,1));
-		init_pair((short)ColorPair::FilerOtherFile,        MyColor(3,3,3), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerOtherImageFile,   MyColor(3,4,3), MyColor(0,0,1));
+		init_pair((short)ColorPair::FilerOtherFile,        MyColor(3,2,2), MyColor(0,0,1));
 		init_pair((short)ColorPair::FilerUnknownCsr,       MyColor(3,3,3), MyColor(0,0,4));
 		init_pair((short)ColorPair::FilerParentDirCsr,     MyColor(0,4,5), MyColor(0,0,4));
 		init_pair((short)ColorPair::FilerDirCsr,           MyColor(0,5,0), MyColor(0,0,4));
@@ -91,6 +92,7 @@ void initColorPair(void)
 		init_pair((short)ColorPair::FilerParentDir,        COLOR_YELLOW, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerDir,              COLOR_GREEN, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerFdxFile,          COLOR_WHITE, COLOR_BLACK);
+		init_pair((short)ColorPair::FilerOtherImageFile,   COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerOtherFile,        COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::FilerUnknownCsr,       COLOR_WHITE, COLOR_BLUE);
 		init_pair((short)ColorPair::FilerParentDirCsr,     COLOR_YELLOW, COLOR_BLUE);

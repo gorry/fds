@@ -61,6 +61,7 @@ enum class ColorPair : short {
 	FilerParentDir,
 	FilerDir,
 	FilerFdxFile,
+	FilerOtherImageFile,
 	FilerOtherFile,
 	FilerUnknownCsr,
 	FilerParentDirCsr,

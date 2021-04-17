@@ -71,10 +71,12 @@ FDSAnalyzer::sectorViewRedrawBorder()
 // ビュー更新
 // -------------------------------------------------------------
 static wchar_t sjis2wchar(char* chr) {
+	(void)chr;
 	return (wchar_t)'.';
 }
 
 static wchar_t utf82wchar(char* chr) {
+	(void)chr;
 	return (wchar_t)'.';
 }
 

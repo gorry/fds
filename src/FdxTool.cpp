@@ -100,7 +100,7 @@ FdxTool::readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s)
 	}
 	if (!memcmp(s, "Track length       : ", 21)) {
 		s += 21;
-		if (diskinfo.mFdxInfo.mType != 9) {
+		if (!diskinfo.mFdxInfo.isRaw()) {
 			diskinfo.mFdxInfo.mTrackSize = atoi(s)<<3;
 		}
 		return 1;

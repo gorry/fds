@@ -14,6 +14,25 @@
 // -------------------------------------------------------------
 // コンストラクタ
 // -------------------------------------------------------------
+DirEntry::DirEntry(const std::string& filename, DirEntry::Type t, const std::vector<std::string>& otherimageexts)
+ : DirEntry(filename, t)
+{
+	// 拡張子が合致すればならOtherImageFileとして定義される
+	size_t len = mWFileName.length();
+	if (mType == Type::OtherFile) {
+		if (len >= 5) {
+			for (int i=0; i<(int)otherimageexts.size(); i++) {
+				std::wstring exts = WStrUtil::str2wstr(otherimageexts[i]);
+				int l = exts.length();
+				if (!WStrUtil::wstricmp(&mWFileName[len-l], exts)) {
+					mType = Type::OtherImageFile;
+					break;
+				}
+			}
+		}
+	}
+}
+
 DirEntry::DirEntry(const std::string& filename, DirEntry::Type t)
 {
 	mFileName = filename;
@@ -52,6 +71,15 @@ void
 Directory::setPath(const std::string& path)
 {
 	mPath = path;
+}
+
+// -------------------------------------------------------------
+// 対応イメージファイル拡張子の設定
+// -------------------------------------------------------------
+void
+Directory::setOtherImageExts(const std::vector<std::string>& otherimageexts)
+{
+	mVecOtherImageExts = otherimageexts;
 }
 
 // -------------------------------------------------------------
@@ -97,7 +125,7 @@ Directory::getFiles(bool isRoot)
 				mFiles.push_back(DirEntry(ent->d_name, DirEntry::Type::Dir));
 			} else if (ent->d_type & DT_REG) {
 				// 通常ファイル（FDXファイルを含む）
-				DirEntry entry(ent->d_name, DirEntry::Type::OtherFile);
+				DirEntry entry(ent->d_name, DirEntry::Type::OtherFile, mVecOtherImageExts);
 				if (entry.isFdxFile()) {
 					mFiles.push_back(entry);
 				} else {
@@ -139,7 +167,7 @@ Directory::sortFiles()
 			if (left.type() == right.type()) {
 				return (left.filename() < right.filename());
 			}
-			// ParentDir/Dir/FdxFile/OtherFileの順にソート
+			// ParentDir/Dir/FdxFile/OtherImageFile/OtherFileの順にソート
 			return (left.type() < right.type());
 		}
 	} sortOp;

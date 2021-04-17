@@ -86,6 +86,9 @@ FDSSystem::start()
 		return;
 	}
 
+	// 拡張子設定
+	mFiles.setOtherImageExts(mConfig.cfgOtherImageExts());
+
 	// ウィンドウ位置算出
 	initView();
 	setViewLayout();
@@ -335,6 +338,9 @@ FDSSystem::mainLoop()
 		  case 'R':
 		  case '?':
 			cmdRename();
+			goto refreshScreen;
+		  case 'V':
+			cmdConvertDisk();
 			goto refreshScreen;
 		  case 'X':
 		  case KEY_DC:

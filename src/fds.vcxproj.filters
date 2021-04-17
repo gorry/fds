@@ -132,6 +132,9 @@
     <ClCompile Include="FDSAnalyzerRestore.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="FdxConv.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent\dirent.h">
@@ -201,6 +204,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FdxView.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="FdxConv.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -49,6 +49,7 @@ public:
 	const std::string& fdxViewCmd() const { return mFdxViewCmd; }
 	const std::string& fdDumpCmd() const { return mFdDumpCmd; }
 	const std::string& fdRestoreCmd() const { return mFdRestoreCmd; }
+	const std::string& fdxConvCmd() const { return mFdxConvCmd; }
 
 	const std::string& drivesDir() const { return mDrivesDir; }
 	int numDrives() const { return mVecDrives.size(); }
@@ -67,6 +68,14 @@ public:
 	FDSMachine& cfgMachineW(int num) { return mVecMachines[num]; }
 	int machineNo() const { return mMachineNo; }
 	void setMachineNo(int num) { mMachineNo = num; }
+
+	const std::string& cfgOtherImageExt(int num) const { return mVecOtherImages[num]; }
+	const std::vector<std::string>& cfgOtherImageExts() const { return mVecOtherImages; }
+	int numOtherImages() const { return mVecOtherImages.size(); }
+	int fromOtherImageNo() const { return mFromOtherImageNo; }
+	void setFromOtherImageNo(int num) { mFromOtherImageNo = num; }
+	int toOtherImageNo() const { return mToOtherImageNo; }
+	void setToOtherImageNo(int num) { mToOtherImageNo = num; }
 
 	std::string makeDumpOpt(int machineno, int driveno, int dumpno) const;
 	std::string makeDumpOpt(int dumpno) const { return makeDumpOpt(machineNo(), driveNo(), dumpno); }
@@ -95,6 +104,10 @@ private:
 	std::string mMachinesDir;
 	std::vector<FDSMachine> mVecMachines;
 	int mMachineNo;
+
+	std::vector<std::string> mVecOtherImages;
+	int mFromOtherImageNo;
+	int mToOtherImageNo;
 
 };
 

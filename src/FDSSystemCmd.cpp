@@ -23,8 +23,8 @@ FDSSystem::cmdRename()
 		return;
 	}
 
-	// ディレクトリかFDXファイルのみ受け付ける
-	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isNormalDir()) {
+	// ディレクトリかイメージファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isOtherImageFile() && !mFiles[idx].isNormalDir()) {
 		return;
 	}
 
@@ -39,6 +39,7 @@ FDSSystem::cmdRename()
 	if (ret == -1) {
 		return;
 	}
+#if 0
 	if (ret < -1) {
 		// 正常に情報取得できなければ中止
 		DlgSelect dlg;
@@ -48,6 +49,7 @@ FDSSystem::cmdRename()
 		ret = dlg.start();
 		return;
 	}
+#endif
 
 	std::string filename = mFiles[idx].filename();
 	while (!0) {
@@ -340,6 +342,7 @@ FDSSystem::cmdCreateDisk()
 				refreshAllView();
 				continue;
 			}
+
 			// 入力結果の拡張子が".FDX"でなかったらやり直し
 			std::wstring wnewname = WStrUtil::str2wstr(newname);
 			size_t len = wnewname.length();
@@ -394,8 +397,8 @@ FDSSystem::cmdCreateDisk()
 			// イメージを作成
 			std::string option = fdxtoolopt+" \""+dst.c_str()+"\"";
 			std::string cmd = mConfig.fdxToolCmd();
-			int ret2 = mFdxTool.execCmd(cmd.c_str(), option.c_str());
-			if (ret2 != 0) {
+			bool ret2 = mFdxTool.execCmd(cmd.c_str(), option.c_str());
+			if (!ret2) {
 				// 失敗
 				FDS_ERROR("cmdCreateDisk: Create Disk Failed!\n");
 				FDS_ERROR(" dst=[%s], type=[%s], cmd=[%s], option=[%s], result=%d\n", dst.c_str(), name.c_str(), cmd.c_str(), option.c_str(), ret2);
@@ -438,8 +441,8 @@ FDSSystem::cmdDupDisk()
 		return;
 	}
 
-	// FDXファイルのみ受け付ける
-	if (!mFiles[idx].isFdxFile()) {
+	// イメージファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isOtherImageFile()) {
 		return;
 	}
 
@@ -454,6 +457,7 @@ FDSSystem::cmdDupDisk()
 	if (ret == -1) {
 		return;
 	}
+#if 0
 	if (ret < -1) {
 		// 正常に情報取得できなければ中止
 		DlgSelect dlg;
@@ -463,6 +467,7 @@ FDSSystem::cmdDupDisk()
 		dlg.start();
 		return;
 	}
+#endif
 
 	std::string filename = mFiles[idx].filename();
 	std::string newfile = filename.substr(0, filename.length()-4)+"_Copy.fdx";
@@ -514,14 +519,13 @@ FDSSystem::cmdDupDisk()
 			dlg3.start();
 			dlg3.end();
 			refreshAllView();
-			filename = newname;
+			newfile = newname;
 			continue;
 		}
 
 		// 先ファイルがすでにあったらやり直し
-		newfile = dlg.getText();
 		std::string src = mRootDir + mCurDir + filename;
-		std::string dst = mRootDir + mCurDir + newfile;
+		std::string dst = mRootDir + mCurDir + newname;
 		FILE* fin = fopen(dst.c_str(), "rb");
 		if (fin != nullptr) {
 			fclose(fin);
@@ -534,7 +538,7 @@ FDSSystem::cmdDupDisk()
 			dlg2.start();
 			dlg2.end();
 			refreshAllView();
-			filename = newname;
+			newfile = newname;
 			continue;
 		}
 
@@ -908,8 +912,8 @@ FDSSystem::cmdDelete()
 		return;
 	}
 
-	// ディレクトリかFDXファイルのみ受け付ける
-	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isNormalDir()) {
+	// ディレクトリかイメージファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isOtherImageFile() && !mFiles[idx].isNormalDir()) {
 		return;
 	}
 
@@ -924,6 +928,7 @@ FDSSystem::cmdDelete()
 	if (ret == -1) {
 		return;
 	}
+#if 0
 	if (ret < -1) {
 		// 正常に情報取得できなければ中止
 		DlgSelect dlg;
@@ -933,6 +938,7 @@ FDSSystem::cmdDelete()
 		dlg.start();
 		return;
 	}
+#endif
 
 	{
 		// "Yes/No"を選択
@@ -1051,8 +1057,8 @@ FDSSystem::cmdProtectDisk()
 		return;
 	}
 
-	// FDXファイルのみ受け付ける
-	if (!mFiles[idx].isFdxFile()) {
+	// イメージファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile() && !mFiles[idx].isOtherImageFile()) {
 		return;
 	}
 
@@ -1067,6 +1073,7 @@ FDSSystem::cmdProtectDisk()
 	if (ret == -1) {
 		return;
 	}
+#if 0
 	if (ret < -1) {
 		// 正常に情報取得できなければ中止
 		DlgSelect dlg;
@@ -1076,6 +1083,7 @@ FDSSystem::cmdProtectDisk()
 		dlg.start();
 		return;
 	}
+#endif
 
 	// プロテクトの状態をダイアログで処理
 	bool protect = mFiles[idx].isProtect();
@@ -1563,7 +1571,6 @@ FDSSystem::cmdRestoreDisk()
 		  default:
 			break;
 		}
-		FDS_LOG("type=[%s]\n", type.c_str());
 		if (type.empty()) {
 			FDS_ERROR("cmdRestoreDisk: Restore TYPE Unknown!\n");
 			DlgSelect dlg3;
@@ -1805,7 +1812,555 @@ FDSSystem::cmdAnalyzeDisk()
 	filerViewSetIdx(idx);
 }
 
+// -------------------------------------------------------------
+// FDXファイルを他イメージにコンバート
+// -------------------------------------------------------------
+void
+FDSSystem::cmdConvertDisk()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return;
+	}
 
+	// FDXファイルなら他イメージにコンバート
+	if (mFiles[idx].isFdxFile()) {
+		cmdConvertDiskFromFdx();
+	}
+
+	// 他イメージファイルならFDXイメージにコンバート
+	if (mFiles[idx].isOtherImageFile()) {
+		cmdConvertDiskToFdx();
+	}
+}
+
+// -------------------------------------------------------------
+// FDXファイルを他イメージにコンバート
+// -------------------------------------------------------------
+void
+FDSSystem::cmdConvertDiskFromFdx()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return;
+	}
+
+	// FDXファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile()) {
+		return;
+	}
+
+	// 選択したエントリで情報ビューを更新
+	std::string path = mRootDir + mCurDir + mFiles[idx].filename();
+	if (mFiles[idx].isDir()) {
+		path += "/";
+	}
+	infoViewSetFile(path);
+	infoViewRefresh();
+	int ret = infoViewGetResult();
+	if (ret == -1) {
+		return;
+	}
+	if (ret < -1) {
+		// 正常に情報取得できなければ中止
+		DlgSelect dlg;
+		dlg.setItemsOk();
+		dlg.setHeader("FDX File Info Error");
+		dlg.setCanEscape(true);
+		dlg.start();
+		return;
+	}
+
+	// 拡張子選択肢択準備
+	DlgSelect::ItemsVec items;
+	int n = mConfig.numOtherImages();
+	for (int i=0; i<n; i++) {
+		items.push_back(mConfig.cfgOtherImageExt(i));
+	}
+	bool isRaw = mFdxHeader.isRaw();
+	if (isRaw) {
+		items.push_back(".FDX(encode)");
+	} else {
+		items.push_back(".FDX(raw)");
+	}
+	items.push_back("[ Cancel ]");
+
+	// 拡張子選択肢
+	int sel = mConfig.toOtherImageNo();
+	while (!0) {
+	  format:;
+		// ダイアログ表示
+		DlgSelect dlg;
+		dlg.setItemsVec(items);
+		dlg.setHeader("[Select Image File]");
+		dlg.setCanEscape(true);
+		sel = dlg.start(sel);
+
+		// [Cancel]を選んだら終了
+		if ((sel == -1) || (sel == (int)items.size()-1)) {
+			break;
+		}
+		mConfig.setToOtherImageNo(sel);
+
+		// ".FDX"を選んだ場合のコンバート処理
+		if (sel == mConfig.numOtherImages()) {
+			ret = cmdConvertDiskFdxToFdx();
+			if (ret < 0) {
+				goto format;
+			}
+			return;
+		}
+
+		std::string filename = mFiles[idx].filename();
+		std::string newext = mConfig.cfgOtherImageExt(sel);
+		std::string newfile = filename + newext;
+		while (!0) {
+			// 新しいファイル名を入力
+			DlgInput dlg2;
+			dlg2.setHeader("Convert FDX to:");
+			dlg2.setText(newfile);
+			dlg2.setMaxLength(FDX_FILENAME_MAX);
+			dlg2.setCanEscape(true);
+			ret = dlg2.start(COLS/2);
+
+			// 入力が行われなかったらフォーマット選択に戻る
+			if (ret < 0) {
+				goto format;
+			}
+
+			// 入力が空だったら最初の名前でやり直し
+			std::string newname = dlg2.getText();
+			if (newname.empty()) {
+				refreshAllView();
+				continue;
+			}
+
+			// 入力結果の拡張子が元と同じでなかったらやり直し
+			std::wstring wnewname = WStrUtil::str2wstr(newname);
+			std::wstring wnewext = WStrUtil::str2wstr(newext);
+			size_t newnamelen = wnewname.length();
+			size_t newextlen = wnewext.length();
+			if ((newnamelen < newextlen) || WStrUtil::wstricmp(&wnewname[newnamelen-newextlen], wnewext)) {
+				std::string msg = "Use Extention \"" + newext + "\"!";
+				FDS_ERROR("cmdDup: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// ファイル名に"/"が含まれていたらやり直し
+			if (std::string::npos != newname.find('/')) {
+				std::string msg = "Can't use '/'!";
+				FDS_ERROR("cmdConvertDiskFromFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// 先ファイルがすでにあったらやり直し
+			std::string src = mRootDir + mCurDir + filename;
+			std::string dst = mRootDir + mCurDir + newname;
+			FILE* fin = fopen(dst.c_str(), "rb");
+			if (fin != nullptr) {
+				std::string msg = "Disk Already Exist!";
+				fclose(fin);
+				FDS_ERROR("cmdConvertDiskFromFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// コンバート
+			std::string option = "-i \"" + src + "\" -o \"" + dst + "\"";
+			std::string cmd = mConfig.fdxConvCmd();
+			bool ret2 = mFdxConv.execCmd(cmd.c_str(), option.c_str());
+			if (!ret2) {
+				// 失敗
+				std::string msg = "Convert Failed!";
+				FDS_ERROR("cmdConvertDiskFromFdx: %s\n", msg.c_str());
+				FDS_ERROR(" src=[%s], dst=[%s], result=%d\n", src.c_str(), dst.c_str(), ret2);
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+			}
+
+#if !defined(FDS_WINDOWS)
+			if (!mNoRoot) {
+				chmod(dst.c_str(), 0666);
+			}
+#endif
+
+			// 新しいファイルリストを取得
+			mFiles.getFiles(mCurDir.empty());
+			mFiles.sortFiles();
+			filerViewFindEntry(filename);
+
+			return;
+		}
+	}
+}
+
+// -------------------------------------------------------------
+// FDXファイルのEncode/Raw変換
+// -------------------------------------------------------------
+int
+FDSSystem::cmdConvertDiskFdxToFdx()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return -1;
+	}
+
+	// FDXファイルのみ受け付ける
+	if (!mFiles[idx].isFdxFile()) {
+		return -1;
+	}
+
+	// 選択したエントリで情報ビューを更新
+	std::string path = mRootDir + mCurDir + mFiles[idx].filename();
+	if (mFiles[idx].isDir()) {
+		path += "/";
+	}
+	infoViewSetFile(path);
+	infoViewRefresh();
+	int ret = infoViewGetResult();
+	if (ret == -1) {
+		return -1;
+	}
+	if (ret < -1) {
+		// 正常に情報取得できなければ中止
+		DlgSelect dlg;
+		dlg.setItemsOk();
+		dlg.setHeader("FDX File Info Error");
+		dlg.setCanEscape(true);
+		dlg.start();
+		return -1;
+	}
+
+	// Raw/Encode準備
+	bool isRaw = mFdxHeader.isRaw();
+
+	// 拡張子選択肢
+	{
+		std::string filename = mFiles[idx].filename();
+		std::string newext = ".fdx";
+		std::string newfile = filename.substr(0, filename.length()-4)+(isRaw ? "_Encode" : "_Raw");
+		newfile += newext;
+		while (!0) {
+			// 新しいファイル名を入力
+			DlgInput dlg2;
+			dlg2.setHeader("Convert FDX to:");
+			dlg2.setText(newfile);
+			dlg2.setMaxLength(FDX_FILENAME_MAX);
+			dlg2.setCanEscape(true);
+			ret = dlg2.start(COLS/2);
+
+			// 入力が行われなかったらフォーマット選択に戻る
+			if (ret < 0) {
+				return -1;
+			}
+
+			// 入力が空だったら最初の名前でやり直し
+			std::string newname = dlg2.getText();
+			if (newname.empty()) {
+				refreshAllView();
+				continue;
+			}
+
+			// 入力結果の拡張子が元と同じでなかったらやり直し
+			std::wstring wnewname = WStrUtil::str2wstr(newname);
+			std::wstring wnewext = WStrUtil::str2wstr(newext);
+			size_t newnamelen = wnewname.length();
+			size_t newextlen = wnewext.length();
+			if ((newnamelen < newextlen) || WStrUtil::wstricmp(&wnewname[newnamelen-newextlen], wnewext)) {
+				std::string msg = "Use Extention \"" + newext + "\"!";
+				FDS_ERROR("cmdDup: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// ファイル名に"/"が含まれていたらやり直し
+			if (std::string::npos != newname.find('/')) {
+				std::string msg = "Can't use '/'!";
+				FDS_ERROR("cmdConvertDiskFdxToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// 先ファイルがすでにあったらやり直し
+			std::string src = mRootDir + mCurDir + filename;
+			std::string dst = mRootDir + mCurDir + newname;
+			FILE* fin = fopen(dst.c_str(), "rb");
+			if (fin != nullptr) {
+				std::string msg = "Disk Already Exist!";
+				fclose(fin);
+				FDS_ERROR("cmdConvertDiskFdxToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// コンバート
+			std::string option = "-i \"" + src + "\" -o \"" + dst + "\"";
+			option += (isRaw ? " -f encode" : " -f raw");
+			std::string cmd = mConfig.fdxConvCmd();
+			bool ret2 = mFdxConv.execCmd(cmd.c_str(), option.c_str());
+			if (!ret2) {
+				// 失敗
+				std::string msg = "Convert Failed!";
+				FDS_ERROR("cmdConvertDiskFdxToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" src=[%s], dst=[%s], result=%d\n", src.c_str(), dst.c_str(), ret2);
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+			}
+
+#if !defined(FDS_WINDOWS)
+			if (!mNoRoot) {
+				chmod(dst.c_str(), 0666);
+			}
+#endif
+
+			// 新しいファイルリストを取得
+			mFiles.getFiles(mCurDir.empty());
+			mFiles.sortFiles();
+			filerViewFindEntry(filename);
+
+			return 0;
+		}
+	}
+	// not reach
+	return 0;
+}
+
+// -------------------------------------------------------------
+// 他イメージをFDXファイルにコンバート
+// -------------------------------------------------------------
+void
+FDSSystem::cmdConvertDiskToFdx()
+{
+	// 選択位置をチェック
+	int idx = filerViewGetIdx();
+	if (idx >= (int)mFiles.size()) {
+		return;
+	}
+
+	// その他のイメージファイルのみ受け付ける
+	if (!mFiles[idx].isOtherImageFile()) {
+		return;
+	}
+
+	// 選択したエントリで情報ビューを更新
+	std::string path = mRootDir + mCurDir + mFiles[idx].filename();
+	if (mFiles[idx].isDir()) {
+		path += "/";
+	}
+	infoViewSetFile(path);
+	infoViewRefresh();
+	int ret = infoViewGetResult();
+	if (ret == -1) {
+		return;
+	}
+#if 0
+	if (ret < -1) {
+		// 正常に情報取得できなければ中止
+		DlgSelect dlg;
+		dlg.setItemsOk();
+		dlg.setHeader("FDX File Info Error");
+		dlg.setCanEscape(true);
+		dlg.start();
+		return;
+	}
+#endif
+
+	// 形式選択肢択準備
+	DlgSelect::ItemsVec items;
+	items.push_back("Encode");
+	items.push_back("Raw");
+	items.push_back("[ Cancel ]");
+
+	// 拡張子選択肢
+	int sel = mConfig.fromOtherImageNo();
+	while (!0) {
+	  format:;
+		// ダイアログ表示
+		DlgSelect dlg;
+		dlg.setItemsVec(items);
+		dlg.setHeader("[Select FDX Type]");
+		dlg.setCanEscape(true);
+		sel = dlg.start(sel);
+
+		// [Cancel]を選んだら終了
+		if ((sel == -1) || (sel == (int)items.size()-1)) {
+			break;
+		}
+		mConfig.setFromOtherImageNo(sel);
+
+		std::string filename = mFiles[idx].filename();
+		std::string newext = ".fdx";
+		std::string newfile = filename + newext;
+		while (!0) {
+			// 新しいファイル名を入力
+			DlgInput dlg2;
+			dlg2.setHeader("Convert to FDX:");
+			dlg2.setText(newfile);
+			dlg2.setMaxLength(FDX_FILENAME_MAX);
+			dlg2.setCanEscape(true);
+			ret = dlg2.start(COLS/2);
+
+			// 入力が行われなかったらフォーマット選択に戻る
+			if (ret < 0) {
+				goto format;
+			}
+
+			// 入力が空だったら最初の名前でやり直し
+			std::string newname = dlg2.getText();
+			if (newname.empty()) {
+				refreshAllView();
+				continue;
+			}
+
+			// 入力結果の拡張子が元と同じでなかったらやり直し
+			std::wstring wnewname = WStrUtil::str2wstr(newname);
+			std::wstring wnewext = WStrUtil::str2wstr(newext);
+			size_t newnamelen = wnewname.length();
+			size_t newextlen = wnewext.length();
+			if ((newnamelen < newextlen) || WStrUtil::wstricmp(&wnewname[newnamelen-newextlen], wnewext)) {
+				std::string msg = "Use Extention \"" + newext + "\"!";
+				FDS_ERROR("cmdDup: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// ファイル名に"/"が含まれていたらやり直し
+			if (std::string::npos != newname.find('/')) {
+				std::string msg = "Can't use '/'!";
+				FDS_ERROR("cmdConvertDiskToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// 先ファイルがすでにあったらやり直し
+			std::string src = mRootDir + mCurDir + filename;
+			std::string dst = mRootDir + mCurDir + newname;
+			FILE* fin = fopen(dst.c_str(), "rb");
+			if (fin != nullptr) {
+				std::string msg = "Disk Already Exist!";
+				fclose(fin);
+				FDS_ERROR("cmdConvertDiskToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" newname=[%s]\n", newname.c_str());
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+				dlg3.end();
+				refreshAllView();
+				newfile = newname;
+				continue;
+			}
+
+			// コンバート
+			std::string option = "-i \"" + src + "\" -o \"" + dst + "\"";
+			if (sel == 1) {
+				option += " -f raw";
+			}
+			std::string cmd = mConfig.fdxConvCmd();
+			bool ret2 = mFdxConv.execCmd(cmd.c_str(), option.c_str());
+			if (!ret2) {
+				// 失敗
+				std::string msg = "Convert Failed!";
+				FDS_ERROR("cmdConvertDiskToFdx: %s\n", msg.c_str());
+				FDS_ERROR(" src=[%s], dst=[%s], result=%d\n", src.c_str(), dst.c_str(), ret2);
+				DlgSelect dlg3;
+				dlg3.setItemsOk();
+				dlg3.setHeader(msg);
+				dlg3.setCanEscape(true);
+				dlg3.start();
+			}
+
+#if !defined(FDS_WINDOWS)
+			if (!mNoRoot) {
+				chmod(dst.c_str(), 0666);
+			}
+#endif
+
+			// 新しいファイルリストを取得
+			mFiles.getFiles(mCurDir.empty());
+			mFiles.sortFiles();
+			filerViewFindEntry(filename);
+
+			return;
+		}
+	}
+}
 
 // =====================================================================
 // [EOF]

@@ -83,7 +83,7 @@ FDSSystem::infoViewRefresh()
 
 	{
 		char buf2[64];
-		std::string disktype = fds:: getDiskType(mFdxHeader);
+		std::string disktype = fds::getDiskType(mFdxHeader);
 
 		// ファイル名
 		size_t pos = mInfoViewFileName.rfind('/');

@@ -122,6 +122,16 @@ FDSSystem::filerViewRefresh()
 					md = FDSSystem::HelpViewMode::FdxFile;
 				}
 				break;
+			  case DirEntry::Type::OtherImageFile:
+				w = mFilerViewInnerW-3;
+				w -= WStrUtil::copyByWidth(wline, mFiles[y].wfilename(), 0, w);
+				wline += std::wstring(w, ' ');
+				line = WStrUtil::wstr2str(wline);
+				waddstr(mwFilerView, line.c_str());
+				if (sel) {
+					md = FDSSystem::HelpViewMode::OtherImageFile;
+				}
+				break;
 			  default:
 			  case DirEntry::Type::OtherFile:
 				w = mFilerViewInnerW-3;

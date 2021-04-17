@@ -37,6 +37,7 @@ public:		// struct, enum
 		ParentDir,
 		Dir,
 		FdxFile,
+		OtherImageFile,
 		OtherFile,
 		Max,
 	};
@@ -44,6 +45,7 @@ public:		// struct, enum
 public:		// function
 	DirEntry() = delete;
 	DirEntry(const std::string& filename, Type t);
+	DirEntry(const std::string& filename, Type t, const std::vector<std::string>& otherimageexts);
 	virtual ~DirEntry() {};
 
 	const std::string& filename() const { return mFileName; }
@@ -53,8 +55,10 @@ public:		// function
 	bool isNormalDir() const { return (mType == Type::Dir); }
 	bool isDir() const { return (mType == Type::Dir)||(mType == Type::ParentDir); }
 	bool isFdxFile() const { return (mType == Type::FdxFile); }
+	bool isOtherImageFile() const { return (mType == Type::OtherImageFile); }
 	bool isOtherFile() const { return (mType == Type::OtherFile); }
-	bool isFile() const { return (mType == Type::OtherFile)||(mType == Type::FdxFile); }
+	bool isImageFile() const { return (mType == Type::OtherImageFile)||(mType == Type::FdxFile); }
+	bool isFile() const { return (mType == Type::OtherFile)||(mType == Type::OtherImageFile)||(mType == Type::FdxFile); }
 	void setProtect(bool sw) { mProtect = sw; }
 	bool isProtect() const { return mProtect; }
 
@@ -85,6 +89,7 @@ public:		// function
 
 	void setPath(const std::string& path);
 	const std::string& getPath() const { return mPath; }
+	void setOtherImageExts(const std::vector<std::string>& otherimageexts);
 	void getFiles(bool isRoot);
 	void sortFiles();
 	void clear() { mFiles.clear(); }
@@ -100,6 +105,7 @@ public:		// var
 private:	// var
 	std::string mPath;
 	std::vector<DirEntry> mFiles;
+	std::vector<std::string> mVecOtherImageExts;
 	bool mMaskFdxFile = false;
 
 };

@@ -35,6 +35,7 @@
 #include "FdRestore.h"
 #include "FdxTool.h"
 #include "FdxView.h"
+#include "FdxConv.h"
 #include "FDXFile.h"
 #include "FDSConfig.h"
 #include "DlgInput.h"
@@ -58,6 +59,7 @@ public:		// struct, enum
 		ParentDir=0,
 		Dir,
 		FdxFile,
+		OtherImageFile,
 		OtherFile,
 	};
 
@@ -112,6 +114,11 @@ private:	// function
 
 	static int cmdRestoreDiskCallback_(FdRestore::Status& st, void* p);
 	int cmdRestoreDiskCallback(FdRestore::Status& st);
+
+	void cmdConvertDisk();
+	void cmdConvertDiskFromFdx();
+	void cmdConvertDiskToFdx();
+	int cmdConvertDiskFdxToFdx();
 
 	// filer view
 	void filerViewCreateWindow();
@@ -193,6 +200,7 @@ private:	// var
 	FddEmu mFddEmu;
 	FdDump mFdDump;
 	FdRestore mFdRestore;
+	FdxConv mFdxConv;
 	bool mNoRoot;
 
 	FDSConfig mConfig;

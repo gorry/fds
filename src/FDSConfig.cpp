@@ -97,6 +97,22 @@ FDSConfig::load(const std::string& filename)
 		}
 	}
 
+	// [OTHERIMAGES]セクション読み込み
+	for (num=1; ; num++) {
+		char key[FDX_FILENAME_MAX];
+		sprintf(key, "OTHERIMAGE-%d", num);
+		if (!mIniFile.hasKey("OTHERIMAGES", key)) {
+			break;
+		}
+	}
+	mVecOtherImages.resize(num-1);
+	for (int i=1; i<num; i++) {
+		char key[FDX_FILENAME_MAX];
+		sprintf(key, "OTHERIMAGE-%d", i);
+		std::string ext = mIniFile.getString("OTHERIMAGES", key);
+		mVecOtherImages[i-1] = ext;
+	}
+
 	return 0;
 }
 

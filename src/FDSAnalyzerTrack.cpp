@@ -162,7 +162,7 @@ FDSAnalyzer::trackViewRefresh()
 
 				int diskrate = disk.mFdxInfo.mRate;
 				int trackcellsize = disk.mFdxInfo.mTrackSize / 2 / 8;
-				if (disk.mFdxInfo.mType == 9) {  // RAW
+				if (disk.mFdxInfo.isRaw()) {  // RAW
 					diskrate /= 8;
 					trackcellsize /= 8;
 				}
