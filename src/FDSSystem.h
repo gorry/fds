@@ -205,6 +205,8 @@ private:	// var
 
 	FDSConfig mConfig;
 
+	bool mIsWindows;
+
 	// filer view
 	WINDOW *mwFilerView = nullptr;
 	fds::XYWH mFilerViewXYWH = {};

@@ -64,6 +64,12 @@ FDSSystem::setNoRoot(bool sw)
 void
 FDSSystem::start()
 {
+#if defined(FDS_WINDOWS)
+	mIsWindows = true;
+#else
+	mIsWindows = false;
+#endif
+
 #if !defined(FDS_WINDOWS)
 	// fddemuチェック
 	if (!mNoRoot) {
@@ -303,6 +309,7 @@ FDSSystem::mainLoop()
 
 		  case 'A':
 		  case ' ':
+			if (mIsWindows) break;
 			cmdAutoSet();
 			goto refreshScreen;
 		  case 'C':
@@ -313,6 +320,7 @@ FDSSystem::mainLoop()
 			cmdDupDisk();
 			goto refreshScreen;
 		  case 'E':
+			if (mIsWindows) break;
 			cmdEjectDrive();
 			goto refreshScreen;
 		  case 'I':
@@ -330,6 +338,7 @@ FDSSystem::mainLoop()
 			cmdEditProtect();
 			goto refreshScreen;
 		  case 'P':
+			if (mIsWindows) break;
 			cmdProtectDrive();
 			goto refreshScreen;
 		  case 'Q':
@@ -350,23 +359,29 @@ FDSSystem::mainLoop()
 			cmdProtectDisk();
 			goto refreshScreen;
 		  case '#':
+			if (mIsWindows) break;
 			cmdShell();
 			break;
 
 		  case '1':
+			if (mIsWindows) break;
 			cmdSetDrive(0);
 			break;
 		  case '2':
+			if (mIsWindows) break;
 			cmdSetDrive(1);
 			break;
 		  case '0':
+			if (mIsWindows) break;
 			cmdEjectAllDrive();
 			goto refreshScreen;
 
 		  case '<':
+			if (mIsWindows) break;
 			cmdDumpDisk();
 			break;
 		  case '>':
+			if (mIsWindows) break;
 			cmdRestoreDisk();
 			break;
 		  default:
