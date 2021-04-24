@@ -111,8 +111,8 @@ FDSAnalyzer::sectorViewRefresh()
 	  default:
 	  case SectorViewMode::Data:
 		//                          01234567890123456789012345678901234567890123456789012345678901234567890
-		mvwaddstr(mwSectorView,  1, 2, "Ofs| 0 1 2 3 4 5 6 7 8 9 A B C D E F|0123456789ABCDEF");
-		mvwaddstr(mwSectorView,  2, 2, "---+--------------------------------+----------------");
+		mvwaddstr(mwSectorView,  1, 2, "Ofs| 0 1 2 3 4 5 6 7  8 9 A B C D E F|0123456789ABCDEF");
+		mvwaddstr(mwSectorView,  2, 2, "---+---------------------------------+----------------");
 		break;
 	}
 	{
@@ -151,7 +151,7 @@ FDSAnalyzer::sectorViewRefresh()
 				std::vector<uint8_t>& data = sector->Data();
 				std::vector<uint8_t>& encode = sector->Encode();
 				int ofs = y*mSectorViewListColumns;
-				sprintf(line, "%03X|%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X|",
+				sprintf(line, "%03X|%02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X|",
 				  ofs,
 				  data[ofs+0x00], data[ofs+0x01], data[ofs+0x02], data[ofs+0x03],
 				  data[ofs+0x04], data[ofs+0x05], data[ofs+0x06], data[ofs+0x07],
@@ -318,7 +318,7 @@ FDSAnalyzer::sectorViewRefresh()
 					if (col2 != fds::ColorPair::Normal) {
 						wattron(mwSectorView, COLOR_PAIR(col2)|A_BOLD);
 						sprintf(line, "%02X", data[ofs+j]);
-						wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+5+j*2);
+						wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+5+j*2 + ((j>=8) ? 1 : 0));
 						waddstr(mwSectorView, line);
 						wattroff(mwSectorView, COLOR_PAIR(col2)|A_BOLD);
 					}
@@ -334,6 +334,9 @@ FDSAnalyzer::sectorViewRefresh()
 		y++;
 	}
 	mSectorViewClear = false;
+
+	// 選択内容に応じてヘルプビューを更新
+	helpViewRefresh();
 
 	// 枠を追加して更新
 	sectorViewRedrawBorder();

@@ -149,6 +149,7 @@ FDSAnalyzer::mainLoop()
 				if (fds::doEscKey(mwSectorView)) {
 					// ディスクビューに切り替え
 					mAnalyzerMode = AnalyzerMode::Disk;
+					helpViewSetMode(FDSAnalyzer::HelpViewMode::Disk);
 					diskRefresh = true;
 				}
 				wtimeout(mwSectorView, DiskViewRefreshInterval);
@@ -198,10 +199,12 @@ FDSAnalyzer::mainLoop()
 			if (mAnalyzerMode == AnalyzerMode::Disk) {
 				// セクタビューに切り替え
 				mAnalyzerMode = AnalyzerMode::Sector;
+				helpViewSetMode(FDSAnalyzer::HelpViewMode::Data);
 				sectorRefresh = true;
 			} else {
 				// ディスクビューに切り替え
 				mAnalyzerMode = AnalyzerMode::Disk;
+				helpViewSetMode(FDSAnalyzer::HelpViewMode::Disk);
 				diskRefresh = true;
 			}
 			goto updateView;

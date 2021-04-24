@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20210212a.tar.gz
+FDSARC = fds68k_20210424a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
@@ -115,8 +115,8 @@ arc:
 	mkdir -p package/fds/src/package_ini
 	cp -r package_ini/* package/fds/src/package_ini/
 	cd package/fds; tar cvzf src.tar.gz src; rm -rf src; cd ../..
-	-cp Release/fds ./
-	cp ../readme.md fds APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
+	-cp Release/fds Release/fds.exe ./
+	cp readme.md fds APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
 	chmod +x package/fds/fds
 	cd package; tar cvzf $(FDSARC) fds; cd ..
 
