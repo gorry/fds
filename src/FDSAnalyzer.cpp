@@ -20,6 +20,15 @@ FDSAnalyzer::FDSAnalyzer()
 }
 
 // -------------------------------------------------------------
+// IsWindowsの設定
+// -------------------------------------------------------------
+void
+FDSAnalyzer::setIsWindows(bool b)
+{
+	mIsWindows = b;
+}
+
+// -------------------------------------------------------------
 // FddEmuの設定
 // -------------------------------------------------------------
 void
@@ -141,7 +150,7 @@ FDSAnalyzer::mainLoop()
 				wtimeout(mwDiskView, 0);
 				if (fds::doEscKey(mwDiskView)) {
 					// exit
-					finish = true;
+					// finish = true;
 				}
 				wtimeout(mwDiskView, DiskViewRefreshInterval);
 			} else {
@@ -259,6 +268,11 @@ FDSAnalyzer::mainLoop()
 		  case 'X':
 			trackViewPageBottomCursor();
 			goto updateView;
+
+		  case 'Q':
+			finish = true;
+			break;
+
 
 		  case '<':
 			cmdDumpTrack();

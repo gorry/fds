@@ -63,6 +63,7 @@ FDSSystem::helpViewRefresh()
 	if (mIsWindows) {
 		P = false;
 	}
+
 	// ビューのクリア
 	werase(mwHelpView);
 

@@ -1803,6 +1803,7 @@ FDSSystem::cmdAnalyzeDisk()
 
 	// アナライザを起動
 	FDSAnalyzer analyzer;
+	analyzer.setIsWindows(mIsWindows);
 	analyzer.setFddEmu(&mFddEmu);
 	analyzer.start(path, mConfig.machineNo());
 
@@ -1881,9 +1882,9 @@ FDSSystem::cmdConvertDiskFromFdx()
 	}
 	bool isRaw = mFdxHeader.isRaw();
 	if (isRaw) {
-		items.push_back(".FDX(encode)");
+		items.push_back(".FDX(Encode)");
 	} else {
-		items.push_back(".FDX(raw)");
+		items.push_back(".FDX(Raw)");
 	}
 	items.push_back("[ Cancel ]");
 
@@ -1894,7 +1895,7 @@ FDSSystem::cmdConvertDiskFromFdx()
 		// ダイアログ表示
 		DlgSelect dlg;
 		dlg.setItemsVec(items);
-		dlg.setHeader("[Select Image File]");
+		dlg.setHeader("[Select Image Type]");
 		dlg.setCanEscape(true);
 		sel = dlg.start(sel);
 

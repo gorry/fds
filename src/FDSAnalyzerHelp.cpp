@@ -59,6 +59,11 @@ FDSAnalyzer::helpViewRedraw()
 void
 FDSAnalyzer::helpViewRefresh()
 {
+	bool P = true;
+	if (mIsWindows) {
+		P = false;
+	}
+
 	// ビューのクリア
 	werase(mwHelpView);
 
@@ -74,22 +79,25 @@ FDSAnalyzer::helpViewRefresh()
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Track " : ""));
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Data  " : ""));
-		mvwaddstr(mwHelpView,  6, 1, (1 ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  7, 1, (1 ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
+		mvwaddstr(mwHelpView,  7, 1, (P ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (P ? ">: Restore Track " : ""));
 		break;
 	  case HelpViewMode::Data:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Data  " : ""));
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Track " : ""));
-		mvwaddstr(mwHelpView,  6, 1, (0 ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  7, 1, (0 ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
+		mvwaddstr(mwHelpView,  7, 1, (0 ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (0 ? ">: Restore Track " : ""));
 		break;
 	  case HelpViewMode::Encode:
 		  mvwaddstr(mwHelpView, 3, 1, (1 ? "Arrow:Move Data  " : ""));
 		  mvwaddstr(mwHelpView, 4, 1, (1 ? "AZSX :Move Sector" : ""));
 		  mvwaddstr(mwHelpView, 5, 1, (1 ? "Enter:View Track " : ""));
-		  mvwaddstr(mwHelpView, 6, 1, (0 ? "<: Dump Track    " : ""));
-		  mvwaddstr(mwHelpView, 7, 1, (0 ? ">: Restore Track " : ""));
+		  mvwaddstr(mwHelpView, 6, 1, (1 ? "Q: Quit          " : ""));
+		  mvwaddstr(mwHelpView, 7, 1, (0 ? "<: Dump Track    " : ""));
+		  mvwaddstr(mwHelpView, 8, 1, (0 ? ">: Restore Track " : ""));
 		  break;
 	}
 

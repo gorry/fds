@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20210424a.tar.gz
+FDSARC = fds68k_20210425a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
@@ -106,17 +106,20 @@ clean:
 arc:
 	rm -rf package
 	mkdir -p package/fds/src
-	cp *.cpp *.h *.txt *.sln *.vcxproj *.filters Makefile package/fds/src/
-	cp -r package_ini/* package/fds/
+	cp -pv *.cpp *.h *.txt *.sln *.vcxproj *.filters Makefile package/fds/src/
+	mkdir -p package/fds/src/pdcurses
+	cp -pv pdcurses/* package/fds/src/pdcurses/
+	cp -pv -r package_ini/* package/fds/
 	mkdir -p package/fds/src/wcwidth
-	cp wcwidth/*.c wcwidth/*.txt package/fds/src/wcwidth/
+	cp -pv wcwidth/*.c wcwidth/*.txt package/fds/src/wcwidth/
 	mkdir -p package/fds/src/dirent
-	cp dirent/*.c dirent/*.h package/fds/src/dirent/
+	cp -pv dirent/*.c dirent/*.h package/fds/src/dirent/
 	mkdir -p package/fds/src/package_ini
-	cp -r package_ini/* package/fds/src/package_ini/
+	cp -pv -r package_ini/* package/fds/src/package_ini/
 	cd package/fds; tar cvzf src.tar.gz src; rm -rf src; cd ../..
-	-cp Release/fds Release/fds.exe ./
-	cp readme.md fds APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
+	cp -pv Release/fds Release/fds.exe ./
+	strip fds
+	cp -pv readme.md fds fds.exe APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
 	chmod +x package/fds/fds
 	cd package; tar cvzf $(FDSARC) fds; cd ..
 

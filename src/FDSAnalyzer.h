@@ -75,6 +75,7 @@ public:		// function
 	FDSAnalyzer();
 	virtual ~FDSAnalyzer() {}
 
+	void setIsWindows(bool b);
 	void setFddEmu(FddEmu* pfddemu);
 	void start(const std::string& filename, int machineNo);
 	void end();
@@ -206,6 +207,7 @@ private:	// var
 
 	FDSConfig mConfig;
 	FddEmu* mpFddEmu;
+	bool mIsWindows;
 
 	// disk view
 	WINDOW *mwDiskView = nullptr;
