@@ -1,6 +1,6 @@
 ◇ FDS: FDX68 File Selector
   Hiroaki GOTO as GORRY / http://GORRY.hauN.org/
-  Version 20201224a
+  Version 20210425a
 
 ========================================================================
 1. 概要
