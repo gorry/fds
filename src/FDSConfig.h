@@ -81,10 +81,10 @@ public:
 	std::string makeDumpOpt(int dumpno) const { return makeDumpOpt(machineNo(), driveNo(), dumpno); }
 	std::string makeDumpTrackOpt(int machineno, int driveno, int dumpno, int trackno, int retrycount) const;
 	std::string makeDumpTrackOpt(int dumpno, int trackno, int retrycount) const { return makeDumpTrackOpt(machineNo(), driveNo(), dumpno, trackno, retrycount); }
-	std::string makeRestoreOpt(int machineno, int driveno) const;
-	std::string makeRestoreOpt() const { return makeRestoreOpt(machineNo(), driveNo()); }
-	std::string makeRestoreTrackOpt(int machineno, int driveno, int trackno) const;
-	std::string makeRestoreTrackOpt(int trackno) const { return makeRestoreTrackOpt(machineNo(), driveNo(), trackno); }
+	std::string makeRestoreOpt(int machineno, int driveno, int restoreno) const;
+	std::string makeRestoreOpt(int restoreno) const { return makeRestoreOpt(machineNo(), driveNo(), restoreno); }
+	std::string makeRestoreTrackOpt(int machineno, int driveno, int restoreno, int trackno) const;
+	std::string makeRestoreTrackOpt(int restoreno, int trackno) const { return makeRestoreTrackOpt(machineNo(), driveNo(), restoreno, trackno); }
 
 private:
 	std::string mCmdDir;

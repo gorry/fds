@@ -1172,13 +1172,24 @@ FDSSystem::cmdDumpDisk()
 		}
 
 		// ドライブを選択
-		mConfig.setDriveNo(vecDrive[selDrive]);
+		selDrive = vecDrive[selDrive];
+		mConfig.setDriveNo(selDrive);
 
 		// ダンプ形式選択肢準備
+		std::vector<int> vecDump;
 		DlgSelect::ItemsVec items;
 		int n = mConfig.cfgMachine().numDump();
 		for (int i=0; i<n; i++) {
-			items.push_back(mConfig.cfgMachine().dump(i).name());
+			const std::string& type = mConfig.cfgMachine().dump(i).type();
+			for (int j=0; j<mConfig.cfgDrive().numDump(); j++) {
+				const FDSDriveDump& d = mConfig.cfgDrive().dump(j);
+				if (std::string::npos != type.find(d.type())) {
+					vecDump.push_back(i);
+					items.push_back(mConfig.cfgMachine().dump(i).name());
+					goto nextMachine;
+				}
+			}
+		  nextMachine:;
 		}
 		items.push_back("[ Cancel ]");
 
@@ -1199,6 +1210,7 @@ FDSSystem::cmdDumpDisk()
 			}
 
 			// ダンプ形式を選択
+			selDump = vecDump[selDump];
 			mConfig.cfgMachineW().setDumpNo(selDump);
 			const std::string& type = mConfig.cfgMachine().dump().type();
 			int no = mConfig.cfgDrive().findDumpNoByType(type);
@@ -1493,6 +1505,44 @@ FDSSystem::cmdRestoreDisk()
 		return;
 	}
 
+		// TYPEを設定
+		std::string type;
+		switch (mFdxHeader.mType) {
+		  case 0:
+			type = "2D-250KBPS";
+			break;
+		  case 1:
+			type = "2DD-250KBPS";
+			// type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+			break;
+		  case 2:
+			type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
+			break;
+		  case 9:
+			if (mFdxHeader.mCylinders < 60) {
+				type = "2D-250KBPS";
+			} else {
+				if (mFdxHeader.mRate < 5000) {
+					// type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+					type = "2DD-250KBPS";
+				} else {
+					type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
+				}
+			}
+			break;
+		  default:
+			break;
+		}
+		if (type.empty()) {
+			FDS_ERROR("cmdRestoreDisk: Restore TYPE Unknown!\n");
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader("Restore TYPE Unknown!");
+			dlg3.start();
+			dlg3.end();
+			return;
+		}
+
 	// ディスク名を設定
 	FdxHeader& disk = infoViewGetFdxHeader();
 	{
@@ -1502,16 +1552,18 @@ FDSSystem::cmdRestoreDisk()
 	}
 
 	// ドライブ選択肢準備
+#if 0
 	int selDrive = 0;
 	int driveNo = mConfig.driveNo();
 	std::vector<int> vecDrive;
 	DlgSelect::ItemsVec items;
 	for (int i=0; i<mConfig.numDrives(); i++) {
 		for (int j=0; j<mConfig.cfgDrive(i).numRestore(); j++) {
-			const std::string& type = mConfig.cfgDrive(i).restore(j).type();
+			// const std::string& type = mConfig.cfgDrive(i).restore(j).type();
 			for (int k=0; k<mConfig.cfgMachine().numRestore(); k++) {
 				const FDSMachineRestore& d = mConfig.cfgMachine().restore(k);
-				if (std::string::npos != type.find(d.type())) {
+				// if (std::string::npos != type.find(d.type())) {
+				if (std::string::npos != d.type().find(type)) {
 					if (i == driveNo) {
 						selDrive = vecDrive.size();
 					}
@@ -1519,6 +1571,25 @@ FDSSystem::cmdRestoreDisk()
 					items.push_back(mConfig.cfgDrive(i).name());
 					goto nextDrive;
 				}
+			}
+		}
+	  nextDrive:;
+	}
+#endif
+	int selDrive = 0;
+	int driveNo = mConfig.driveNo();
+	std::vector<int> vecDrive;
+	DlgSelect::ItemsVec items;
+	for (int i=0; i<mConfig.numDrives(); i++) {
+		for (int j=0; j<mConfig.cfgDrive(i).numRestore(); j++) {
+			const FDSDriveRestore& d = mConfig.cfgDrive(i).restore(j);
+			if (std::string::npos != d.type().find(type)) {
+				if (i == driveNo) {
+					selDrive = vecDrive.size();
+				}
+				vecDrive.push_back(i);
+				items.push_back(mConfig.cfgDrive(i).name());
+				goto nextDrive;
 			}
 		}
 	  nextDrive:;
@@ -1542,58 +1613,11 @@ FDSSystem::cmdRestoreDisk()
 		}
 
 		// ドライブを選択
-		mConfig.setDriveNo(vecDrive[selDrive]);
 		std::string& driveName = items[selDrive];
-
-		// TYPEを設定
-		std::string type;
-		switch (mFdxHeader.mType) {
-		  case 0:
-			type = "2D-250KBPS-300RPM";
-			break;
-		  case 1:
-			type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
-			break;
-		  case 2:
-			type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
-			break;
-		  case 9:
-			if (mFdxHeader.mCylinders < 60) {
-				type = "2D-250KBPS-300RPM";
-			} else {
-				if (mFdxHeader.mRate < 5000) {
-					type = ((mFdxHeader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
-				} else {
-					type = ((mFdxHeader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
-				}
-			}
-			break;
-		  default:
-			break;
-		}
-		if (type.empty()) {
-			FDS_ERROR("cmdRestoreDisk: Restore TYPE Unknown!\n");
-			DlgSelect dlg3;
-			dlg3.setItemsOk();
-			dlg3.setHeader("Restore TYPE Unknown!");
-			dlg3.start();
-			dlg3.end();
-			goto selectDrive;
-		}
+		selDrive = vecDrive[selDrive];
+		mConfig.setDriveNo(selDrive);
 
 		// ダンプ形式を選択
-		ret = mConfig.cfgMachineW().setRestoreNoByType(type);
-		if (ret < 0) {
-			char buf[FDX_FILENAME_MAX];
-			sprintf(buf, "Restore TYPE [%s] not found in [MACHINES] Config.\n", type.c_str());
-			FDS_ERROR("cmdRestoreDisk: %s", buf);
-			DlgSelect dlg3;
-			dlg3.setItemsOk();
-			dlg3.setHeader(buf);
-			dlg3.start();
-			dlg3.end();
-			goto selectDrive;
-		}
 		ret = mConfig.cfgDriveW().setRestoreNoByType(type);
 		if (ret < 0) {
 			char buf[FDX_FILENAME_MAX];
@@ -1606,10 +1630,24 @@ FDSSystem::cmdRestoreDisk()
 			dlg3.end();
 			goto selectDrive;
 		}
+		type = mConfig.cfgDrive().restore().type();
+		ret = mConfig.cfgMachineW().setRestoreNoByType(type);
+		if (ret < 0) {
+			char buf[FDX_FILENAME_MAX];
+			sprintf(buf, "Restore TYPE [%s] not found in [MACHINES] Config.\n", type.c_str());
+			FDS_ERROR("cmdRestoreDisk: %s", buf);
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader(buf);
+			dlg3.start();
+			dlg3.end();
+			goto selectDrive;
+		}
 
 		// 選択した設定を読み込む
 		std::string name = mConfig.cfgMachine().restore().name();
-		std::string fdrestoreopt = mConfig.makeRestoreOpt();
+		int restoreno = mConfig.cfgMachine().restoreNo();
+		std::string fdrestoreopt = mConfig.makeRestoreOpt(restoreno);
 
 		{
 			// "Yes/No"を選択

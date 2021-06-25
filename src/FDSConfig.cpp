@@ -79,8 +79,8 @@ FDSConfig::load(const std::string& filename)
 		}
 	}
 	if (num < 2) {
-		FDS_ERROR("failed: no MACHINE entry in [MACHINES] section in file %s", filename.c_str());
-		fprintf(stderr, "No MACHINE entry in [MACHINES] section in file %s", filename.c_str());
+		FDS_ERROR("failed: no MACHINE entry in [MACHINES] section in file %s\n", filename.c_str());
+		fprintf(stderr, "No MACHINE entry in [MACHINES] section in file %s\n", filename.c_str());
 		return -1;
 	}
 	mVecMachines.resize(num-1);
@@ -127,6 +127,8 @@ FDSConfig::makeDumpOpt(int machineno, int driveno, int dumpno) const
 	const std::string& type = cfgMachine(machineno).dump(dumpno).type();
 	int no = cfgDrive(driveno).findDumpNoByType(type);
 	if (no < 0) {
+		FDS_ERROR("failed: machineno=%d, driveno=%d, dumpno=%d, type=[%s], no=%d\n", machineno, driveno, dumpno, type.c_str(), no);
+		fprintf(stderr, "failed: machineno=%d, driveno=%d, dumpno=%d, type=[%s], no=%d\n", machineno, dumpno, driveno, type.c_str(), no);
 		std::string str;
 		return str;
 	}
@@ -153,6 +155,8 @@ FDSConfig::makeDumpTrackOpt(int machineno, int driveno, int dumpno, int trackno,
 	const std::string& type = cfgMachine(machineno).dump(dumpno).type();
 	int no = cfgDrive(driveno).findDumpNoByType(type);
 	if (no < 0) {
+		FDS_ERROR("failed: machineno=%d, driveno=%d, dumpno=%d, type=[%s], no=%d\n", machineno,driveno, dumpno, type.c_str(), no);
+		fprintf(stderr, "failed: machineno=%d, driveno=%d, dumpno=%d, type=[%s], no=%d\n", machineno, driveno, dumpno, type.c_str(), no);
 		std::string str;
 		return str;
 	}
@@ -173,13 +177,15 @@ FDSConfig::makeDumpTrackOpt(int machineno, int driveno, int dumpno, int trackno,
 // リストアオプション文字列作成
 // -------------------------------------------------------------
 std::string
-FDSConfig::makeRestoreOpt(int machineno, int driveno) const
+FDSConfig::makeRestoreOpt(int machineno, int driveno, int restoreno) const
 {
 	char buf[FDX_STRING_MAX];
 
-	const std::string& type = cfgMachine(machineno).restore().type();
+	const std::string& type = cfgMachine(machineno).restore(restoreno).type();
 	int no = cfgDrive(driveno).findRestoreNoByType(type);
 	if (no < 0) {
+		FDS_ERROR("failed: machineno=%d, driveno=%d, restoreno=%d, type=[%s], no=%d\n", machineno, driveno, restoreno, type.c_str(), no);
+		fprintf(stderr, "failed: machineno=%d, driveno=%d, restoreno=%d, type=[%s], no=%d\n", machineno, driveno, restoreno, type.c_str(), no);
 		std::string str;
 		return str;
 	}
@@ -197,13 +203,15 @@ FDSConfig::makeRestoreOpt(int machineno, int driveno) const
 // リストアトラックオプション文字列作成
 // -------------------------------------------------------------
 std::string
-FDSConfig::makeRestoreTrackOpt(int machineno, int driveno, int trackno) const
+FDSConfig::makeRestoreTrackOpt(int machineno, int driveno, int restoreno, int trackno) const
 {
 	char buf[FDX_STRING_MAX];
 
-	const std::string& type = cfgMachine(machineno).restore().type();
+	const std::string& type = cfgMachine(machineno).restore(restoreno).type();
 	int no = cfgDrive(driveno).findRestoreNoByType(type);
 	if (no < 0) {
+		FDS_ERROR("failed: machineno=%d, driveno=%d, restoreno=%d, type=[%s], no=%d\n", machineno, driveno, restoreno, type.c_str(), no);
+		fprintf(stderr, "failed: machineno=%d, driveno=%d, restoreno=%d, type=[%s], no=%d\n", machineno, driveno, restoreno, type.c_str(), no);
 		std::string str;
 		return str;
 	}

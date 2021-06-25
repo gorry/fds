@@ -57,7 +57,8 @@ FDSAnalyzer::cmdDumpTrack()
 		}
 
 		// ドライブを選択
-		mConfig.setDriveNo(vecDrive[selDrive]);
+		selDrive = vecDrive[selDrive];
+		mConfig.setDriveNo(selDrive);
 
 		// TYPEを設定
 		std::string type;
@@ -65,10 +66,11 @@ FDSAnalyzer::cmdDumpTrack()
 		const FdxHeader& fdxheader = mFdxView.diskInfo().mFdxInfo;
 		switch (fdxheader.mType) {
 		  case 0:
-			type = "2D-250KBPS-300RPM";
+			type = "250KBPS-300RPM";
 			break;
 		  case 1:
-			type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+			type = "2DD-250KBPS";
+			// type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
 			break;
 		  case 2:
 			type = ((fdxheader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
@@ -76,10 +78,11 @@ FDSAnalyzer::cmdDumpTrack()
 		  case 9:
 			format = "raw";
 			if (fdxheader.mCylinders < 60) {
-				type = "2D-250KBPS-300RPM";
+				type = "2D-250KBPS";
 			} else {
 				if (fdxheader.mRate < 5000) {
-					type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+					// type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+					type = "2DD-250KBPS";
 				} else {
 					type = ((fdxheader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
 				}
@@ -419,20 +422,22 @@ FDSAnalyzer::cmdRestoreTrack()
 		const FdxHeader& fdxheader = mFdxView.diskInfo().mFdxInfo;
 		switch (fdxheader.mType) {
 		  case 0:
-			type = "2D-250KBPS-300RPM";
+			type = "2D-250KBPS";
 			break;
 		  case 1:
-			type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+			// type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+			type = "2DD-250KBPS";
 			break;
 		  case 2:
 			type = ((fdxheader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
 			break;
 		  case 9:
 			if (fdxheader.mCylinders < 60) {
-				type = "2D-250KBPS-300RPM";
+				type = "2D-250KBPS";
 			} else {
 				if (fdxheader.mRate < 5000) {
-					type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+					// type = ((fdxheader.mRpm == 300) ? "2DD-250KBPS-300RPM" : "2DD-250KBPS-360RPM");
+					type = "2DD-250KBPS";
 				} else {
 					type = ((fdxheader.mRpm == 300) ? "2HD-500KBPS-300RPM" : "2HD-500KBPS-360RPM");
 				}
@@ -452,19 +457,7 @@ FDSAnalyzer::cmdRestoreTrack()
 		}
 
 		// ダンプ形式を選択
-		int ret = mConfig.cfgMachineW().setRestoreNoByType(type);
-		if (ret < 0) {
-			char buf[FDX_FILENAME_MAX];
-			sprintf(buf, "Restore TYPE [%s] not found in [MACHINES] Config.\n", type.c_str());
-			FDS_ERROR("cmdRestoreTrack: %s", buf);
-			DlgSelect dlg3;
-			dlg3.setItemsOk();
-			dlg3.setHeader(buf);
-			dlg3.start();
-			dlg3.end();
-			goto selectDrive;
-		}
-		ret = mConfig.cfgDriveW().setRestoreNoByType(type);
+		int ret = mConfig.cfgDriveW().setRestoreNoByType(type);
 		if (ret < 0) {
 			char buf[FDX_FILENAME_MAX];
 			sprintf(buf, "Restore TYPE [%s] not found in [DRIVES] Config.\n", type.c_str());
@@ -476,10 +469,24 @@ FDSAnalyzer::cmdRestoreTrack()
 			dlg3.end();
 			goto selectDrive;
 		}
+		type = mConfig.cfgDrive().restore().type();
+		ret = mConfig.cfgMachineW().setRestoreNoByType(type);
+		if (ret < 0) {
+			char buf[FDX_FILENAME_MAX];
+			sprintf(buf, "Restore TYPE [%s] not found in [MACHINES] Config.\n", type.c_str());
+			FDS_ERROR("cmdRestoreTrack: %s", buf);
+			DlgSelect dlg3;
+			dlg3.setItemsOk();
+			dlg3.setHeader(buf);
+			dlg3.start();
+			dlg3.end();
+			goto selectDrive;
+		}
 
 		// 選択した設定を読み込む
 		std::string name = mConfig.cfgMachine().restore().name();
-		std::string fdrestoreopt = mConfig.makeRestoreTrackOpt(mTrackViewTrackNo);
+		int restoreno = mConfig.cfgMachine().restoreNo();
+		std::string fdrestoreopt = mConfig.makeRestoreTrackOpt(restoreno, mTrackViewTrackNo);
 
 		{
 			// "Yes/No"を選択
