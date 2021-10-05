@@ -95,7 +95,20 @@ int
 FDSDrive::findDumpNoByType(const std::string& type) const
 {
 	for (int i=0; i<(int)mVecDump.size(); i++) {
-		if (std::string::npos != mVecDump[i].type().find(type)) {
+		const std::string& listtype = mVecDump[i].type();
+		if (std::string::npos != listtype.find(type)) {
+			return i;
+		}
+		std::string listtype2 = "3.5-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
+			return i;
+		}
+		listtype2 = "5.25-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
+			return i;
+		}
+		listtype2 = "8-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
 			return i;
 		}
 	}
@@ -123,7 +136,20 @@ int
 FDSDrive::findRestoreNoByType(const std::string& type) const
 {
 	for (int i=0; i< (int)mVecRestore.size(); i++) {
-		if (std::string::npos != mVecRestore[i].type().find(type)) {
+		const std::string& listtype = mVecRestore[i].type();
+		if (std::string::npos != listtype.find(type)) {
+			return i;
+		}
+		std::string listtype2 = "3.5-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
+			return i;
+		}
+		listtype2 = "5.25-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
+			return i;
+		}
+		listtype2 = "8-"+listtype;
+		if (std::string::npos != listtype2.find(type)) {
 			return i;
 		}
 	}
