@@ -90,7 +90,7 @@ FDSAnalyzer::diskViewRefresh()
 	mvwaddstr(mwDiskView, 10, 2, "160|                     |                     ");
 	wattroff(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpGauge));
 
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	for (int i=0; i<(int)disk.TrackSize(); i++) {
 		int n = i%20;
 		int x =  (n+(n>=10)) * 2 + 7;
@@ -154,7 +154,7 @@ FDSAnalyzer::diskViewSetIdx(int idx)
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (idx > h) {
 		idx = h;
@@ -178,7 +178,7 @@ FDSAnalyzer::diskViewUpCursor()
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -197,7 +197,7 @@ FDSAnalyzer::diskViewDownCursor()
 	i += 20;
 
 	// カーソルがビュー末尾より後を差さないよう調整
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i -= 20;
@@ -226,7 +226,7 @@ FDSAnalyzer::diskViewLeftCursor()
 	}
 
 	// カーソルがビュー最終位置として差せる位置を算出
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -245,7 +245,7 @@ FDSAnalyzer::diskViewRightCursor()
 	i++;
 
 	// カーソルがビュー末尾より後を差さないよう調整
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (i > h) {
 		i = h;
@@ -292,7 +292,7 @@ FDSAnalyzer::diskViewPageTopCursor()
 void
 FDSAnalyzer::diskViewPageBottomCursor()
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 
 	mDiskViewCsr = h;
@@ -313,7 +313,7 @@ int
 FDSAnalyzer::diskViewGetIdx()
 {
 	int idx = mDiskViewCsr;
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	int h = disk.TrackSize()-1;
 	if (idx >= h) {
 		idx = h;
@@ -328,7 +328,7 @@ FDSAnalyzer::diskViewGetIdx()
 void
 FDSAnalyzer::diskViewShowTrack()
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	trackViewSetCylinder(mDiskViewCsr / disk.mFdxInfo.mHeads);
 	trackViewSetHead(mDiskViewCsr % disk.mFdxInfo.mHeads);
 	trackViewSetLoad();

@@ -40,7 +40,7 @@ FdxTool::execCmd(const std::string& cmd, const std::string& option)
 // fdxtoolログのヘッダ読み取り
 // -------------------------------------------------------------
 int
-FdxTool::readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s)
+FdxTool::readFDXDiskInfoHeader(FdxDiskInfo& diskinfo, char* s)
 {
 	// FDS_LOG("readFDXDiskInfoHeader: get line: %s", s);
 	if (!memcmp(s, "DIsk Type          : ", 21) ||
@@ -115,7 +115,7 @@ FdxTool::readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s)
 // fdxtoolログの本体読み取り
 // -------------------------------------------------------------
 int
-FdxTool::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
+FdxTool::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 {
 	// FDS_LOG("readFDXDiskInfoBody: get line: %s", s);
 	if (!memcmp(s, "CYLINDER ", 9)) {

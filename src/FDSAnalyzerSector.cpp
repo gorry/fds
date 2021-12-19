@@ -90,7 +90,7 @@ FDSAnalyzer::sectorViewRefresh()
 		std::string cmd = mConfig.fdxViewCmd();
 		mFdxView.readFDXSector(cmd, mFilename, mSectorViewTrackNo, mSectorViewSectorNo);
 	}
-	FdxView::SectorInfo* sector = nullptr;
+	FdxSectorInfo* sector = nullptr;
 	if (mFdxView.isSectorReady(mSectorViewTrackNo, mSectorViewSectorNo)) {
 		sector = &(mFdxView.Sector(mSectorViewTrackNo, mSectorViewSectorNo));
 		mSectorViewListLines = sector->mSecSize/mSectorViewListColumns;
@@ -116,7 +116,7 @@ FDSAnalyzer::sectorViewRefresh()
 		break;
 	}
 	{
-		FdxView::SectorInfo& sec2 = mFdxView.Sector(mSectorViewTrackNo, mSectorViewSectorNo);
+		FdxSectorInfo& sec2 = mFdxView.Sector(mSectorViewTrackNo, mSectorViewSectorNo);
 		int secfm = 'M';
 		if (sec2.mStatus.InfoIFM()) secfm = 'F';
 		if (sec2.mStatus.InfoIMIX()) secfm = 'X';
@@ -624,7 +624,7 @@ FDSAnalyzer::sectorViewSetLoad(void)
 void
 FDSAnalyzer::sectorViewReqReload(void)
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	disk.ReqSectorReload(mSectorViewTrackNo, mSectorViewSectorNo);
 	mSectorViewReqLoad = true;
 }
@@ -632,7 +632,7 @@ FDSAnalyzer::sectorViewReqReload(void)
 bool
 FDSAnalyzer::sectorViewDataIsReady(void)
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	return disk.isSectorReady(mSectorViewTrackNo, mSectorViewSectorNo);
 }
 

@@ -75,13 +75,13 @@ FDSAnalyzer::trackViewRefresh()
 {
 	char line[256];
 
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	if (mTrackViewReqLoad && !mTrackViewClear) {
 		mTrackViewReqLoad = false;
 		std::string cmd = mConfig.fdxViewCmd();
 		mFdxView.readFDXTrack(cmd, mFilename, mTrackViewTrackNo);
 	}
-	FdxView::TrackInfo* track = nullptr;
+	FdxTrackInfo* track = nullptr;
 	if (mFdxView.isTrackReady(mTrackViewTrackNo)) {
 		track = &(mFdxView.Track(mTrackViewTrackNo));
 		mTrackViewListLines = track->SectorSize();
@@ -132,7 +132,7 @@ FDSAnalyzer::trackViewRefresh()
 		fds::ColorPair col = fds::ColorPair::Normal;
 		if (track && !mTrackViewClear) {
 			if (y < mTrackViewListLines) {
-				FdxView::SectorInfo& sector = track->Sector(y);
+				FdxSectorInfo& sector = track->Sector(y);
 				col = fds::ColorPair::TrackNormalSec;
 				if (sector.mStatus.Err()) {
 					col = fds::ColorPair::TrackErrorSec;
@@ -154,7 +154,7 @@ FDSAnalyzer::trackViewRefresh()
 		// アイテムを表示
 		if (track && !mTrackViewClear) {
 			if (y < mTrackViewListLines) {
-				FdxView::SectorInfo& sector = track->Sector(y);
+				FdxSectorInfo& sector = track->Sector(y);
 
 				int secfm = 'M';
 				if (sector.mStatus.InfoIFM()) secfm = 'F';
@@ -669,7 +669,7 @@ void
 FDSAnalyzer::trackViewSetCylinder(int cylinder)
 {
 	mTrackViewCylinderNo = cylinder;
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	mTrackViewTrackNo = mTrackViewCylinderNo * disk.mFdxInfo.mHeads + mTrackViewHeadNo;
 }
 
@@ -677,7 +677,7 @@ void
 FDSAnalyzer::trackViewSetHead(int head)
 {
 	mTrackViewHeadNo = head;
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	mTrackViewTrackNo = mTrackViewCylinderNo * disk.mFdxInfo.mHeads + mTrackViewHeadNo;
 }
 
@@ -690,7 +690,7 @@ FDSAnalyzer::trackViewSetLoad(void)
 void
 FDSAnalyzer::trackViewReqReload(void)
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	disk.ReqTrackReload(mTrackViewTrackNo);
 	mTrackViewReqLoad = true;
 }
@@ -698,7 +698,7 @@ FDSAnalyzer::trackViewReqReload(void)
 bool
 FDSAnalyzer::trackViewDataIsReady(void)
 {
-	FdxView::DiskInfo& disk = mFdxView.diskInfo();
+	FdxDiskInfo& disk = mFdxView.diskInfo();
 	return disk.isTrackReady(mTrackViewTrackNo);
 }
 

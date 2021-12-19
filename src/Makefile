@@ -34,6 +34,7 @@ CPPSRCS = \
 	FDSSystemPath.cpp \
 	FDSSystemRestore.cpp \
 	FdxConv.cpp \
+	FdxStatus.cpp \
 	FdxTool.cpp \
 	FdxView.cpp \
 	IniFile.cpp \

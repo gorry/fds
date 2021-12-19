@@ -33,22 +33,6 @@ FdxView::execCmd(const std::string& cmd, const std::string& option)
 // トラックが読み込み済みか調べる
 // -------------------------------------------------------------
 bool
-FdxView::DiskInfo::isTrackReady(int trackno)
-{
-	// トラック範囲チェック
-	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
-		return false;
-	}
-
-	// トラックが読み込み済みなら即終了
-	if (Track(trackno).mLastSectorNo < 0) {
-		return false;
-	}
-
-	return true;
-}
-
-bool
 FdxView::isTrackReady(int trackno)
 {
 	return mDiskInfo.isTrackReady(trackno);
@@ -57,20 +41,6 @@ FdxView::isTrackReady(int trackno)
 // -------------------------------------------------------------
 // トラックのリロードを要求
 // -------------------------------------------------------------
-bool
-FdxView::DiskInfo::ReqTrackReload(int trackno)
-{
-	// トラック範囲チェック
-	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
-		return false;
-	}
-
-	// トラックの情報をクリア
-	Track(trackno).mLastSectorNo = -1;
-
-	return true;
-}
-
 bool
 FdxView::ReqTrackReload(int trackno)
 {
@@ -81,33 +51,6 @@ FdxView::ReqTrackReload(int trackno)
 // セクタが読み込み済みか調べる
 // -------------------------------------------------------------
 bool
-FdxView::TrackInfo::isSectorReady(int sectorno)
-{
-	// セクタ範囲チェック
-	if ((sectorno < 0) || ((int)SectorSize() <= sectorno)) {
-		return false;
-	}
-
-	// セクタが読み込み済みなら即終了
-	if (Sector(sectorno).mSectorData.mOffset < 0) {
-		return false;
-	}
-
-	return true;
-}
-
-bool
-FdxView::DiskInfo::isSectorReady(int trackno, int sectorno)
-{
-	// トラック範囲チェック
-	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
-		return false;
-	}
-
-	return Track(trackno).isSectorReady(sectorno);
-}
-
-bool
 FdxView::isSectorReady(int trackno, int sectorno)
 {
 	return mDiskInfo.isSectorReady(trackno, sectorno);
@@ -116,31 +59,6 @@ FdxView::isSectorReady(int trackno, int sectorno)
 // -------------------------------------------------------------
 // セクタのリロードを要求
 // -------------------------------------------------------------
-bool
-FdxView::TrackInfo::ReqSectorReload(int sectorno)
-{
-	// セクタ範囲チェック
-	if ((sectorno < 0) || ((int)SectorSize() <= sectorno)) {
-		return false;
-	}
-
-	// セクタの情報をクリア
-	Sector(sectorno).mSectorData.mOffset = -1;
-
-	return true;
-}
-
-bool
-FdxView::DiskInfo::ReqSectorReload(int trackno, int sectorno)
-{
-	// トラック範囲チェック
-	if ((trackno < 0) || ((int)TrackSize() <= trackno)) {
-		return false;
-	}
-
-	return Track(trackno).ReqSectorReload(sectorno);
-}
-
 bool
 FdxView::ReqSectorReload(int trackno, int sectorno)
 {
@@ -151,7 +69,7 @@ FdxView::ReqSectorReload(int trackno, int sectorno)
 // fdxviewログのヘッダ読み取り
 // -------------------------------------------------------------
 int
-FdxView::readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s)
+FdxView::readFDXDiskInfoHeader(FdxDiskInfo& diskinfo, char* s)
 {
 	FDS_LOG("readFDXDiskInfoHeader: get line: %s", s);
 	if (!memcmp(s, "DIsk Type          : ", 21) ||
@@ -215,7 +133,7 @@ FdxView::readFDXDiskInfoHeader(DiskInfo& diskinfo, char* s)
 // fdxviewログの本体読み取り
 // -------------------------------------------------------------
 int
-FdxView::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
+FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 {
 	FDS_LOG("readFDXDiskInfoBody: get line: %s", s);
 
@@ -248,7 +166,7 @@ FdxView::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
 			return 1;
 		}
 		diskinfo.mLastTrackNo = trackno;
-		TrackInfo& track = diskinfo.mTrack[diskinfo.mLastTrackNo];
+		FdxTrackInfo& track = diskinfo.mTrack[diskinfo.mLastTrackNo];
 		track.mCylinder = cylinder;
 		track.mHead = head;
 		s += 1;
@@ -340,6 +258,11 @@ FdxView::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
 				track.mStatus.SetErrDataCRC(true);
 				continue;
 			}
+			if (!memcmp(s, "OVERLAP", 7)) {
+				s += 7;
+				track.mStatus.SetErrOverlap(true);
+				continue;
+			}
 			
 		}
 		return 1;
@@ -349,7 +272,7 @@ FdxView::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
 		FDS_LOG("readFDXDiskInfoBody: invalid trackno=%d\n", diskinfo.mLastTrackNo);
 		return 1;
 	}
-	TrackInfo& track = diskinfo.Track(diskinfo.mLastTrackNo);
+	FdxTrackInfo& track = diskinfo.Track(diskinfo.mLastTrackNo);
 
 	if (!memcmp(s, " GAP4a ", 7)) {
 		s += 7;
@@ -432,7 +355,7 @@ FdxView::readFDXDiskInfoBody(DiskInfo& diskinfo, char* s)
 // fdxviewログのダンプ読み取り
 // -------------------------------------------------------------
 int
-FdxView::readFDXDiskInfoDump(DiskInfo& diskinfo, char* s)
+FdxView::readFDXDiskInfoDump(FdxDiskInfo& diskinfo, char* s)
 {
 	FDS_LOG("readFDXDiskInfoBody: get line: %s", s);
 
@@ -440,7 +363,7 @@ FdxView::readFDXDiskInfoDump(DiskInfo& diskinfo, char* s)
 		FDS_ERROR("readFDXDiskInfoDump: track=%d\n", diskinfo.mLastTrackNo);
 		return 1;
 	}
-	TrackInfo& track = diskinfo.Track(diskinfo.mLastTrackNo);
+	FdxTrackInfo& track = diskinfo.Track(diskinfo.mLastTrackNo);
 
 	if (!memcmp(s, "TRACK ERRORS", 12)) {
 		return 1;
@@ -475,8 +398,8 @@ FdxView::readFDXDiskInfoDump(DiskInfo& diskinfo, char* s)
 			return 1;
 		}
 		track.mLastSectorNo = sectorno-1;
-		SectorInfo& sector = track.Sector(track.mLastSectorNo);
-		SectorData& data = sector.mSectorData;
+		FdxSectorInfo& sector = track.Sector(track.mLastSectorNo);
+		FdxSectorData& data = sector.mSectorData;
 		if (data.mData.size() == 0) {
 			data.mData.resize(sector.mSecSize+16, 0);
 			data.mEncode.resize((sector.mSecSize+16)*2, 0);
@@ -490,8 +413,8 @@ FdxView::readFDXDiskInfoDump(DiskInfo& diskinfo, char* s)
 		FDS_ERROR("readFDXDiskInfoDump: sector=%d\n", track.mLastSectorNo);
 		return 1;
 	}
-	SectorInfo& sector = track.Sector(track.mLastSectorNo);
-	SectorData& data = sector.mSectorData;
+	FdxSectorInfo& sector = track.Sector(track.mLastSectorNo);
+	FdxSectorData& data = sector.mSectorData;
 
 	char buf[16];
 	sprintf(buf, "%04X", data.mOffset);

@@ -135,6 +135,9 @@
     <ClCompile Include="FdxConv.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="FdxStatus.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dirent\dirent.h">
@@ -207,6 +210,9 @@
       <Filter>ソース ファイル</Filter>
     </ClInclude>
     <ClInclude Include="FdxConv.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="FdxStatus.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
