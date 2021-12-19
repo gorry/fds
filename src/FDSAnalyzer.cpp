@@ -276,10 +276,10 @@ FDSAnalyzer::mainLoop()
 
 		  case '<':
 			cmdDumpTrack();
-			break;
+			goto updateView;
 		  case '>':
 			cmdRestoreTrack();
-			break;
+			goto updateView;
 
 #if 0
 		  case '\\':

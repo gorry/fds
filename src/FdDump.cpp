@@ -221,9 +221,20 @@ FdDump::run()
 	}
 
 #else
+	// -t（シングルトラック読み込み）オプションの処理
+	int track_st = 0;
+	int track_ed = mStatus.mTracks;
+	size_t pos = mOption.find("-t");
+	if (pos != std::string::npos) {
+		int num = atoi(mOption.c_str()+pos+2);
+		if ((track_st <= num) && (num < track_ed)) {
+			track_st = num;
+			track_ed = num+1;
+		}
+	}
 
 	// ダミーのダンプ
-	for (int i=0; i<mStatus.mTracks; i++) {
+	for (int i=track_st; i<track_ed; i++) {
 		// 経過のコールバック発行
 		mStatus.mStatus[i] = TrackStatus::Finish;
 		mStatus.mChanged[i] = 1;

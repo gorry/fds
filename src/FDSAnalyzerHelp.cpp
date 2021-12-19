@@ -80,8 +80,13 @@ FDSAnalyzer::helpViewRefresh()
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Data  " : ""));
 		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
+#if !defined(NDEBUG)
+		mvwaddstr(mwHelpView,  7, 1, (1 ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (1 ? ">: Restore Track " : ""));
+#else
 		mvwaddstr(mwHelpView,  7, 1, (P ? "<: Dump Track    " : ""));
 		mvwaddstr(mwHelpView,  8, 1, (P ? ">: Restore Track " : ""));
+#endif
 		break;
 	  case HelpViewMode::Data:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Data  " : ""));

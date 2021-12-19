@@ -28,7 +28,7 @@
 
 #include "WStrUtil.h"
 #include "FDXFile.h"
-#include "FDXStatus.h"
+#include "FdxStatus.h"
 #include "Log.h"
 
 // FdxToolのコマンドポート
