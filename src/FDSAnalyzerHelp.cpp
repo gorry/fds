@@ -83,6 +83,7 @@ FDSAnalyzer::helpViewRefresh()
 #if !defined(NDEBUG)
 		mvwaddstr(mwHelpView,  7, 1, (1 ? "<: Dump Track    " : ""));
 		mvwaddstr(mwHelpView,  8, 1, (1 ? ">: Restore Track " : ""));
+		(void)P;
 #else
 		mvwaddstr(mwHelpView,  7, 1, (P ? "<: Dump Track    " : ""));
 		mvwaddstr(mwHelpView,  8, 1, (P ? ">: Restore Track " : ""));

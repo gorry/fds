@@ -442,7 +442,7 @@ FdxView::readFDXDiskInfoDump(FdxDiskInfo& diskinfo, char* s)
 }
 
 // -------------------------------------------------------------
-// fdxファイル情報の読み取り
+// fdxviewを起動してログを得る
 // -------------------------------------------------------------
 bool
 FdxView::execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std::string& filename, const char* option)
@@ -452,7 +452,7 @@ FdxView::execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std
 	sprintf(tmpfilename, "/tmp/fdxview.log.XXXXXX");
 	int tmpfd = mkstemp(tmpfilename);
 	if (tmpfd < 0) {
-		FDS_ERROR("cannot open temp file: errno=%d", errno);
+		FDS_ERROR("cannot open temp file: errno=%d\n", errno);
 		return false;
 	}
 	close(tmpfd);
@@ -462,17 +462,14 @@ FdxView::execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std
 	FDS_LOG("readFDXDiskInfo: [%s]\n", cmdline.c_str());
 	int exitcode = system(cmdline.c_str());
 	if (exitcode != 0) {
-		FDS_ERROR("readFDXDiskInfo: exitcode=%d\n", exitcode);
+		FDS_ERROR("execFdxViewAnalyze: exitcode=%d\n", exitcode);
 		unlink(tmpfilename);
 		return false;
 	}
-	FDS_LOG("readFDXDiskInfo: exitcode=%d\n", exitcode);
+	FDS_LOG("execFdxViewAnalyze: exitcode=%d\n", exitcode);
 
 #else
-#if 0
-	// ログファイルを開く
-	sprintf(tmpfilename, "fdxanalyze1.log");
-#else
+
 #define unlink(a) _unlink(a)
 	// ログファイル名を作成
 	char tmpdir[FDX_FILENAME_MAX+1];
@@ -481,7 +478,7 @@ FdxView::execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std
 	sprintf(tmpfilename, "%sfdxview.log.XXXXXX", tmpdir);
 	errno_t err = _mktemp_s(tmpfilename, tmpdirsiz);
 	if (err < 0) {
-		FDS_ERROR("cannot open temp file: errno=%d", err);
+		FDS_ERROR("cannot open temp file: errno=%d\n", err);
 		return false;
 	}
 
@@ -496,10 +493,12 @@ FdxView::execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std
 	}
 	FDS_LOG("readFDXDiskInfo: exitcode=%d\n", exitcode);
 #endif
-#endif
 	return true;
 }
 
+// -------------------------------------------------------------
+// fdxファイル情報の読み取り
+// -------------------------------------------------------------
 bool
 FdxView::readFDXDiskInfo(const std::string& cmd, const std::string& filename)
 {
@@ -547,6 +546,284 @@ FdxView::readFDXDiskInfo(const std::string& cmd, const std::string& filename)
 }
 
 // -------------------------------------------------------------
+// fdxviewを起動してログを得る（経過表示付き）
+// -------------------------------------------------------------
+bool
+FdxView::execFdxViewAnalyze2(char* tmpfilename, const std::string& cmd, const std::string& filename, const char* option)
+{
+	// 外部コマンドを作成
+	std::string dummy;
+	std::string cmdline = dummy + option + " \"" + filename + "\"";
+
+#if !defined(FDS_WINDOWS)
+	// ログファイル名を作成
+	sprintf(tmpfilename, "/tmp/fdxview.log.XXXXXX");
+	int tmpfd = mkstemp(tmpfilename);
+	if (tmpfd < 0) {
+		FDS_ERROR("cannot open temp file: errno=%d\n", errno);
+		return false;
+	}
+	close(tmpfd);
+
+	// 出力をパイプに差し替える準備
+	int pipebuf[2];
+	int err = pipe2(pipebuf, O_NONBLOCK);
+	if (err < 0) {
+		FDS_ERROR("cannot open pipe");
+		return -1;
+	}
+	FDS_LOG("pipe: 0=%d, 1=%d\n", pipebuf[0], pipebuf[1]);
+
+	// スレッドの生成
+	pid_t pid = fork();
+	if (pid < 0) {
+		FDS_ERROR("cannot fork()");
+		return -1;
+	}
+
+	// 生成先スレッドの実行内容
+	if (pid == 0) {
+		// 起動したFdDumpのstdoutとstderrを親へリダイレクト
+		FDS_LOG("child: dup to pipe\n");
+		close(pipebuf[0]);
+		dup2(pipebuf[1], STDOUT_FILENO);
+		dup2(pipebuf[1], STDERR_FILENO);
+		close(pipebuf[1]);
+
+		// FdDumpを起動
+		FDS_LOG("child: run cmd=[%s], option=[%s]\n", cmd.c_str(), option);
+		std::vector<std::string> argvs;
+		std::vector<const char*> argv = makeArgv(cmd, option, argvs);
+		err = execvp(cmd.c_str(), (char* const*)&argv[0]);
+		if (err != 0) {
+			FDS_ERROR("child: error %d: cmd=[%s], option=[%s]\n", cmd.c_str(), option);
+		}
+
+		// 起動
+		FDS_LOG("child: exit\n");
+		exit(1);
+		return 0;
+	}
+
+	// 生成元スレッドの実行内容
+
+	// 不要なハンドルは閉じる
+	close(pipebuf[1]);
+
+	FILE *fout;
+	fout = fopen(tmpfilename, "wb");
+	if (fout == NULL) {
+		FDS_ERROR("execFdxViewAnalyze2: cannot create [%s]\n", tmpfilename);
+	}
+
+	// パイプからの入力処理
+	std::string line;
+	while (!0) {
+
+		// 出力を読み込み
+		char buf[1024];
+		memset(buf, 0, sizeof(buf));
+		ssize_t readsize = read(pipebuf[0], &buf, sizeof(buf));
+
+		// プロセスが終了していたらquit
+		if (readsize <= 0) {
+			int st;
+			if (waitpid(pid, &st, WNOHANG)) {
+				if (WIFEXITED(st) || WIFSIGNALED(st)) {
+					break;
+				}
+			}
+		}
+
+		// 出力がなければ繰り返し
+		if (readsize == 0) {
+			usleep(1000*100);
+			continue;
+		}
+
+		// 出力をログへ
+		fwrite(buf, 1, readsize, fout);
+
+		// 出力を解析
+		for (ssize_t i=0; i<readsize; i++) {
+			char c = buf[i];
+			if ((unsigned char)c < 0x20) {
+				size_t pos = line.find("TRACK");
+				if (pos != std::string::npos) {
+					int track = atoi(line.c_str()+pos);
+					FDS_LOG("analyze: track %d\n", track);
+#if 0
+					if (mCallbackFunc) {
+						int ret = mCallbackFunc(mStatus, mCallbackParam);
+						if (ret < 0) {
+							// 中止
+							escape = true;
+							::kill(pid, SIGHUP);
+						}
+					}
+#endif
+				}
+				line.clear();
+				continue;
+			}
+			line.push_back(buf[i]);
+		}
+
+		// ウェイト
+		usleep(200*1000);
+	}
+
+#else
+
+	// ログファイル名を作成
+	char tmpdir[FDX_FILENAME_MAX+1];
+	const int tmpdirsiz = sizeof(tmpdir)/sizeof(tmpdir[0]);
+	GetTempPathA(tmpdirsiz, tmpdir);
+	sprintf(tmpfilename, "%sfdxview.log.XXXXXX", tmpdir);
+	errno_t err = _mktemp_s(tmpfilename, tmpdirsiz);
+	if (err < 0) {
+		FDS_ERROR("cannot open temp file: errno=%d\n", err);
+		return false;
+	}
+
+	// パイプの作成
+	HANDLE pipe_in_read = NULL;
+	HANDLE pipe_in_write = NULL;
+	HANDLE pipe_out_read = NULL;
+	HANDLE pipe_out_write = NULL;
+	SECURITY_ATTRIBUTES sa; 
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.bInheritHandle = TRUE;
+	sa.lpSecurityDescriptor = NULL;
+	BOOL ret = CreatePipe(&pipe_out_read, &pipe_out_write, &sa, 0);
+	if (!ret) {
+		FDS_ERROR("execFdxViewAnalyze2: cannot create pipe_out\n");
+		return false;
+	}
+	ret = SetHandleInformation(pipe_out_read, HANDLE_FLAG_INHERIT, 0);
+	if (!ret) {
+		FDS_ERROR("execFdxViewAnalyze2: set pipe_out_read\n");
+		return false;
+	}
+
+	ret = CreatePipe(&pipe_in_read, &pipe_in_write, &sa, 0);
+	if (!ret) {
+		FDS_ERROR("execFdxViewAnalyze2: cannot create pipe_in\n");
+		return false;
+	}
+	ret = SetHandleInformation(pipe_in_write, HANDLE_FLAG_INHERIT, 0);
+	if (!ret) {
+		FDS_ERROR("execFdxViewAnalyze2: set pipe_in_write\n");
+		return false;
+	}
+
+	// パイプを繋いで子プロセスを起動
+	PROCESS_INFORMATION pi = {0};
+	STARTUPINFO si = {0};
+
+	si.cb = sizeof(STARTUPINFO); 
+	si.hStdError = pipe_out_write;
+	si.hStdOutput = pipe_out_write;
+	si.hStdInput = pipe_in_read;
+	si.dwFlags |= STARTF_USESTDHANDLES;
+
+	ret = CreateProcess(
+	  cmd.c_str(), cmdline.c_str(),
+	  NULL, NULL, TRUE, 0,
+	  NULL, NULL, &si,&pi
+	);
+	if (!ret) {
+		FDS_ERROR("execFdxViewAnalyze2: cannot exec [%s]\n", cmdline.c_str());
+		CloseHandle(pipe_in_read);
+		CloseHandle(pipe_in_write);
+		CloseHandle(pipe_out_read);
+		CloseHandle(pipe_out_write);
+		return false;
+	}
+
+	FILE *fout;
+	fout = fopen(tmpfilename, "wb");
+	if (fout == NULL) {
+		FDS_ERROR("execFdxViewAnalyze2: cannot create [%s]\n", tmpfilename);
+	}
+
+	// パイプからの入力処理
+	std::string line;
+	while (!0) {
+
+		// 出力を読み込み
+		char buf[1024];
+		memset(buf, 0, sizeof(buf));
+		DWORD readsize = 0;
+		ret = ReadFile(pipe_out_rd, buf, sizeof(buf);, readsize, NULL);
+
+		// プロセスが終了していたらquit
+		if (!ret) {
+			break;
+		}
+		if (readsize == 0) {
+			DWORD w = WaitForSingleObject(pi.hProcess, 0);
+			if (w != WAIT_TIMEOUT) {
+				break;
+			}
+		}
+
+		// 出力がなければ繰り返し
+		if (readsize == 0) {
+			Sleep(100);
+			continue;
+		}
+
+		// 出力をログへ
+		fwrite(buf, 1, readsize, fout);
+
+		// 出力を解析
+		for (DWORD i=0; i<readsize; i++) {
+			char c = buf[i];
+			if ((unsigned char)c < 0x20) {
+				size_t pos = line.find("TRACK");
+				if (pos != std::string::npos) {
+					int track = atoi(line.c_str()+pos);
+					FDS_LOG("analyze: track %d\n", track);
+#if 0
+					if (mCallbackFunc) {
+						int ret = mCallbackFunc(mStatus, mCallbackParam);
+#if 0
+						if (ret < 0) {
+							// 中止
+							escape = true;
+							::kill(mPid, SIGHUP);
+							// mStatus.mFinished = true;
+						}
+#endif
+					}
+#endif
+				}
+				line.clear();
+				continue;
+			}
+			line.push_back(buf[i]);
+		}
+
+		// ウェイト
+		Sleep(200);
+	}
+
+	// ハンドルを閉じる
+	fclose(fout);
+	CloseHandle(pipe_in_read);
+	CloseHandle(pipe_in_write);
+	CloseHandle(pipe_out_read);
+	CloseHandle(pipe_out_write);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+#endif
+
+	return true;
+}
+
+// -------------------------------------------------------------
 // fdxトラック情報の読み取り
 // -------------------------------------------------------------
 bool
@@ -565,7 +842,7 @@ FdxView::readFDXTrack(const std::string& cmd, const std::string& filename, int t
 
 	// トラック範囲チェック
 	if ((trackno < 0) || ((int)mDiskInfo.TrackSize() <= trackno)) {
-		FDS_ERROR("invalid trackno number %d", trackno);
+		FDS_ERROR("invalid trackno number %d\n", trackno);
 		return false;
 	}
 
@@ -591,7 +868,7 @@ FdxView::readFDXTrack(const std::string& cmd, const std::string& filename, int t
 	// ログファイルを開く
 	FILE* fin = fopen(tmp, "rb");
 	if (fin == nullptr) {
-		FDS_ERROR("cannot open temp file [%s]", tmp);
+		FDS_ERROR("cannot open temp file [%s]\n", tmp);
 		return false;
 	}
 
@@ -629,7 +906,7 @@ FdxView::readFDXSector(const std::string& cmd, const std::string& filename, int 
 
 	// トラック範囲チェック
 	if ((trackno < 0) || ((int)mDiskInfo.TrackSize() <= trackno)) {
-		FDS_ERROR("invalid trackno=%d", trackno);
+		FDS_ERROR("invalid trackno=%d\n", trackno);
 		return false;
 	}
 
@@ -643,7 +920,7 @@ FdxView::readFDXSector(const std::string& cmd, const std::string& filename, int 
 
 	// セクタ範囲チェック
 	if ((sectorno < 0) || ((int)(mDiskInfo.Track(trackno).SectorSize()) <= sectorno)) {
-		FDS_ERROR("invalid trackno=%d, sectorno=%d", trackno, sectorno);
+		FDS_ERROR("invalid trackno=%d, sectorno=%d\n", trackno, sectorno);
 		return false;
 	}
 
@@ -670,7 +947,7 @@ FdxView::readFDXSector(const std::string& cmd, const std::string& filename, int 
 	// ログファイルを開く
 	FILE* fin = fopen(tmp, "rb");
 	if (fin == nullptr) {
-		FDS_ERROR("cannot open temp file [%s]", tmp);
+		FDS_ERROR("cannot open temp file [%s]\n", tmp);
 		return false;
 	}
 

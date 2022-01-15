@@ -313,7 +313,7 @@ FdxTool::execFdxToolAnalyze(char* tmpfilename, const std::string& cmd, const std
 	sprintf(tmpfilename, "/tmpfilename/fdxtool.log.XXXXXX");
 	int tmpfd = mkstemp(tmpfilename);
 	if (tmpfd < 0) {
-		FDS_ERROR("cannot open temp file: errno=%d", errno);
+		FDS_ERROR("cannot open temp file: errno=%d\n", errno);
 		return false;
 	}
 	close(tmpfd);
@@ -342,7 +342,7 @@ FdxTool::execFdxToolAnalyze(char* tmpfilename, const std::string& cmd, const std
 	sprintf(tmpfilename, "%sfdxtool.log.XXXXXX", tmpdir);
 	errno_t err = _mktemp_s(tmpfilename, tmpdirsiz);
 	if (err < 0) {
-		FDS_ERROR("cannot open temp file: errno=%d", err);
+		FDS_ERROR("cannot open temp file: errno=%d\n", err);
 		return false;
 	}
 
@@ -379,7 +379,7 @@ FdxTool::readFDXDiskInfo(const std::string& cmd, const std::string& filename)
 	// ログファイルを開く
 	FILE* fin = fopen(tmp, "rb");
 	if (fin == nullptr) {
-		FDS_ERROR("cannot open temp file [%s]", tmp);
+		FDS_ERROR("cannot open temp file [%s]\n", tmp);
 		unlink(tmp);
 		return false;
 	}
@@ -430,7 +430,7 @@ FdxTool::readFDXDiskInfoVerbose(const std::string& cmd, const std::string& filen
 	// ログファイルを開く
 	FILE* fin = fopen(tmp, "rb");
 	if (fin == nullptr) {
-		FDS_ERROR("cannot open temp file [%s]", tmp);
+		FDS_ERROR("cannot open temp file [%s]\n", tmp);
 		return false;
 	}
 

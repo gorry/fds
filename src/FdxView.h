@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fcntl.h>
 #else
 #include <windows.h>
 #include <io.h>
@@ -30,6 +31,7 @@
 #include "FDXFile.h"
 #include "FdxStatus.h"
 #include "Log.h"
+#include "MakeArgv.h"
 
 // =====================================================================
 // FdxViewの操作
@@ -49,6 +51,7 @@ public:		// function
 	bool execCmd(const std::string& cmd, const std::string& option);
 
 	bool readFDXDiskInfo(const std::string& cmd, const std::string& filename);
+	bool readFDXDiskInfo2(const std::string& cmd, const std::string& filename);
 	bool readFDXTrack(const std::string& cmd, const std::string& filename, int trackno);
 	bool readFDXSector(const std::string& cmd, const std::string& filename, int trackno, int sectorno);
 
@@ -65,6 +68,7 @@ private:	// function
 	int readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s);
 	int readFDXDiskInfoDump(FdxDiskInfo& diskinfo, char* s);
 	bool execFdxViewAnalyze(char* tmpfilename, const std::string& cmd, const std::string& filename, const char* option);
+	bool execFdxViewAnalyze2(char* tmpfilename, const std::string& cmd, const std::string& filename, const char* option);
 
 
 public:		// var
