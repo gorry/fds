@@ -166,9 +166,9 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 			return 1;
 		}
 		diskinfo.mLastTrackNo = trackno;
-		FdxTrackInfo& track = diskinfo.mTrack[diskinfo.mLastTrackNo];
-		track.mCylinder = cylinder;
-		track.mHead = head;
+		FdxTrackInfo& trk = diskinfo.Track(diskinfo.mLastTrackNo);
+		trk.mCylinder = cylinder;
+		trk.mHead = head;
 		s += 1;
 		while (s[0] == ' ') {
 			s++;
@@ -176,7 +176,7 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 		if (!memcmp(s, "UNFORMAT TRACK", 14)) {
 			return 1;
 		}
-		track.mLenBits = strtoul(s, &s, 10);
+		trk.mLenBits = strtoul(s, &s, 10);
 		s += 4;
 		int lenbytes = strtoul(s, &s, 10);
 		s += 5;
@@ -184,14 +184,15 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 		int lencells = strtoul(s, &s, 10);
 		s += 6;
 		(void)lencells;
-		track.mDRate = strtod(s, &s);
+		trk.mDRate = strtod(s, &s);
 		s += 2;
 		int sector = strtoul(s, &s, 10);
 		if (sector == 0) {
 			return 1;
 		}
-		track.mSectors = sector;
-		track.mSector.resize(sector);
+		trk.mSectors = sector;
+		trk.mSector.resize(sector);
+		trk.mStatus.Clear();
 		while (s[0] >= ' ') {
 			if (!memcmp(s, "/", 1)) {
 				s += 1;
@@ -207,27 +208,27 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 			}
 			if (!memcmp(s, "MIX", 3)) {
 				s += 3;
-				track.mStatus.SetInfoIMIX(true);
+				trk.mStatus.SetInfoIMIX(true);
 				continue;
 			}
 			if (!memcmp(s, "MFM", 3)) {
 				s += 3;
-				track.mStatus.SetInfoIMFM(true);
+				trk.mStatus.SetInfoIMFM(true);
 				continue;
 			}
 			if (!memcmp(s, "FM", 2)) {
 				s += 2;
-				track.mStatus.SetInfoIFM(true);
+				trk.mStatus.SetInfoIFM(true);
 				continue;
 			}
 			if (!memcmp(s, "IAM", 3)) {
 				s += 3;
-				track.mStatus.SetInfoIAM(true);
+				trk.mStatus.SetInfoIAM(true);
 				continue;
 			}
 			if (!memcmp(s, "ISTR", 4)) {
 				s += 4;
-				track.mStatus.SetInfoISTR(true);
+				trk.mStatus.SetInfoISTR(true);
 				continue;
 			}
 			if (!memcmp(s, "NORMAL", 6)) {
@@ -240,27 +241,27 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 			}
 			if (!memcmp(s, "INVALD ID", 9)) {
 				s += 9;
-				track.mStatus.SetErrInfoInvalid(true);
+				trk.mStatus.SetErrInfoInvalid(true);
 				continue;
 			}
 			if (!memcmp(s, "ID CRC ERROR", 12)) {
 				s += 12;
-				track.mStatus.SetErrInfoCRC(true);
+				trk.mStatus.SetErrInfoCRC(true);
 				continue;
 			}
 			if (!memcmp(s, "INVALD DATA", 11)) {
 				s += 11;
-				track.mStatus.SetErrDataInvalid(true);
+				trk.mStatus.SetErrDataInvalid(true);
 				continue;
 			}
 			if (!memcmp(s, "DATA CRC ERROR", 14)) {
 				s += 14;
-				track.mStatus.SetErrDataCRC(true);
+				trk.mStatus.SetErrDataCRC(true);
 				continue;
 			}
 			if (!memcmp(s, "OVERLAP", 7)) {
 				s += 7;
-				track.mStatus.SetErrOverlap(true);
+				trk.mStatus.SetErrOverlap(true);
 				continue;
 			}
 			
@@ -272,26 +273,26 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 		FDS_LOG("readFDXDiskInfoBody: invalid trackno=%d\n", diskinfo.mLastTrackNo);
 		return 1;
 	}
-	FdxTrackInfo& track = diskinfo.Track(diskinfo.mLastTrackNo);
+	FdxTrackInfo& trk = diskinfo.Track(diskinfo.mLastTrackNo);
 
 	if (!memcmp(s, " GAP4a ", 7)) {
 		s += 7;
-		track.mSizeGap4a = atoi(s);
+		trk.mSizeGap4a = atoi(s);
 		return 1;
 	}
 	if (!memcmp(s, " GAP4b ", 7)) {
 		s += 7;
-		track.mSizeGap4b = atoi(s);
+		trk.mSizeGap4b = atoi(s);
 		return 1;
 	}
 	if (!memcmp(s, " IAM ", 5)) {
 		s += 5;
-		track.mCellIAM = atoi(s);
+		trk.mCellIAM = atoi(s);
 		return 1;
 	}
 	if (!memcmp(s, " GAP1 ", 6)) {
 		s += 6;
-		track.mSizeGap1 = atoi(s);
+		trk.mSizeGap1 = atoi(s);
 		return 1;
 	}
 	if (!memcmp(s, " M", 2) || !memcmp(s, " F", 2)) {
@@ -304,47 +305,49 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 		if (sector <= 0) {
 			return 1;
 		}
-		track.mLastSectorNo = sector;
+		trk.mLastSectorNo = sector;
 		sector--;
-		if (sector >= (int)track.mSector.size()) {
+		if (sector >= (int)trk.mSector.size()) {
 			FDS_ERROR("readFDXDiskInfoBody: invalid sector=%d\n", sector);
 			return 1;
 		}
 
+		FdxSectorInfo& sct = trk.mSector[sector];
+		sct.mStatus.Clear();
 		if (mfm) {
-			track.mSector[sector].mStatus.SetInfoIMFM(true);
+			sct.mStatus.SetInfoIMFM(true);
 		} else {
-			track.mSector[sector].mStatus.SetInfoIFM(true);
+			sct.mStatus.SetInfoIFM(true);
 		}
-		track.mSector[sector].mCellStart = strtoul(s, &s, 10);
+		sct.mCellStart = strtoul(s, &s, 10);
 		s += 3;
-		track.mSector[sector].mCellEnd = strtoul(s, &s, 10);
-		track.mSector[sector].mTime = strtoul(s, &s, 10);
+		sct.mCellEnd = strtoul(s, &s, 10);
+		sct.mTime = strtoul(s, &s, 10);
 		int c = strtoul(s, &s, 16);
 		int h = strtoul(s, &s, 16);
 		int r = strtoul(s, &s, 16);
 		int n = strtoul(s, &s, 16);
-		track.mSector[sector].SetCHRN(c, h, r, n);
-		track.mSector[sector].mSecSize = strtoul(s, &s, 10);
-		track.mSector[sector].mGap2 = strtoul(s, &s, 10);
-		track.mSector[sector].mGap3 = strtoul(s, &s, 10);
+		sct.SetCHRN(c, h, r, n);
+		sct.mSecSize = strtoul(s, &s, 10);
+		sct.mGap2 = strtoul(s, &s, 10);
+		sct.mGap3 = strtoul(s, &s, 10);
 		s += 2;
 		if (!memcmp(s, "ERR", 3)) {
-			track.mSector[sector].mStatus.SetErrInfoCRC(true);
+			sct.mStatus.SetErrInfoCRC(true);
 		}
 		s += 4;
 		if (!memcmp(s, "---", 3)) {
-			track.mSector[sector].mStatus.SetErrDataNothing(true);
+			sct.mStatus.SetErrDataNothing(true);
 		}
 		if (!memcmp(s, "DEL", 3)) {
-			track.mSector[sector].mStatus.SetErrDataDeleted(true);
+			sct.mStatus.SetErrDataDeleted(true);
 		}
 		s += 5;
 		if (!memcmp(s, "ERR", 3)) {
-			track.mSector[sector].mStatus.SetErrDataCRC(true);
+			sct.mStatus.SetErrDataCRC(true);
 		}
 		s += 3;
-		track.mSector[sector].mDRate = strtod(s, &s);
+		sct.mDRate = strtod(s, &s);
 
 		return 1;
 	}

@@ -75,6 +75,7 @@ class FdxStatus {
 	bool InfoIAM(void) const { return ((uint32_t)mStatus & (uint32_t)Status::InfoIAM) != 0; }
 	int  Sec(void) const { return (uint32_t)mStatus & (uint32_t)Status::SecMask; }
 	void SetErr(int s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrMask)) | (uint32_t)((s&0xff) << 24)); };
+	void ClearErr(void) { SetErr((uint32_t)Status::None); }
 	void SetErrOverlap(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrOverlap)) | (uint32_t)(s ? Status::ErrInfoCRC : Status::None)); }
 	void SetErrInfoCRC(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrInfoCRC)) | (uint32_t)(s ? Status::ErrInfoCRC : Status::None)); }
 	void SetErrInfoInvalid(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrInfoInvalid)) | (uint32_t)(s ? Status::ErrInfoInvalid : Status::None)); }
@@ -89,6 +90,9 @@ class FdxStatus {
 	void SetInfoIFM(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::InfoFMMask)) | (uint32_t)(s ? Status::InfoFM : Status::None)); }
 	void SetInfoIAM(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::InfoIAM)) | (uint32_t)(s ? Status::InfoIAM : Status::None)); }
 	void SetInfoSec(int s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::SecMask)) | (uint32_t)(s & 0xff)); }
+	void ClearInfo(void) { SetInfoSec((uint32_t)Status::None); }
+
+	void Clear(void) { ClearErr(); ClearInfo(); }
 
   private:
 	Status mStatus;
