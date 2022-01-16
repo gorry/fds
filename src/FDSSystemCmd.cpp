@@ -548,7 +548,7 @@ FDSSystem::cmdDupDisk()
 #else
 		std::string cmd = "cp";
 		std::string option = "-pf \"" + src + "\" \"" + dst + "\"";
-		int ret2 = mFdxTool.execCmd(cmd.c_str(), option.c_str());
+		int ret2 = !mFdxTool.execCmd(cmd.c_str(), option.c_str());
 #endif  // defined(FDS_WINDOW)
 		if (ret2 != 0) {
 			// 失敗
