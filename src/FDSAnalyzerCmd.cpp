@@ -207,8 +207,10 @@ FDSAnalyzer::cmdDumpTrack()
 				mRetryCount = num;
 				std::string fddumpopt = mConfig.makeDumpTrackOpt(selDump, mTrackViewTrackNo, mRetryCount);
 
+#if 0
 				// FddEmuを終了
 				mpFddEmu->kill();
+#endif
 
 				// ダンプビューを作成
 				refreshAllView();
@@ -309,8 +311,10 @@ FDSAnalyzer::cmdDumpTrack()
 #endif
 #endif
 
+#if 0
 				// FddEmuを再開
 				mpFddEmu->run();
+#endif
 
 				goto quit;
 			}
@@ -503,8 +507,10 @@ FDSAnalyzer::cmdRestoreTrack()
 			}
 		}
 
+#if 0
 		// FddEmuを終了
 		mpFddEmu->kill();
+#endif
 
 		while (!0) {
 			// Fdxファイルのアナライズ
@@ -610,8 +616,10 @@ FDSAnalyzer::cmdRestoreTrack()
 				break;
 			}
 
+#if 0
 			// FddEmuを再開
 			mpFddEmu->run();
+#endif
 
 			goto quit;
 		}

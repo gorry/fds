@@ -1839,11 +1839,17 @@ FDSSystem::cmdAnalyzeDisk()
 	std::string src = mFiles[idx].filename();
 	std::string path = mRootDir + mCurDir + src;
 
+	// FddEmuを終了
+	mFddEmu.kill();
+
 	// アナライザを起動
 	FDSAnalyzer analyzer;
 	analyzer.setIsWindows(mIsWindows);
 	analyzer.setFddEmu(&mFddEmu);
 	analyzer.start(path, mConfig.machineNo());
+
+	// FddEmuを再開
+	mFddEmu.run();
 
 	// 新しいファイルリストを取得
 	mFiles.getFiles(mCurDir.empty());
