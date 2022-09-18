@@ -66,7 +66,7 @@ FDSAnalyzer::cmdDumpTrack()
 		const FdxHeader& fdxheader = mFdxView.diskInfo().mFdxInfo;
 		switch (fdxheader.mType) {
 		  case 0:
-			type = "250KBPS-300RPM";
+			type = "2D-250KBPS";
 			break;
 		  case 1:
 			type = "2DD-250KBPS";
