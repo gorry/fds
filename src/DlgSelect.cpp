@@ -18,6 +18,7 @@ DlgSelect::DlgSelect()
  : mOfsX(0)
  , mOfsY(0)
 {
+	mViewOfsY = 0;
 }
 
 // -------------------------------------------------------------
@@ -130,6 +131,9 @@ DlgSelect::measureSize(int &retWidth, int &retHeight)
 	if (w > COLS-4) {
 		w = COLS-4;
 	}
+	if (h > LINES-2) {
+		h = LINES-2;
+	}
 
 	retWidth = w;
 	retHeight = h;
@@ -173,8 +177,13 @@ DlgSelect::start(int x, int y, int sel)
 	if (x < 0) {
 		x = (COLS-w)/2;
 	}
+	mInnerHeight = h-4;
 	if (y < 0) {
 		y = (LINES-h)/2;
+	}
+	if (mSelect > mInnerHeight-1) {
+		mViewOfsY = mSelect - (mInnerHeight-1);
+		mSelect -= mViewOfsY;
 	}
 
 	// 表示準備
@@ -208,7 +217,17 @@ DlgSelect::start(int x, int y, int sel)
 			}
 			mSelect--;
 			if (mSelect < 0) {
-				mSelect = (int)mSelectTxt.size()-1;
+				mSelect++;
+				mViewOfsY--;
+				if (mSelect+mViewOfsY < 0) {
+					mSelect = (int)mSelectTxt.size()-1;
+					mViewOfsY = mSelect+1 - mInnerHeight;
+					if (mViewOfsY < 0) {
+						mViewOfsY = 0;
+					} else {
+						mSelect -= mViewOfsY;
+					}
+				}
 			}
 			break;
 		  case KEY_DOWN:
@@ -220,13 +239,18 @@ DlgSelect::start(int x, int y, int sel)
 				break;
 			}
 			mSelect++;
-			if (mSelect > (int)mSelectTxt.size()-1) {
-				mSelect = 0;
+			if (mSelect >= mInnerHeight) {
+				mSelect--;
+				mViewOfsY++;
+				if (mSelect+mViewOfsY > (int)mSelectTxt.size()-1) {
+					mViewOfsY = 0;
+					mSelect = 0;
+				}
 			}
 			break;
 		  case 10: // ENTER
 			if (!mDisableEnter) {
-				menuRet = mSelect;
+				menuRet = mSelect + mViewOfsY;
 				finish = true;
 			}
 			break;
@@ -263,7 +287,12 @@ DlgSelect::show()
 {
 	std::string buf(mInnerWidth, ' ');
 
-	for (int i=0; i<(int)mSelectTxt.size(); i++) {
+	int h = mSelectTxt.size();
+	if (h > mInnerHeight) {
+		h = mInnerHeight;
+	}
+	for (int i=0; i<h; i++) {
+		int y = i + mViewOfsY;
 		// 選択肢カーソルを表示
 		if ((i == mSelect) && (!mDisableEnter)) {
 			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor));
@@ -277,11 +306,11 @@ DlgSelect::show()
 		wmove(mwFrame, mInnerOfsY+i, mInnerOfsX+1);
 		if ((i == mSelect) && (!mDisableEnter)) {
 			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor)|A_BOLD);
-			waddstr(mwFrame, mSelectTxt[i].c_str());
+			waddstr(mwFrame, mSelectTxt[y].c_str());
 			wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItemCursor)|A_BOLD);
 		} else {
 			wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItem));
-			waddstr(mwFrame, mSelectTxt[i].c_str());
+			waddstr(mwFrame, mSelectTxt[y].c_str());
 			wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectItem));
 		}
 

@@ -171,6 +171,7 @@ FDSSystem::start()
 				}
 			}
 		}
+		dlg.end();
 
 		// FddEmuを起動
 		std::string cmd = mConfig.fddEmuCmd();
