@@ -38,6 +38,8 @@ public:
 	FDSConfig() {
 		mDriveNo = 0;
 		mMachineNo = 0;
+		mFromOtherImageNo = 0;
+		mToOtherImageNo = 0;
 	}
 	virtual ~FDSConfig() {}
 

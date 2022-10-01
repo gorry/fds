@@ -163,6 +163,9 @@ DlgSelect::start(int x, int y, int sel)
 
 	// 準備
 	mSelect = sel;
+	if (mSelect > (int)mSelectTxt.size()-1) {
+		mSelect = (int)mSelectTxt.size()-1;
+	}
 
 	// ダイアログ位置算出
 	int w, h;
