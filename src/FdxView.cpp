@@ -731,7 +731,7 @@ FdxView::execFdxViewAnalyze2(char* tmpfilename, const std::string& cmd, const st
 	si.dwFlags |= STARTF_USESTDHANDLES;
 
 	ret = CreateProcess(
-	  cmd.c_str(), cmdline.c_str(),
+	  (LPCTSTR)cmd.c_str(), (LPTSTR)cmdline.c_str(),
 	  NULL, NULL, TRUE, 0,
 	  NULL, NULL, &si,&pi
 	);
@@ -758,7 +758,7 @@ FdxView::execFdxViewAnalyze2(char* tmpfilename, const std::string& cmd, const st
 		char buf[1024];
 		memset(buf, 0, sizeof(buf));
 		DWORD readsize = 0;
-		ret = ReadFile(pipe_out_rd, buf, sizeof(buf);, readsize, NULL);
+		ret = ReadFile(pipe_out_read, buf, sizeof(buf), &readsize, NULL);
 
 		// プロセスが終了していたらquit
 		if (!ret) {
