@@ -1399,11 +1399,6 @@ FDSSystem::cmdDumpDisk()
 					}
 					break;
 				}
-#if !defined(FDS_WINDOWS)
-				if (!mNoRoot) {
-					chmod(dst.c_str(), 0666);
-				}
-#endif
 
 				// ダンプビューを破棄
 				dumpViewDestroyWindow();
@@ -1417,9 +1412,19 @@ FDSSystem::cmdDumpDisk()
 				mFiles.sortFiles();
 				filerViewFindEntry(newname);
 
-				// 作成したファイルの情報を表示
-				infoViewSetFile(dst);
-				infoViewRefresh();
+				// ファイルがあれば、作成したファイルの情報を表示
+				fin = fopen(dst.c_str(), "rb");
+				if (fin) {
+					fclose(fin);
+#if !defined(FDS_WINDOWS)
+					if (!mNoRoot) {
+						// 吸い出したファイルをフルアクセス可能にしておく
+						chmod(dst.c_str(), 0666);
+					}
+#endif
+					infoViewSetFile(dst);
+					infoViewRefresh();
+				}
 
 				return;
 			}
