@@ -119,7 +119,7 @@ arc:
 	cp -pv -r package_ini/* package/fds/src/package_ini/
 	cd package/fds; tar cvzf src.tar.gz src; rm -rf src; cd ../..
 	cp -pv Release/fds Release/fds.exe ./
-	strip fds
+	# strip fds
 	cp -pv readme.md fds fds.exe APACHE-LICENSE-2.0.txt readme.txt update.txt package/fds/
 	chmod +x package/fds/fds
 	cd package; tar cvzf $(FDSARC) fds; cd ..
