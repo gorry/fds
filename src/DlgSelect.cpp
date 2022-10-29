@@ -122,7 +122,7 @@ DlgSelect::measureSize(int &retWidth, int &retHeight)
 	int h = mSelectTxt.size()+4;
 	for (int i=0; i<(int)mSelectTxt.size(); i++) {
 		wstr = WStrUtil::str2wstr(mSelectTxt[i]);
-		int w2 = WStrUtil::widthN(wstr);
+		int w2 = WStrUtil::widthN(wstr)+2;
 		if (w < w2) {
 			w = w2;
 		}
