@@ -249,7 +249,7 @@ FDSSystem::infoViewSaveFile()
 		return -1;
 	}
 	{
-		FILE *fin = fopen(mInfoViewFileName.c_str(), "w+b");
+		FILE *fin = fopen(mInfoViewFileName.c_str(), "r+b");
 		if (fin == nullptr) {
 			mDiskInfoResult = -1;
 			return mDiskInfoResult;
