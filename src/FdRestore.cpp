@@ -323,7 +323,8 @@ FdRestore::analyzeLogLine(void)
 			// 前のトラックのステータスが処理中なら完了にする
 			if (mStatus.mNowTrack != nowtrack) {
 				if (mStatus.mNowTrack >= 0) {
-					if (mStatus.mStatus[mStatus.mNowTrack] != TrackStatus::None) {
+					TrackStatus s = mStatus.mStatus[mStatus.mNowTrack];
+					if ((s != TrackStatus::None) && (s != TrackStatus::Error)) {
 						FDS_LOG("analyze: Processing Track %d is Finished\n", mStatus.mNowTrack);
 						mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::None;
 						mStatus.mChanged[mStatus.mNowTrack] = 1;
@@ -333,8 +334,55 @@ FdRestore::analyzeLogLine(void)
 
 			// 処理トラック番号を更新
 			mStatus.mNowTrack = nowtrack;
+			FDS_LOG("analyze: Processing Track %d is Finished\n", mStatus.mNowTrack);
+			mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::None;
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
 		}
 		return;
+	}
+
+	// "Retry"のときの処理
+	pos1 = mLineBuf.find("Retry");
+	if (0 == pos1) {
+		FDS_LOG("analyze: found [Retry] on %d\n", (int)pos1);
+		// リトライ回数を得る
+		int retry = atoi(mLineBuf.c_str()+pos1+5);
+		size_t pos2 = mLineBuf.find("(T", pos1);
+		if (std::string::npos != pos2) {
+			// Retry   1/5        :   0%(T  0 C 0 H0)
+			// トラック番号を得る
+			int nowtrack = atoi(mLineBuf.c_str()+pos2+2);
+			FDS_LOG("analyze: found [Retry %d] Track on %d: %d\n", retry, (int)pos2+2, nowtrack);
+
+			// 前のトラックのステータスが処理中なら完了にする
+			if (mStatus.mNowTrack != nowtrack) {
+				if (mStatus.mNowTrack >= 0) {
+					TrackStatus s = mStatus.mStatus[mStatus.mNowTrack];
+					if ((s != TrackStatus::None) && (s != TrackStatus::Error)) {
+						FDS_LOG("analyze: Processing Track %d is Finished\n", mStatus.mNowTrack);
+						mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::None;
+						mStatus.mChanged[mStatus.mNowTrack] = 1;
+					}
+				}
+			}
+
+			// 処理トラック番号を更新
+			mStatus.mNowTrack = nowtrack;
+			FDS_LOG("analyze: Processing Track %d is Retry %d\n", mStatus.mNowTrack, retry);
+			mStatus.mStatus[mStatus.mNowTrack] = (FdRestore::TrackStatus)((int)FdRestore::TrackStatus::Retry1+retry-1);
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
+		}
+	}
+
+	// "Error"のときの処理
+	pos1 = mLineBuf.find("Error");
+	if (1 == pos1) {
+		FDS_LOG("analyze: found [Error] on %d\n", (int)pos1);
+		if (mStatus.mNowTrack >= 0) {
+			FDS_LOG("analyze: Processing Track %d is Error\n", mStatus.mNowTrack);
+			mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Error;
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
+		}
 	}
 
 	pos1 = mLineBuf.find("Write protect");
@@ -639,38 +687,33 @@ FdRestore::analyzeAnalyzeLogLine(void)
 	FDS_LOG("analyze: [%s]\n", mLineBuf.c_str());
 	size_t pos1;
 
-	// "CYLINDER"のときの処理
-	pos1 = mLineBuf.find("CYLINDER");
+	// "TRACK"のときの処理
+	pos1 = mLineBuf.find("TRACK");
 	if (std::string::npos != pos1) {
-		FDS_LOG("analyze: found [CYLINDER] on %d\n", (int)pos1);
-		int nowcylinder = atoi(mLineBuf.c_str()+pos1+8);
-		size_t pos2 = mLineBuf.find("HEAD", pos1);
-		if (std::string::npos != pos2) {
-			// CYLINDER 00 HEAD 
-			FDS_LOG("analyze: found [HEAD] on %d\n", (int)pos2);
-			int nowhead = atoi(mLineBuf.c_str()+pos2+4);
-			mStatus.mNowTrack = nowcylinder*2 + nowhead;
-			size_t pos3 = mLineBuf.find("NORMAL", pos2);
-			if (std::string::npos != pos3) {
-				// CYLINDER 00 HEAD ... NORMAL
-				mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Finish;
-				mStatus.mChanged[mStatus.mNowTrack] = 1;
-				return;
-			}
-			pos3 = mLineBuf.find("ILLEGAL", pos2);
-			if (std::string::npos != pos3) {
-				// CYLINDER 00 HEAD ... ILLEGAL
-				mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Error;
-				mStatus.mChanged[mStatus.mNowTrack] = 1;
-				return;
-			}
-			pos3 = mLineBuf.find("UNFORMAT", pos2);
-			if (std::string::npos != pos3) {
-				// CYLINDER 00 HEAD ... UNFORMAT
-				mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Unformat;
-				mStatus.mChanged[mStatus.mNowTrack] = 1;
-				return;
-			}
+		FDS_LOG("analyze: found [TRACK] on %d\n", (int)pos1);
+		int nowtrack = atoi(mLineBuf.c_str()+pos1+5);
+		mStatus.mNowTrack = nowtrack;
+		size_t pos2 = mLineBuf.find("%)", pos1);
+		size_t pos3 = mLineBuf.find("NORMAL", pos2);
+		if (std::string::npos != pos3) {
+			// CYLINDER 00 HEAD ... NORMAL
+			mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Finish;
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
+			return;
+		}
+		pos3 = mLineBuf.find("ILLEGAL", pos2);
+		if (std::string::npos != pos3) {
+			// CYLINDER 00 HEAD ... ILLEGAL
+			mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Error;
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
+			return;
+		}
+		pos3 = mLineBuf.find("UNFORMAT", pos2);
+		if (std::string::npos != pos3) {
+			// CYLINDER 00 HEAD ... UNFORMAT
+			mStatus.mStatus[mStatus.mNowTrack] = TrackStatus::Unformat;
+			mStatus.mChanged[mStatus.mNowTrack] = 1;
+			return;
 		}
 	}
 }

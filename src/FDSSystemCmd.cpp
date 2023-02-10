@@ -1675,7 +1675,7 @@ FDSSystem::cmdRestoreDisk()
 		while (!0) {
 			// Fdxファイルのアナライズ
 			{
-				std::string cmd = mConfig.fdxToolCmd();
+				std::string cmd = mConfig.fdxViewCmd();
 				std::string option = "-a \""+path+"\"";
 				mFdRestore.setAnalyzeCmd(cmd);
 				mFdRestore.setAnalyzeOption(option);
