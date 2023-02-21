@@ -105,8 +105,8 @@ FDSAnalyzer::sectorViewRefresh()
 	switch (mSectorViewMode) {
 	  case SectorViewMode::Encode:
 		//                          01234567890123456789012345678901234567890123456789012345678901234567890
-		mvwaddstr(mwSectorView,  1, 2, "Ofs|   0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F");
-		mvwaddstr(mwSectorView,  2, 2, "---+----------------------------------------------------------------");
+		mvwaddstr(mwSectorView,  1, 2, "Ofs|   0   1   2   3   4   5   6   7    8   9   A   B   C   D   E   F|0123456789ABCDEF");
+		mvwaddstr(mwSectorView,  2, 2, "---+-----------------------------------------------------------------+----------------");
 		break;
 	  default:
 	  case SectorViewMode::Data:
@@ -151,13 +151,32 @@ FDSAnalyzer::sectorViewRefresh()
 				std::vector<uint8_t>& data = sector->Data();
 				std::vector<uint8_t>& encode = sector->Encode();
 				int ofs = y*mSectorViewListColumns;
-				sprintf(line, "%03X|%02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X|",
-				  ofs,
-				  data[ofs+0x00], data[ofs+0x01], data[ofs+0x02], data[ofs+0x03],
-				  data[ofs+0x04], data[ofs+0x05], data[ofs+0x06], data[ofs+0x07],
-				  data[ofs+0x08], data[ofs+0x09], data[ofs+0x0a], data[ofs+0x0b],
-				  data[ofs+0x0c], data[ofs+0x0d], data[ofs+0x0e], data[ofs+0x0f]
-				);
+				switch (mSectorViewMode) {
+				  case SectorViewMode::Encode:
+					sprintf(line, "%03X|%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X|",
+					  ofs,
+					  encode[ofs*2+0x00], encode[ofs*2+0x01], encode[ofs*2+0x02], encode[ofs*2+0x03],
+					  encode[ofs*2+0x04], encode[ofs*2+0x05], encode[ofs*2+0x06], encode[ofs*2+0x07],
+					  encode[ofs*2+0x08], encode[ofs*2+0x09], encode[ofs*2+0x0a], encode[ofs*2+0x0b],
+					  encode[ofs*2+0x0c], encode[ofs*2+0x0d], encode[ofs*2+0x0e], encode[ofs*2+0x0f],
+					  encode[ofs*2+0x10], encode[ofs*2+0x11], encode[ofs*2+0x12], encode[ofs*2+0x13],
+					  encode[ofs*2+0x14], encode[ofs*2+0x15], encode[ofs*2+0x16], encode[ofs*2+0x17],
+					  encode[ofs*2+0x18], encode[ofs*2+0x19], encode[ofs*2+0x1a], encode[ofs*2+0x1b],
+					  encode[ofs*2+0x1c], encode[ofs*2+0x1d], encode[ofs*2+0x1e], encode[ofs*2+0x1f]
+					);
+					break;
+
+				  case SectorViewMode::Data:
+				  default:
+					sprintf(line, "%03X|%02X%02X%02X%02X%02X%02X%02X%02X %02X%02X%02X%02X%02X%02X%02X%02X|",
+					  ofs,
+					  data[ofs+0x00], data[ofs+0x01], data[ofs+0x02], data[ofs+0x03],
+					  data[ofs+0x04], data[ofs+0x05], data[ofs+0x06], data[ofs+0x07],
+					  data[ofs+0x08], data[ofs+0x09], data[ofs+0x0a], data[ofs+0x0b],
+					  data[ofs+0x0c], data[ofs+0x0d], data[ofs+0x0e], data[ofs+0x0f]
+					);
+					break;
+				}
 				wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+1);
 				waddstr(mwSectorView, line);
 				wchar_t wbuf[256];
@@ -317,8 +336,18 @@ FDSAnalyzer::sectorViewRefresh()
 					}
 					if (col2 != fds::ColorPair::Normal) {
 						wattron(mwSectorView, COLOR_PAIR(col2)|A_BOLD);
-						sprintf(line, "%02X", data[ofs+j]);
-						wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+5+j*2 + ((j>=8) ? 1 : 0));
+						switch (mSectorViewMode) {
+						  case SectorViewMode::Encode:
+							sprintf(line, "%02X%02X", encode[(ofs+j)*2], encode[(ofs+j)*2+1]);
+							wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+5+j*4 + ((j>=8) ? 1 : 0));
+							break;
+
+						  case SectorViewMode::Data:
+						  default:
+							sprintf(line, "%02X", data[ofs+j]);
+							wmove(mwSectorView, mSectorViewWindowOfsY+i, mSectorViewWindowOfsX+5+j*2 + ((j>=8) ? 1 : 0));
+							break;
+						}
 						waddstr(mwSectorView, line);
 						wattroff(mwSectorView, COLOR_PAIR(col2)|A_BOLD);
 					}

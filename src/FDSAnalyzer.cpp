@@ -273,6 +273,19 @@ FDSAnalyzer::mainLoop()
 			finish = true;
 			break;
 
+		  case 'V':
+			if (mAnalyzerMode == AnalyzerMode::Sector) {
+				if (mSectorViewMode == SectorViewMode::Encode) {
+					mSectorViewMode = SectorViewMode::Data;
+					helpViewSetMode(FDSAnalyzer::HelpViewMode::Data);
+				} else {
+					mSectorViewMode = SectorViewMode::Encode;
+					helpViewSetMode(FDSAnalyzer::HelpViewMode::Encode);
+				}
+				sectorRefresh = true;
+			}
+			break;
+
 
 		  case '<':
 			cmdDumpTrack();
