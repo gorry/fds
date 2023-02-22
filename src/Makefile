@@ -1,7 +1,7 @@
 # gmake
 # ◇
 
-FDSARC = fds68k_20221029a.tar.gz
+FDSARC = fds68k_20230222a.tar.gz
 
 CPPSRCS = \
 	main.cpp \
