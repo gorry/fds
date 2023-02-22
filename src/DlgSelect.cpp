@@ -117,9 +117,30 @@ DlgSelect::setOffset(int ofsx, int ofsy)
 void
 DlgSelect::measureSize(int &retWidth, int &retHeight)
 {
-	std::wstring wstr = WStrUtil::str2wstr(mHeader);
+	// mHeaderを\nで分割したmHeadersを作成する
+	mHeaders.clear();
+	size_t ofs = 0;
+	while (!0) {
+		size_t pos = mHeader.find('\n', ofs);
+		if (pos == std::string::npos) {
+			mHeaders.push_back(mHeader.substr(ofs));
+			break;
+		}
+		mHeaders.push_back(mHeader.substr(ofs, pos-ofs));
+		ofs = pos+1;
+	}
+
+	// mHeadersから最長のものを求める
+	std::wstring wstr = WStrUtil::str2wstr(mHeaders[0]);
+	for (size_t i=1; i<mHeaders.size(); i++) {
+		std::wstring wstr2 = WStrUtil::str2wstr(mHeaders[i]);
+		if (wstr.length() < wstr2.length()) {
+			wstr = wstr2;
+		}
+	}
+
 	int w = WStrUtil::widthN(wstr);
-	int h = mSelectTxt.size()+4;
+	int h = mSelectTxt.size()+3+mHeaders.size();
 	for (int i=0; i<(int)mSelectTxt.size(); i++) {
 		wstr = WStrUtil::str2wstr(mSelectTxt[i]);
 		int w2 = WStrUtil::widthN(wstr)+2;
@@ -175,12 +196,12 @@ DlgSelect::start(int x, int y, int sel)
 		w = 6;
 	}
 	mInnerOfsX = 2;
-	mInnerOfsY = 3;
+	mInnerOfsY = 2 + mHeaders.size();
 	mInnerWidth = w-4;
 	if (x < 0) {
 		x = (COLS-w)/2;
 	}
-	mInnerHeight = h-4;
+	mInnerHeight = h-3-mHeaders.size();
 	if (y < 0) {
 		y = (LINES-h)/2;
 	}
@@ -193,7 +214,9 @@ DlgSelect::start(int x, int y, int sel)
 	mwFrame = newwin(h, w, y+mOfsY, x+mOfsX);
 	wborder(mwFrame, 0,0,0,0,0,0,0,0);
 	wattron(mwFrame, COLOR_PAIR(fds::ColorPair::SelectHeader)|A_BOLD);
-	mvwaddstr(mwFrame, 1, 2, mHeader.c_str());
+	for (size_t i=0; i<mHeaders.size(); i++) {
+		mvwaddstr(mwFrame, i+1, 2, mHeaders[i].c_str());
+	}
 	wattroff(mwFrame, COLOR_PAIR(fds::ColorPair::SelectHeader)|A_BOLD);
 
 	// 入力準備

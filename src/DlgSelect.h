@@ -72,6 +72,7 @@ private:	// var
 	std::vector<std::string> mSelectTxt;
 	WINDOW *mwFrame = nullptr;
 	std::string mHeader;
+	std::vector<std::string> mHeaders;
 	int mInnerOfsX = 0;
 	int mInnerOfsY = 0;
 	int mInnerWidth = 0;

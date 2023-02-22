@@ -682,23 +682,24 @@ FDSAnalyzer::cmdMergeTrack()
 		pos++;
 		dirname.erase(pos, dirname.length()-pos);
 	}
+	std::string targetFilename = mFilename.substr(pos);
 	Directory dir(dirname);
 	dir.setMaskFdxFile(true);
 	dir.getFiles(false);
 	dir.sortFiles();
 
 	// ファイル選択肢準備
-	std::string filename = "";
+	std::string mergeFilename = "";
 	if (dirname == mConfig.mergeTrackDir()) {
-		filename = mConfig.mergeTrackFilename();
+		mergeFilename = mConfig.mergeTrackFilename();
 	}
-	std::string fdxfile = dirname + filename;
+	std::string fdxfile = dirname + mergeFilename;
 	int selFile = 0;
 	DlgSelect::ItemsVec items0;
 	for (int i=0; i<(int)dir.size(); i++) {
 		std::wstring wstr = WStrUtil::str2wstr(dir[i].filename());
 		std::string str = WStrUtil::wstr2strN(wstr, FDX_FILENAME_MAX);
-		if (str == filename) {
+		if (str == mergeFilename) {
 			selFile = i;
 		}
 		items0.push_back(str);
@@ -710,7 +711,7 @@ FDSAnalyzer::cmdMergeTrack()
 		// ダイアログ表示
 		DlgSelect dlg0;
 		dlg0.setItemsVec(items0);
-		dlg0.setHeader("[Select FDX File merge into this]");
+		dlg0.setHeader("[Select FDX File to merge]");
 		dlg0.setCanEscape(true);
 		selFile = dlg0.start(selFile);
 
@@ -719,14 +720,14 @@ FDSAnalyzer::cmdMergeTrack()
 			break;
 		}
 
-		// ドライブを選択
-		filename = items0[selFile];
+		// ファイルを選択
+		mergeFilename = items0[selFile];
 		mConfig.setMergeTrackDir(dirname);
-		mConfig.setMergeTrackFilename(filename);
+		mConfig.setMergeTrackFilename(mergeFilename);
 
 		// マージ先のFDXファイルを読み込む
-		std::string fromFDXFile = dirname + filename;
-		if (fromFDXFile != fdxfile) {
+		std::string mergeFDXFile = dirname + mergeFilename;
+		if (mergeFDXFile != fdxfile) {
 			mMergeFdxView.Clear();
 		}
 		if (mMergeFdxView.mDiskInfo.TrackSize() == 0) {
@@ -736,46 +737,62 @@ FDSAnalyzer::cmdMergeTrack()
 
 		// マージ先のFDXファイルが同じ仕様でなければ失敗
 		FdxDiskInfo& targetDisk = mFdxView.diskInfo();
-		FdxDiskInfo& fromDisk = mMergeFdxView.diskInfo();
+		FdxDiskInfo& mergeDisk = mMergeFdxView.diskInfo();
 		int track = targetDisk.mLastTrackNo;
-		if (track >= (int)fromDisk.TrackSize()) {
+		if (track >= (int)mergeDisk.TrackSize()) {
 			FDS_ERROR("cmdMergeTrack: Not found track %d in Merge FDX File!\n", track);
-			DlgSelect dlg3;
-			dlg3.setItemsOk();
-			dlg3.setHeader("Not found track %d in Merge FDX File!");
-			dlg3.setCanEscape(true);
-			dlg3.start();
-			dlg3.end();
+			DlgSelect dlg1;
+			dlg1.setItemsOk();
+			dlg1.setHeader("Not found track %d in Merge FDX File!");
+			dlg1.setCanEscape(true);
+			dlg1.start();
+			dlg1.end();
 			break;
 		}
 		if ( 
-		  (targetDisk.mFdxInfo.mType != fromDisk.mFdxInfo.mType) ||
-		  (targetDisk.mFdxInfo.mRpm != fromDisk.mFdxInfo.mRpm) ||
-		  (targetDisk.mFdxInfo.mRate != fromDisk.mFdxInfo.mRate) ||
-		  (targetDisk.mFdxInfo.mCylinders != fromDisk.mFdxInfo.mCylinders) ||
-		  (targetDisk.mFdxInfo.mHeads != fromDisk.mFdxInfo.mHeads)
+		  (targetDisk.mFdxInfo.mType != mergeDisk.mFdxInfo.mType) ||
+		  (targetDisk.mFdxInfo.mRpm != mergeDisk.mFdxInfo.mRpm) ||
+		  (targetDisk.mFdxInfo.mRate != mergeDisk.mFdxInfo.mRate) ||
+		  (targetDisk.mFdxInfo.mCylinders != mergeDisk.mFdxInfo.mCylinders) ||
+		  (targetDisk.mFdxInfo.mHeads != mergeDisk.mFdxInfo.mHeads)
 		) {
 			FDS_ERROR("cmdMergeTrack: Not same disk type FDX File!\n", track);
-			DlgSelect dlg3;
-			dlg3.setItemsOk();
-			dlg3.setHeader("Not same disk type FDX File!");
-			dlg3.setCanEscape(true);
-			dlg3.start();
-			dlg3.end();
+			DlgSelect dlg1;
+			dlg1.setItemsOk();
+			dlg1.setHeader("Not same disk type FDX File!");
+			dlg1.setCanEscape(true);
+			dlg1.start();
+			dlg1.end();
 			break;
+		}
+
+		// ダイアログ表示
+		{
+			DlgSelect dlg2;
+			dlg2.setItemsYesNo();
+			std::string msg = "Merge track " + std::to_string(track) + "\n of   [" + mergeFilename + "]\n into [" + targetFilename + "].\n\nOK?";
+			dlg2.setHeader(msg);
+			dlg2.setCanEscape(true);
+			int sel2 = dlg2.start();
+			dlg2.end();
+
+			// [Cancel]を選んだら最初から
+			if (sel2 != 0) {
+				continue; // 最初から
+			}
 		}
 
 		// マージ
 		std::string target = mFilename;
-		std::string from = fromFDXFile;
-		std::string option = "-t "+ std::to_string(track) + " -i \"" + from + "\" -o \"" + target + "\"";
+		std::string merge = mergeFDXFile;
+		std::string option = "-t "+ std::to_string(track) + " -i \"" + merge + "\" -o \"" + target + "\"";
 		std::string cmd = mConfig.fdxTrkCpyCmd();
 		bool ret2 = mFdxTrkCpy.execCmd(cmd.c_str(), option.c_str());
 		if (!ret2) {
 			// 失敗
 			std::string msg = "Merge Failed!";
 			FDS_ERROR("cmdMergeTrack: %s\n", msg.c_str());
-			FDS_ERROR(" from=[%s], target=[%s], result=%d\n", from.c_str(), target.c_str(), ret2);
+			FDS_ERROR(" merge=[%s], target=[%s], result=%d\n", merge.c_str(), target.c_str(), ret2);
 			DlgSelect dlg3;
 			dlg3.setItemsOk();
 			dlg3.setHeader(msg);
