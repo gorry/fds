@@ -57,8 +57,7 @@ FDSAnalyzer::cmdDumpTrack()
 		}
 
 		// ドライブを選択
-		selDrive = vecDrive[selDrive];
-		mConfig.setDriveNo(selDrive);
+		mConfig.setDriveNo(vecDrive[selDrive]);
 
 		// TYPEを設定
 		std::string type;

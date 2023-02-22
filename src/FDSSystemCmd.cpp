@@ -1172,8 +1172,7 @@ FDSSystem::cmdDumpDisk()
 		}
 
 		// ドライブを選択
-		selDrive = vecDrive[selDrive];
-		mConfig.setDriveNo(selDrive);
+		mConfig.setDriveNo(vecDrive[selDrive]);
 
 		// ダンプ形式選択肢準備
 		std::vector<int> vecDump;
@@ -1618,9 +1617,8 @@ FDSSystem::cmdRestoreDisk()
 		}
 
 		// ドライブを選択
+		mConfig.setDriveNo(vecDrive[selDrive]);
 		std::string& driveName = items[selDrive];
-		selDrive = vecDrive[selDrive];
-		mConfig.setDriveNo(selDrive);
 
 		// ダンプ形式を選択
 		ret = mConfig.cfgDriveW().setRestoreNoByType(type);
