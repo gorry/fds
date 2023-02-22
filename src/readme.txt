@@ -1,6 +1,6 @@
 ◇ FDS: FDX68 File Selector
   Hiroaki GOTO as GORRY / http://GORRY.hauN.org/
-  Version 20221029a
+  Version 20230222a
 
 ========================================================================
 もくじ
@@ -63,7 +63,7 @@ FDSの動作には、以下の環境が必要です。
 
 3. ソフトウェア
 
-    - FDX68
+    - FDX68 v2.00
     ※ 実機接続ディスプレイでファイル名にかな＆漢字を使う場合、fbtermな
        どの漢字対応ターミナルと日本語フォントが必要です。
 
@@ -105,6 +105,7 @@ Windows版が用意されています。
     | - fdxconv
     | - fdxview
     | - fdxtool
+    | - fdxtrkcpy
     | - fddump
     | - fdrestore
 
@@ -1173,6 +1174,7 @@ Windows版が用意されています。
     | - fdxconv.exe
     | - fdxview.exe
     | - fdxtool.exe
+    | - fdxtrkcpy.exe
 
 以降は、Raspberry Piで実行する場合と同じです。Raspberry Piと同じfds
 フォルダをWindowsで扱っても構いません。
