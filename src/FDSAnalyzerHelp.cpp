@@ -79,34 +79,37 @@ FDSAnalyzer::helpViewRefresh()
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Track " : ""));
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Data  " : ""));
-		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
-		mvwaddstr(mwHelpView,  7, 1, (0 ? "V: View Data/Enc " : ""));
+		mvwaddstr(mwHelpView,  6, 1, (1 ? "M: Merge Track   " : ""));
+		mvwaddstr(mwHelpView,  7, 1, (1 ? "Q: Quit          " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (0 ? "V: View Data/Enc " : ""));
 #if !defined(NDEBUG)
-		mvwaddstr(mwHelpView,  8, 1, (1 ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  9, 1, (1 ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  9, 1, (1 ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView, 10, 1, (1 ? ">: Restore Track " : ""));
 		(void)P;
 #else
-		mvwaddstr(mwHelpView,  7, 1, (P ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  8, 1, (P ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  9, 1, (P ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView, 10, 1, (P ? ">: Restore Track " : ""));
 #endif
 		break;
 	  case HelpViewMode::Data:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Data  " : ""));
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Track " : ""));
-		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
-		mvwaddstr(mwHelpView,  7, 1, (1 ? "V: View Data     " : ""));
-		mvwaddstr(mwHelpView,  8, 1, (1 ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  9, 1, (1 ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  6, 1, (1 ? "M: Merge Track   " : ""));
+		mvwaddstr(mwHelpView,  7, 1, (1 ? "Q: Quit          " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (1 ? "V: View Data     " : ""));
+		mvwaddstr(mwHelpView,  9, 1, (1 ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView, 10, 1, (1 ? ">: Restore Track " : ""));
 		break;
 	  case HelpViewMode::Encode:
 		mvwaddstr(mwHelpView,  3, 1, (1 ? "Arrow:Move Data  " : ""));
 		mvwaddstr(mwHelpView,  4, 1, (1 ? "AZSX :Move Sector" : ""));
 		mvwaddstr(mwHelpView,  5, 1, (1 ? "Enter:View Track " : ""));
-		mvwaddstr(mwHelpView,  6, 1, (1 ? "Q: Quit          " : ""));
-		mvwaddstr(mwHelpView,  7, 1, (1 ? "V: View Encode   " : ""));
-		mvwaddstr(mwHelpView,  8, 1, (1 ? "<: Dump Track    " : ""));
-		mvwaddstr(mwHelpView,  9, 1, (1 ? ">: Restore Track " : ""));
+		mvwaddstr(mwHelpView,  6, 1, (1 ? "M: Merge Track   " : ""));
+		mvwaddstr(mwHelpView,  7, 1, (1 ? "Q: Quit          " : ""));
+		mvwaddstr(mwHelpView,  8, 1, (1 ? "V: View Encode   " : ""));
+		mvwaddstr(mwHelpView,  9, 1, (1 ? "<: Dump Track    " : ""));
+		mvwaddstr(mwHelpView, 10, 1, (1 ? ">: Restore Track " : ""));
 		break;
 	}
 

@@ -29,6 +29,7 @@
 #include "FddEmu.h"
 #include "FdDump.h"
 #include "FdxView.h"
+#include "FdxTrkCpy.h"
 #include "FDXFile.h"
 #include "FDSConfig.h"
 #include "DlgInput.h"
@@ -101,6 +102,8 @@ private:	// function
 	void cmdRestoreTrack();
 	static int cmdRestoreTrackCallback_(FdRestore::Status& st, void* p);
 	int cmdRestoreTrackCallback(FdRestore::Status& st);
+
+	void cmdMergeTrack();
 
 	// disk view
 	void diskViewCreateWindow();
@@ -204,6 +207,8 @@ private:	// var
 	FdxView mFdxView;
 	FdDump mFdDump;
 	FdRestore mFdRestore;
+	FdxView mMergeFdxView;
+	FdxTrkCpy mFdxTrkCpy;
 
 	FDSConfig mConfig;
 	FddEmu* mpFddEmu;

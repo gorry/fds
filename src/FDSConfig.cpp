@@ -30,18 +30,19 @@ FDSConfig::load(const std::string& filename)
 
 	// SYSTEMセクション読み込み
 #if defined(FDS_WINDOWS)
-	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIRWIN");
+	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIRWIN", "fdxbinwin");
 	std::string separator = "\\";
 #else
-	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIR");
+	mCmdDir = mIniFile.getString("SYSTEM", "CMDDIR", "fdxbin");
 	std::string separator = "/";
 #endif
-	mFddEmuCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDEMUCMD");
-	mFdxConvCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXCONVCMD");
-	mFdxToolCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXTOOLCMD");
-	mFdxViewCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXVIEWCMD");
-	mFdDumpCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDUMPCMD");
-	mFdRestoreCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDRESTORECMD");
+	mFddEmuCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDEMUCMD", "fddemu");
+	mFdxConvCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXCONVCMD", "fdxconv");
+	mFdxToolCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXTOOLCMD", "fdxtool");
+	mFdxTrkCpyCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXTRKCPYCMD", "fdxtrkcpy");
+	mFdxViewCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDXVIEWCMD", "fdxview");
+	mFdDumpCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDDUMPCMD", "fddump");
+	mFdRestoreCmd = mCmdDir + separator + mIniFile.getString("SYSTEM", "FDRESTORECMD", "fdrestore");
 
 	// [DRIVES]セクション読み込み
 	for (num=1; ; num++) {
@@ -57,7 +58,7 @@ FDSConfig::load(const std::string& filename)
 		return -1;
 	}
 	mVecDrives.resize(num-1);
-	mDrivesDir = mIniFile.getString("DRIVES", "DIR");
+	mDrivesDir = mIniFile.getString("DRIVES", "DIR", "drives");
 	for (int i=1; i<num; i++) {
 		char key[FDX_FILENAME_MAX];
 		sprintf(key, "DRIVE-%d", i);
@@ -84,7 +85,7 @@ FDSConfig::load(const std::string& filename)
 		return -1;
 	}
 	mVecMachines.resize(num-1);
-	mMachinesDir = mIniFile.getString("MACHINES", "DIR");
+	mMachinesDir = mIniFile.getString("MACHINES", "DIR", "machines");
 	for (int i=1; i<num; i++) {
 		char key[FDX_FILENAME_MAX];
 		sprintf(key, "MACHINE-%d", i);

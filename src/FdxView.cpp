@@ -360,7 +360,7 @@ FdxView::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 int
 FdxView::readFDXDiskInfoDump(FdxDiskInfo& diskinfo, char* s)
 {
-	FDS_LOG("readFDXDiskInfoBody: get line: %s", s);
+	FDS_LOG("readFDXDiskInfoDump: get line: %s", s);
 
 	if ((diskinfo.mLastTrackNo < 0) || ((int)diskinfo.TrackSize() <= diskinfo.mLastTrackNo)) {
 		FDS_ERROR("readFDXDiskInfoDump: track=%d\n", diskinfo.mLastTrackNo);

@@ -36,6 +36,7 @@ CPPSRCS = \
 	FdxConv.cpp \
 	FdxStatus.cpp \
 	FdxTool.cpp \
+	FdxTrkCpy.cpp \
 	FdxView.cpp \
 	IniFile.cpp \
 	Log.cpp \

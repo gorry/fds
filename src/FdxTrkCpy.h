@@ -1,11 +1,11 @@
 ﻿// ◇
 // fds: fdx68 selector
-// FdxConv: FdxConvの操作
+// FdxTrkCpy: FdxTrkCpyの操作
 // Copyright: (C)2020 Hiroaki GOTO as GORRY.
 // License: see readme.txt
 
-#if !defined(__FDXCONV_H__)
-#define __FDXCONV_H__
+#if !defined(__FDXTRKCPY_H__)
+#define __FDXTRKCPY_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,16 +31,16 @@
 #include "Log.h"
 
 // =====================================================================
-// FdxConvの操作
+// FdxTrkCpyの操作
 // =====================================================================
 
-class FdxConv
+class FdxTrkCpy
 {
 public:		// struct, enum
 
 public:		// function
-	FdxConv();
-	virtual ~FdxConv() {}
+	FdxTrkCpy();
+	virtual ~FdxTrkCpy() {}
 
 	bool execCmd(const std::string& cmd, const std::string& option);
 
@@ -52,6 +52,6 @@ private:	// var
 
 };
 
-#endif  // __FDXCONV_H__
+#endif  // __FDXTRKCPY_H__
 // =====================================================================
 // [EOF]

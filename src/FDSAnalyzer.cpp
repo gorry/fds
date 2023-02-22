@@ -294,6 +294,10 @@ FDSAnalyzer::mainLoop()
 			cmdRestoreTrack();
 			goto updateView;
 
+		  case 'M':
+			cmdMergeTrack();
+			goto updateView;
+
 #if 0
 		  case '\\':
 		  case '/':

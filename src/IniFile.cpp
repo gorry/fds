@@ -170,11 +170,11 @@ IniFile::hasKey(const std::string& section, const std::string& key)
 // データベースから文字列を読み出す
 // -------------------------------------------------------------
 const std::string
-IniFile::getString(const std::string& section, const std::string& key)
+IniFile::getString(const std::string& section, const std::string& key, const std::string& defaultparam)
 {
 	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
 	if (mIniFileMap.end() == mIniFileMap.find(sectionkey)) {
-		return "";
+		return defaultparam;
 	}
 	return mIniFileMap[sectionkey];
 }
@@ -183,11 +183,11 @@ IniFile::getString(const std::string& section, const std::string& key)
 // データベースからint値（10進数）を読み出す
 // -------------------------------------------------------------
 int
-IniFile::getInt(const std::string& section, const std::string& key)
+IniFile::getInt(const std::string& section, const std::string& key, int defaultparam)
 {
 	std::string sectionkey = (section.empty() ? key : (section + ":" + key));
 	if (mIniFileMap.end() == mIniFileMap.find(sectionkey)) {
-		return 0;
+		return defaultparam;
 	}
 	return atoi(mIniFileMap[sectionkey].c_str());
 }

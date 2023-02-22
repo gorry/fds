@@ -30,8 +30,8 @@ public:		// function
 	int load(const char* filename);
 	int load(const std::string& filename) { return load(filename.c_str()); }
 	bool hasKey(const std::string& section, const std::string& key);
-	const std::string getString(const std::string& section, const std::string& key);
-	int getInt(const std::string& section, const std::string& key);
+	const std::string getString(const std::string& section, const std::string& key, const std::string& defaultparam="");
+	int getInt(const std::string& section, const std::string& key, int defaultparam=0);
 
 	int save(const char* filename);
 	int save(const std::string& filename) { return save(filename.c_str()); }

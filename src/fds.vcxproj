@@ -182,6 +182,7 @@
     <ClCompile Include="FdxConv.cpp" />
     <ClCompile Include="FdxStatus.cpp" />
     <ClCompile Include="FdxTool.cpp" />
+    <ClCompile Include="FdxTrkCpy.cpp" />
     <ClCompile Include="FdxView.cpp" />
     <ClCompile Include="MakeArgv.cpp" />
     <ClCompile Include="wcwidth\wcwidth.c" />
@@ -214,6 +215,7 @@
     <ClInclude Include="FdxConv.h" />
     <ClInclude Include="FdxStatus.h" />
     <ClInclude Include="FdxTool.h" />
+    <ClInclude Include="FdxTrkCpy.h" />
     <ClInclude Include="FdxView.h" />
     <ClInclude Include="MakeArgv.h" />
     <ClInclude Include="wcwidth\wcwidth.h" />

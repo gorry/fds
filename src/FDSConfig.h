@@ -48,6 +48,7 @@ public:
 	const std::string& cmdDir() const { return mCmdDir; }
 	const std::string& fddEmuCmd() const { return mFddEmuCmd; }
 	const std::string& fdxToolCmd() const { return mFdxToolCmd; }
+	const std::string& fdxTrkCpyCmd() const { return mFdxTrkCpyCmd; }
 	const std::string& fdxViewCmd() const { return mFdxViewCmd; }
 	const std::string& fdDumpCmd() const { return mFdDumpCmd; }
 	const std::string& fdRestoreCmd() const { return mFdRestoreCmd; }
@@ -88,11 +89,17 @@ public:
 	std::string makeRestoreTrackOpt(int machineno, int driveno, int restoreno, int trackno) const;
 	std::string makeRestoreTrackOpt(int restoreno, int trackno) const { return makeRestoreTrackOpt(machineNo(), driveNo(), restoreno, trackno); }
 
+	const std::string& mergeTrackDir() const { return mMergeTrackDir; }
+	const void setMergeTrackDir(const std::string& dir) { mMergeTrackDir = dir; }
+	const std::string& mergeTrackFilename() const { return mMergeTrackFilename; }
+	const void setMergeTrackFilename(const std::string& filename) { mMergeTrackFilename = filename; }
+
 private:
 	std::string mCmdDir;
 	std::string mFddEmuCmd;
 	std::string mFdxConvCmd;
 	std::string mFdxToolCmd;
+	std::string mFdxTrkCpyCmd;
 	std::string mFdxViewCmd;
 	std::string mFdDumpCmd;
 	std::string mFdRestoreCmd;
@@ -110,6 +117,9 @@ private:
 	std::vector<std::string> mVecOtherImages;
 	int mFromOtherImageNo;
 	int mToOtherImageNo;
+
+	std::string mMergeTrackDir;
+	std::string mMergeTrackFilename;
 
 };
 
