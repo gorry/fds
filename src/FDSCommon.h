@@ -8,7 +8,7 @@
 #if !defined(__FDSCOMMON_H__)
 #define __FDSCOMMON_H__
 
-#define FDS_VERSION "20230222a"
+#define FDS_VERSION "20230414a"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,6 +91,7 @@ enum class ColorPair : short {
 	DumpStatusFinish,
 	DumpStatusUnformat,
 	DumpStatusError,
+	DumpStatusWarn,
 	DumpStatusCsr,
 	RestoreHeader,
 	RestoreGauge,

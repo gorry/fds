@@ -1,3 +1,7 @@
+20230414a
+
+・fdxviewのMissingIDAMに非対応だったのを修正。
+
 20230222a
 
 ・FDX68 ver2.00に対応。

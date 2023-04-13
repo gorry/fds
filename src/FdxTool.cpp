@@ -289,9 +289,11 @@ FdxTool::readFDXDiskInfoBody(FdxDiskInfo& diskinfo, char* s)
 			sct.mStatus.SetErrInfoCRC(true);
 		}
 		s += 4;
+#if 0
 		if (!memcmp(s, "---", 3)) {
 			sct.mStatus.SetErrDataNothing(true);
 		}
+#endif
 		if (!memcmp(s, "DEL", 3)) {
 			sct.mStatus.SetErrDataDeleted(true);
 		}

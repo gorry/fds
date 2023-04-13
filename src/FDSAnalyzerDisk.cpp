@@ -115,7 +115,13 @@ FDSAnalyzer::diskViewRefresh()
 		if (disk.Track(i).mStatus.Err()) {
 			wattron(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusError));
 			mvwaddch(mwDiskView, y, x, secstr[sec]);
-			wattroff(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusUnformat));
+			wattroff(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusError));
+			continue;
+		}
+		if (disk.Track(i).mStatus.Warn()) {
+			wattron(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusWarn));
+			mvwaddch(mwDiskView, y, x, secstr[sec]);
+			wattroff(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusWarn));
 			continue;
 		}
 		wattron(mwDiskView, COLOR_PAIR(fds::ColorPair::DumpStatusFinish));

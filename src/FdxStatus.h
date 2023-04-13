@@ -36,24 +36,26 @@
 class FdxStatus {
   public:
 	enum class Status : uint32_t {
-		None           = 0,
-		ErrMask        = 0xff000000,
-		ErrOverlap     = 0x80000000,
-		ErrInfoCRC     = 0x40000000,
-		ErrInfoInvalid = 0x20000000,
-		ErrDataCRC     = 0x10000000,
-		ErrDataInvalid = 0x08000000,
-		ErrDataNothing = 0x04000000,
-		ErrDataDeleted = 0x02000000,
-		ErrUnknown     = 0x01000000,
-		InfoMask       = 0x00ff0000,
-		InfoISTR       = 0x00800000,
-		InfoFMMask     = 0x00600000,
-		InfoMIX        = 0x00600000,
-		InfoMFM        = 0x00400000,
-		InfoFM         = 0x00200000,
-		InfoIAM        = 0x00100000,
-		SecMask        = 0x000000ff,
+		None            = 0,
+		ErrMask         = 0xff000000,
+		ErrOverlap      = 0x80000000,
+		ErrInfoCRC      = 0x40000000,
+		ErrInfoInvalid  = 0x20000000,
+		ErrDataCRC      = 0x10000000,
+		ErrDataInvalid  = 0x08000000,
+		// ErrDataNothing  = 0x04000000,
+		ErrDataDeleted  = 0x02000000,
+		ErrUnknown      = 0x01000000,
+		WarnMask        = 0x0000ff00,
+		WarnMissingIDAM = 0x00000100,
+		InfoMask        = 0x00ff0000,
+		InfoISTR        = 0x00800000,
+		InfoFMMask      = 0x00600000,
+		InfoMIX         = 0x00600000,
+		InfoMFM         = 0x00400000,
+		InfoFM          = 0x00200000,
+		InfoIAM         = 0x00100000,
+		SecMask         = 0x000000ff,
 	};
 	FdxStatus() { mStatus = Status::None; }
 	FdxStatus(Status s) { mStatus = s; }
@@ -66,8 +68,11 @@ class FdxStatus {
 	bool ErrInfoInvalid(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrInfoInvalid) != 0; }
 	bool ErrDataCRC(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrDataCRC) != 0; }
 	bool ErrDataInvalid(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrDataInvalid) != 0; }
-	bool ErrDataNothing(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrDataNothing) != 0; }
+//	bool ErrDataNothing(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrDataNothing) != 0; }
+	bool ErrDataNothing(void) const { return false; }
 	bool ErrDataDeleted(void) const { return ((uint32_t)mStatus & (uint32_t)Status::ErrDataDeleted) != 0; }
+	bool Warn(void) const { return ((uint32_t)mStatus & (uint32_t)Status::WarnMask) != 0; }
+	bool WarnMissingIDAM(void) const { return ((uint32_t)mStatus & (uint32_t)Status::WarnMissingIDAM) != 0; }
 	bool InfoISTR(void) const { return ((uint32_t)mStatus & (uint32_t)Status::InfoISTR) != 0; }
 	bool InfoIMIX(void) const { return ((uint32_t)mStatus & (uint32_t)Status::InfoFMMask) == (uint32_t)Status::InfoFMMask; }
 	bool InfoIMFM(void) const { return ((uint32_t)mStatus & (uint32_t)Status::InfoMFM) != 0; }
@@ -81,8 +86,10 @@ class FdxStatus {
 	void SetErrInfoInvalid(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrInfoInvalid)) | (uint32_t)(s ? Status::ErrInfoInvalid : Status::None)); }
 	void SetErrDataCRC(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrDataCRC)) | (uint32_t)(s ? Status::ErrDataCRC : Status::None)); }
 	void SetErrDataInvalid(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrDataInvalid)) | (uint32_t)(s ? Status::ErrDataInvalid : Status::None)); }
-	void SetErrDataNothing(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrDataNothing)) | (uint32_t)(s ? Status::ErrDataNothing : Status::None)); }
+	// void SetErrDataNothing(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrDataNothing)) | (uint32_t)(s ? Status::ErrDataNothing : Status::None)); }
+	void SetErrDataNothing(bool s) { (void)s; }
 	void SetErrDataDeleted(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::ErrDataDeleted)) | (uint32_t)(s ? Status::ErrDataDeleted : Status::None)); }
+	void SetWarnMissingIDAM(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::WarnMissingIDAM)) | (uint32_t)(s ? Status::WarnMissingIDAM : Status::None)); }
 
 	void SetInfoISTR(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::InfoISTR)) | (uint32_t)(s ? Status::InfoISTR : Status::None)); }
 	void SetInfoIMIX(bool s) { mStatus = (Status)(((uint32_t)mStatus & (~(uint32_t)Status::InfoFMMask)) | (uint32_t)(s ? Status::InfoMIX : Status::None)); }

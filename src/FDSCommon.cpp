@@ -59,6 +59,7 @@ void initColorPair(void)
 		init_pair((short)ColorPair::DumpStatusFinish,      MyColor(5,5,5), MyColor(0,0,0));
 		init_pair((short)ColorPair::DumpStatusUnformat,    MyColor(0,0,0), MyColor(5,5,5));
 		init_pair((short)ColorPair::DumpStatusError,       MyColor(0,4,5), MyColor(5,0,0));
+		init_pair((short)ColorPair::DumpStatusWarn,        MyColor(5,5,0), MyColor(0,0,5));
 		init_pair((short)ColorPair::DumpStatusCsr,         MyColor(5,5,5), MyColor(0,0,4));
 		init_pair((short)ColorPair::RestoreHeader,         MyColor(0,4,5), MyColor(0,0,0));
 		init_pair((short)ColorPair::RestoreGauge,          MyColor(0,5,3), MyColor(0,0,0));
@@ -122,6 +123,7 @@ void initColorPair(void)
 		init_pair((short)ColorPair::DumpStatusFinish,      COLOR_WHITE, COLOR_BLACK);
 		init_pair((short)ColorPair::DumpStatusUnformat,    COLOR_BLACK, COLOR_WHITE);
 		init_pair((short)ColorPair::DumpStatusError,       COLOR_WHITE, COLOR_RED);
+		init_pair((short)ColorPair::DumpStatusWarn,        COLOR_YELLOW, COLOR_BLUE);
 		init_pair((short)ColorPair::DumpStatusCsr,         COLOR_WHITE, COLOR_BLUE);
 		init_pair((short)ColorPair::RestoreHeader,         COLOR_CYAN, COLOR_BLACK);
 		init_pair((short)ColorPair::RestoreGauge,          COLOR_GREEN, COLOR_BLACK);
