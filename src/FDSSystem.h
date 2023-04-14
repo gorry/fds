@@ -201,7 +201,7 @@ private:	// var
 	FdDump mFdDump;
 	FdRestore mFdRestore;
 	FdxConv mFdxConv;
-	bool mNoRoot;
+	bool mNoRoot = false;
 
 	FDSConfig mConfig;
 

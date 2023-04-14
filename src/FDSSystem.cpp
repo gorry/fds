@@ -75,6 +75,7 @@ FDSSystem::start()
 	if (!mNoRoot) {
 		FILE *fin = popen("pgrep fddemu", "r");
 		char buf[FDX_FILENAME_MAX];
+		buf[0] = '\0';
 		fgets(buf, sizeof(buf), fin);
 		pclose(fin);
 		FDS_LOG("pgrep: %s\n", buf);
